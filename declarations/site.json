@@ -1,10 +1,25 @@
 {
-  "$comment": "Identité du site, lue par le plugin SEO (adresse canonique, plan du site, données structurées).",
+  "$comment": "Identité du site et informations légales (LCEN), écrites en base par le plugin site. Éditeur sous pseudonyme : un particulier publiant à titre non professionnel peut rester anonyme, ses coordonnées étant communiquées à l'hébergeur.",
   "url": "https://www.winnza.eu",
   "name": "Winnza",
   "locale": "fr_FR",
   "description": "Où passe l'argent de votre plein ? Le vrai découpage du prix du carburant, chaque semaine : pétrole, raffinerie et station, TICPE, TVA et les taxes cachées. Chiffres officiels.",
   "pages": [
-    { "path": "/", "changefreq": "weekly", "priority": 1.0 }
-  ]
+    {
+      "path": "/",
+      "changefreq": "weekly",
+      "priority": 1.0
+    }
+  ],
+  "publisher": {
+    "name": "Shad107",
+    "url": "https://github.com/Shad107/winnza",
+    "note": "Éditeur particulier, à titre non professionnel (loi n° 2004-575 du 21 juin 2004, art. 6, III, 2) : coordonnées communiquées à l'hébergeur."
+  },
+  "host": {
+    "name": "OVH SAS",
+    "address": "2 rue Kellermann, 59100 Roubaix, France",
+    "phone": "1007",
+    "url": "https://www.ovhcloud.com"
+  }
 }

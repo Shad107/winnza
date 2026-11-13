@@ -3,8 +3,9 @@
   import Icon from './Icon.svelte';
   import { ICON } from '#lib/parts.ts';
   import { longDate } from '#lib/format.ts';
+  import type { SiteDecl } from '@winnza/core/plugins/site/index.js';
   type Link = { label: string; href: string };
-  let { asOf, sources, about }: { asOf: string; sources: Link[]; about: Link[] } = $props();
+  let { asOf, sources, about, site }: { asOf: string; sources: Link[]; about: Link[]; site: SiteDecl } = $props();
 </script>
 
 <footer>
@@ -33,6 +34,12 @@
       <span>Une IA peut se tromper : chaque chiffre renvoie à sa source officielle, vérifiez-la avant toute décision. Ce site ne donne aucun conseil financier.</span>
       <span>Dernière mise à jour : {longDate(asOf)}</span>
     </div>
+
+    <p class="publisher">
+      Édité par <a href={site.publisher.url}>{site.publisher.name}</a>, code source sur <a href={site.publisher.url}>GitHub</a> (licence AGPL).
+      Hébergé par <a href={site.host.url}>{site.host.name}</a>, {site.host.address}, tél. {site.host.phone}.
+      <span>{site.publisher.note} Aucun cookie, aucune donnée de visite transmise à un tiers.</span>
+    </p>
   </div>
 </footer>
 
@@ -49,5 +56,8 @@
   .ai p { margin: 0; flex: 1 1 420px; }
   .ai strong { color: var(--ink); }
   .badge { width: 40px; height: 40px; flex: 0 0 40px; border-radius: 12px; background: var(--card); display: inline-flex; align-items: center; justify-content: center; color: var(--ink); }
+  .publisher { margin: 14px 0 0; font-size: 13px; line-height: 1.6; color: var(--muted); }
+  .publisher a { color: var(--ink2); }
+  .publisher span { display: block; }
   .legal { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; font-size: 13px; color: var(--muted); line-height: 1.5; }
 </style>

@@ -7,6 +7,9 @@ export const SITE_SETTING = { site: "site", fuelPage: "page.fuel" } as const;
 export type SiteDecl = {
   url: string; name: string; locale: string; description: string;
   pages: { path: string; changefreq: string; priority: number }[];
+  /** éditeur (pseudonyme, lien) et hébergeur : les mentions obligatoires de la LCEN */
+  publisher: { name: string; url: string; note: string };
+  host: { name: string; address: string; phone: string; url: string };
 };
 export type FuelPageDecl = {
   country: string; products: string[]; historyFrom: string; neighbours: string[];
@@ -27,8 +30,12 @@ const strings = (o: Obj, k: string, f: string): string[] => {
 export function parseSiteDecl(json: unknown): SiteDecl {
   const f = "site", o = (json ?? {}) as Obj;
   if (!Array.isArray(o.pages) || !o.pages.length) throw new Error(`${f} : « pages » doit être une liste non vide`);
+  const pub = (o.publisher ?? {}) as Obj, host = (o.host ?? {}) as Obj;
   return { url: need(o, "url", f).replace(/\/$/, ""), name: need(o, "name", f), locale: need(o, "locale", f),
-    description: need(o, "description", f), pages: o.pages as SiteDecl["pages"] };
+    description: need(o, "description", f), pages: o.pages as SiteDecl["pages"],
+    publisher: { name: need(pub, "name", "site.publisher"), url: need(pub, "url", "site.publisher"), note: need(pub, "note", "site.publisher") },
+    host: { name: need(host, "name", "site.host"), address: need(host, "address", "site.host"), phone: need(host, "phone", "site.host"),
+      url: need(host, "url", "site.host") } };
 }
 
 export function parseFuelPageDecl(json: unknown): FuelPageDecl {

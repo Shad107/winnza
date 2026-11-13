@@ -11,6 +11,6 @@
 
 <style>
   .toggle { display: inline-flex; gap: 4px; padding: 4px; border-radius: 14px; background: var(--card); box-shadow: var(--shadow); }
-  button { border: 0; border-radius: 11px; padding: 0 16px; min-height: 44px; font: 600 15px Inter, system-ui, sans-serif; cursor: pointer; background: transparent; color: var(--ink2); }
+  button { border: 0; border-radius: 11px; padding: 0 16px; min-height: 44px; font: 600 15px 'Inter Variable', system-ui, sans-serif; cursor: pointer; background: transparent; color: var(--ink2); }
   button[aria-pressed='true'] { background: #2a78d6; color: #ffffff; font-weight: 700; }
 </style>

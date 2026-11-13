@@ -75,7 +75,7 @@
   .legend li { display: inline-flex; align-items: center; gap: 8px; }
   .legend span { width: 18px; height: 2px; border-radius: 2px; }
   .plot { position: relative; }
-  svg { display: block; touch-action: pan-y; font-family: Inter, system-ui, sans-serif; }
+  svg { display: block; touch-action: pan-y; font-family: 'Inter Variable', system-ui, sans-serif; }
   .grid { stroke: var(--grid); stroke-width: 1; }
   .base { stroke: var(--line); stroke-width: 1; }
   .cross { stroke: var(--muted); stroke-width: 1; }

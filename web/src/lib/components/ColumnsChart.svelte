@@ -86,7 +86,7 @@
   .legend li { display: inline-flex; align-items: center; gap: 8px; }
   .legend span { width: 14px; height: 14px; border-radius: 4px; }
   .plot { position: relative; }
-  svg { display: block; font-family: Inter, system-ui, sans-serif; }
+  svg { display: block; font-family: 'Inter Variable', system-ui, sans-serif; }
   .grid { stroke: var(--grid); stroke-width: 1; }
   .base { stroke: var(--line); stroke-width: 1; }
   .axis { font-size: 12px; fill: var(--muted); }
