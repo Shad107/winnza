@@ -68,6 +68,29 @@ dans le code.
    référence déclarés avec leur source et leur date, affichés comme tels.
 5. **Prévision « plein maintenant ou j'attends ? »**, seulement si elle passe un test sur l'historique.
 6. **Plugin de gestion autonome par IA.**
+7. **Plugin Keyword Planner** : les phrases que les gens tapent vraiment (volume, tendance) pilotent
+   les titres, les questions fréquentes et les pages à créer. Le contenu parle leurs mots.
+
+## Ce que disent les mots-clés (Keyword Planner, France, 2026-11-13)
+
+| Requête | Recherches/mois | Ce qu'on en fait |
+|---|---|---|
+| prix du baril | 368 000 | personne ne le relie au prix à la pompe : c'est notre angle |
+| prix du baril de pétrole | 135 000 | idem |
+| prix essence luxembourg | 27 100 | page par pays voisin |
+| taxes carburant | 14 800 | décomposition, détail des taxes |
+| prix gasoil espagne | 14 800 | page par pays voisin |
+| prix carburant belgique | 8 100 | page par pays voisin |
+| ticpe | 5 400 | expliquer l'accise (ex-TICPE) |
+| le carburant va-t-il baisser | 880 (×12 depuis mars) | la prévision, quand elle sera validée |
+
+## Design (retours d'Olivier sur la première maquette)
+
+- **Grand public** : partir du plein en euros (« où passe l'argent de votre plein »), pas du prix
+  au litre ; trois parts en mots simples : le pétrole, la raffinerie et la station, l'État.
+- **Graphiques modernes** : palette validée pour les daltoniens, traits fins, fonds légers,
+  info-bulle au survol et au clavier, mode sombre.
+- **Un vrai en-tête et un vrai pied de page** ; la mention « site géré par une IA » dans le pied de page.
 
 ## Sources vérifiées (sans clé, 2026-11-13)
 
