@@ -83,6 +83,11 @@ seul : l'ÉTENDRE, jamais le remplacer). Base dans le volume `winnza-data`. Coll
 (crontab root, journal `/var/log/winnza-collect.log`). Jeton d'administration au coffre, entrée
 « Winnza (www.winnza.eu) », copié dans `~/winnza/.env`. Mettre à jour : `git pull && docker compose up -d --build`.
 
+**14/11, suite** : site en cinq pages (le plein, taxes, depuis 2005, prix du baril, Europe) ; plugin stations
+(6 carburants du jour, France et 96 départements) ; plugin matomo (suivi serveur sans cookie, site 1 de
+matomo.winnza.eu, IP anonymisées, IP d'Olivier exclues ; MATOMO_TOKEN dans `~/winnza/.env`) ; alerte mail
+au changement d'état de la collecte (`scripts/collect-and-alert.sh`, identifiants de la sonde externe).
+
 ## Moteur de plugins partagé avec OpenCloudApp (décision du 2026-11-13)
 
 Winnza n'a aujourd'hui que le principe d'OpenCloudApp (`register(api)`) : ses plugins sont branchés en
