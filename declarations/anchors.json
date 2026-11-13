@@ -1,0 +1,64 @@
+[
+  {
+    "seriesId": "fuel.FR.diesel.ttc",
+    "from": "2021-09-01", "to": "2021-09-30", "aggregate": "mean",
+    "expected": 1.45, "tolerance": 0.03,
+    "publishedBy": "Banque de France, Bloc-notes Éco (données du ministère)",
+    "url": "https://www.banque-france.fr/fr/publications-et-statistiques/publications/quelle-transmission-des-prix-du-petrole-aux-prix-des-carburants",
+    "note": "Décomposition officielle du gazole de septembre 2021 : 1,45 € dont TICPE 0,61, TVA 0,24, HT 0,60."
+  },
+  {
+    "seriesId": "fuel.FR.diesel.excise",
+    "from": "2021-09-01", "to": "2021-09-30", "aggregate": "mean",
+    "expected": 0.61, "tolerance": 0.015,
+    "publishedBy": "Banque de France, Bloc-notes Éco",
+    "url": "https://www.banque-france.fr/fr/publications-et-statistiques/publications/quelle-transmission-des-prix-du-petrole-aux-prix-des-carburants",
+    "note": "Valide la formule accise = TTC / (1 + TVA) - HT."
+  },
+  {
+    "seriesId": "fuel.FR.diesel.vat",
+    "from": "2021-09-01", "to": "2021-09-30", "aggregate": "mean",
+    "expected": 0.24, "tolerance": 0.01,
+    "publishedBy": "Banque de France, Bloc-notes Éco",
+    "url": "https://www.banque-france.fr/fr/publications-et-statistiques/publications/quelle-transmission-des-prix-du-petrole-aux-prix-des-carburants",
+    "note": "Valide la formule TVA = TTC - TTC / (1 + taux)."
+  },
+  {
+    "seriesId": "fuel.FR.diesel.ht",
+    "from": "2021-09-01", "to": "2021-09-30", "aggregate": "mean",
+    "expected": 0.60, "tolerance": 0.02,
+    "publishedBy": "Banque de France, Bloc-notes Éco",
+    "url": "https://www.banque-france.fr/fr/publications-et-statistiques/publications/quelle-transmission-des-prix-du-petrole-aux-prix-des-carburants"
+  },
+  {
+    "seriesId": "fuel.FR.diesel.ttc",
+    "from": "2008-07-01", "to": "2008-07-31", "aggregate": "mean",
+    "expected": 1.45, "tolerance": 0.03,
+    "publishedBy": "prix-carburant.eu, moyenne mensuelle du gazole en juillet 2008",
+    "url": "https://prix-carburant.eu/historique/prix-gazole-2008/"
+  },
+  {
+    "seriesId": "fuel.FR.diesel.ttc",
+    "from": "2026-03-16", "to": "2026-04-13", "aggregate": "max",
+    "expected": 2.24, "tolerance": 0.08,
+    "publishedBy": "prix-carburant.eu, record national du gazole (2,242 €/L le 31 mars 2026, relevé quotidien)",
+    "url": "https://prix-carburant.eu/article/record-historique-gazole-france-mars-2026-brent-penurie",
+    "note": "Le bulletin est hebdomadaire : sa valeur la plus haute peut s'écarter un peu du record d'un jour."
+  },
+  {
+    "seriesId": "oil.brent.usd_per_barrel",
+    "from": "2008-07-01", "to": "2008-07-31", "aggregate": "max",
+    "expected": 145.11, "tolerance": 3,
+    "publishedBy": "Connaissance des énergies, record historique du Brent (juillet 2008)",
+    "url": "https://www.connaissancedesenergies.org/questions-et-reponses-energies/petrole-quappelle-t-le-brent",
+    "note": "Le 147 $ souvent cité est un plus haut en séance sur le contrat à terme ; la série spot quotidienne plafonne un peu plus bas."
+  },
+  {
+    "seriesId": "fx.eurusd",
+    "from": "2008-07-01", "to": "2008-07-31", "aggregate": "max",
+    "expected": 1.6038, "tolerance": 0.012,
+    "publishedBy": "DH, plus haut historique de l'euro en juillet 2008 (en séance)",
+    "url": "https://www.dhnet.be/conso/auto-moto/2026/04/27/pourquoi-le-prix-du-petrole-etait-plus-eleve-en-2008-mais-le-diesel-est-bien-plus-cher-a-la-pompe-quil-y-a-18-ans-cest-scandaleux-KZDDV2Z7Z5H6TN3V7YV66I7IAU/",
+    "note": "Le taux de référence BCE, fixé une fois par jour, reste un peu sous le plus haut en séance."
+  }
+]

@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+# Refuse un commit qui contient un secret. Installation : sh scripts/install-hooks.sh
+# Pourquoi : le projet précédent (Winnza) avait 60 secrets dans son historique, dont un accès à une
+# base de production. Le contrôle se fait AVANT le commit, parce qu'un secret commité ne s'efface plus.
+set -e
+GITLEAKS_IMAGE="zricethezav/gitleaks:v8.30.1"
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks git --staged --no-banner --redact .
+else
+  docker run --rm -v "$(pwd):/repo" -w /repo "$GITLEAKS_IMAGE" git --staged --no-banner --redact /repo
+fi

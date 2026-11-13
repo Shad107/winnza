@@ -1,0 +1,170 @@
+{
+  "$comment": "Greffon carburants. Les adresses des sources et la liste des pays et produits se DÉCLARENT ici : si une source change d'adresse ou de format, c'est ce fichier qu'on corrige, pas le code. Codes pays tels que le bulletin pétrolier européen les écrit (GR pour la Grèce, EU et EUR pour les moyennes).",
+  "sources": {
+    "oilBulletin": {
+      "id": "ec-weekly-oil-bulletin",
+      "name": "Bulletin pétrolier hebdomadaire (historique depuis 2005)",
+      "publisher": "Commission européenne, DG Énergie",
+      "url": "https://energy.ec.europa.eu/document/download/906e60ca-8b6a-44e7-8589-652854d2fd3f_en?filename=Weekly_Oil_Bulletin_Prices_History_maticni_4web.xlsx",
+      "licence": "Réutilisation autorisée avec mention de la source (décision 2011/833/UE)"
+    },
+    "brent": {
+      "id": "fred-brent",
+      "name": "Brent Europe, prix spot (DCOILBRENTEU)",
+      "publisher": "Federal Reserve Bank of St. Louis (FRED), d'après l'EIA",
+      "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+      "licence": "Domaine public (EIA)"
+    },
+    "eurusd": {
+      "id": "ecb-eurusd",
+      "name": "Taux de change de référence euro/dollar",
+      "publisher": "Banque centrale européenne",
+      "url": "https://data-api.ecb.europa.eu/service/data/EXR/D.USD.EUR.SP00.A?format=csvdata",
+      "licence": "Réutilisation libre avec mention de la source"
+    }
+  },
+  "products": [
+    {
+      "id": "euro95",
+      "label": "Sans plomb 95",
+      "bulletinCode": "euro95",
+      "vatColumnLabel": "Euro-super 95"
+    },
+    {
+      "id": "diesel",
+      "label": "Gazole",
+      "bulletinCode": "diesel",
+      "vatColumnLabel": "Gas oil automobile"
+    },
+    {
+      "id": "heating_oil",
+      "label": "Fioul domestique",
+      "bulletinCode": "heating_oil",
+      "vatColumnLabel": "Gas oil de chauffage"
+    },
+    {
+      "id": "lpg",
+      "label": "GPL carburant",
+      "bulletinCode": "LPG",
+      "vatColumnLabel": "GPL pour moteur"
+    }
+  ],
+  "countries": [
+    {
+      "code": "FR",
+      "label": "France"
+    },
+    {
+      "code": "AT",
+      "label": "Autriche"
+    },
+    {
+      "code": "BE",
+      "label": "Belgique"
+    },
+    {
+      "code": "BG",
+      "label": "Bulgarie"
+    },
+    {
+      "code": "CY",
+      "label": "Chypre"
+    },
+    {
+      "code": "CZ",
+      "label": "Tchéquie"
+    },
+    {
+      "code": "DE",
+      "label": "Allemagne"
+    },
+    {
+      "code": "DK",
+      "label": "Danemark"
+    },
+    {
+      "code": "EE",
+      "label": "Estonie"
+    },
+    {
+      "code": "ES",
+      "label": "Espagne"
+    },
+    {
+      "code": "FI",
+      "label": "Finlande"
+    },
+    {
+      "code": "GR",
+      "label": "Grèce"
+    },
+    {
+      "code": "HR",
+      "label": "Croatie"
+    },
+    {
+      "code": "HU",
+      "label": "Hongrie"
+    },
+    {
+      "code": "IE",
+      "label": "Irlande"
+    },
+    {
+      "code": "IT",
+      "label": "Italie"
+    },
+    {
+      "code": "LT",
+      "label": "Lituanie"
+    },
+    {
+      "code": "LU",
+      "label": "Luxembourg"
+    },
+    {
+      "code": "LV",
+      "label": "Lettonie"
+    },
+    {
+      "code": "MT",
+      "label": "Malte"
+    },
+    {
+      "code": "NL",
+      "label": "Pays-Bas"
+    },
+    {
+      "code": "PL",
+      "label": "Pologne"
+    },
+    {
+      "code": "PT",
+      "label": "Portugal"
+    },
+    {
+      "code": "RO",
+      "label": "Roumanie"
+    },
+    {
+      "code": "SE",
+      "label": "Suède"
+    },
+    {
+      "code": "SI",
+      "label": "Slovénie"
+    },
+    {
+      "code": "SK",
+      "label": "Slovaquie"
+    },
+    {
+      "code": "EU",
+      "label": "Moyenne UE"
+    },
+    {
+      "code": "EUR",
+      "label": "Moyenne zone euro"
+    }
+  ]
+}

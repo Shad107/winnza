@@ -1,0 +1,8 @@
+node_modules/
+dist/
+dist-test/
+data/
+*.db
+*.db-*
+.env
+.env.*

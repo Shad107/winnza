@@ -1,0 +1,29 @@
+name: ci
+on:
+  push:
+  pull_request:
+
+jobs:
+  secrets:
+    # Deuxième barrière, au cas où le crochet local n'est pas installé : tout l'historique est scanné.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+      - name: gitleaks
+        run: docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.30.1 git --no-banner --redact /repo
+
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: "26"
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
