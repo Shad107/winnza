@@ -1,5 +1,5 @@
 {
-  "name": "@energy-prices/core",
+  "name": "@winnza/core",
   "private": true,
   "type": "module",
   "scripts": {

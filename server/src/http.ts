@@ -2,7 +2,7 @@
 // refusent les requêtes sans User-Agent).
 import type { CollectContext } from "./contract.js";
 
-const USER_AGENT = "energy-prices-collector/0.1 (+https://github.com/Shad107)";
+const USER_AGENT = "winnza-collector/0.1 (+https://www.winnza.eu)";
 const TIMEOUT_MS = 180_000;
 
 async function get(url: string): Promise<Response> {

@@ -1,7 +1,8 @@
 # Plan
 
-Nom de travail : `energy-prices`. Le nom public et le domaine seront choisis ensemble (pistes libres au
-2026-11-13 : pompeetprise.fr/.com, ouvamonplein.fr/.com, lecoutreel.fr, litrekwh.fr/.com).
+Nom : **Winnza**, sur le domaine winnza.eu (déjà détenu ; ses sous-domaines techniques, Matomo,
+console Coolify, recherche, restent en place). Le nom reprend celui du projet loto abandonné en 2026 :
+code et dépôts de l'époque archivés, rien n'en est réutilisé.
 
 ## Ce que fait le site
 

@@ -1,4 +1,4 @@
-# energy-prices
+# Winnza
 
 D'où vient le prix de l'énergie qu'on paie : le litre à la pompe, le kWh à la maison, la recharge,
 le solaire. Chiffres officiels, chacun avec sa source. Site gratuit, sans compte, sans publicité
