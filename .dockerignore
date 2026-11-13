@@ -1,0 +1,9 @@
+**/node_modules
+**/dist
+**/dist-test
+web/build
+web/.svelte-kit
+data
+.git
+.env
+*.db

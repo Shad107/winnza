@@ -1,0 +1,35 @@
+# Winnza sur le serveur.
+#   docker compose up -d --build                    le site
+#   docker compose run --rm collect                 une collecte (lancée chaque jour par cron)
+#
+# Le site rejoint le réseau du reverse-proxy existant (Caddy, réseau « coolify ») : pas de port public.
+# .env (jamais commité) : WINNZA_ADMIN_TOKEN, rangé dans le coffre.
+services:
+  web:
+    build: .
+    image: winnza:latest
+    container_name: winnza-web
+    restart: unless-stopped
+    env_file: [.env]
+    environment:
+      - ORIGIN=https://www.winnza.eu
+    volumes:
+      - data:/data
+    networks: [proxy]
+
+  collect:
+    image: winnza:latest
+    profiles: [collect]
+    command: ["node", "server/dist/cli.js", "collect", "/data/energy.db"]
+    volumes:
+      - data:/data
+    networks: [proxy]
+
+volumes:
+  data:
+    name: winnza-data
+
+networks:
+  proxy:
+    name: coolify
+    external: true
