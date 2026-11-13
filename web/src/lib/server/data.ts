@@ -22,5 +22,11 @@ function load() {
   }
 }
 
+/** Base en écriture, pour l'administration seulement (réglages des plugins). Fermée après usage. */
+export function withWritableStore<T>(fn: (store: Store) => T): T {
+  const store = new Store(DB);
+  try { return fn(store); } finally { store.close(); }
+}
+
 export const fuelPage = (): FuelPage => load().page;
 export const siteDecl = (): SiteDecl => load().site;

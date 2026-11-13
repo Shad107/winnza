@@ -8,7 +8,7 @@
     "test": "rm -rf dist-test && tsc -p tsconfig.test.json && node --test \"dist-test/**/*.test.js\""
   },
   "dependencies": {
-    "@isno-open/plugin-host": "github:Isno-Open/OpenPluginHost#v0.1.0",
+    "@isno-open/plugin-host": "github:Isno-Open/OpenPluginHost#v0.2.0",
     "better-sqlite3": "13.1.1",
     "fflate": "0.8.3"
   },

@@ -1,6 +1,7 @@
 // Plugin « site » : identité du site (adresse, nom, description) et choix éditoriaux des pages, écrits
 // en base. Le site web ne lit que la base ; ces réglages y entrent par ici (et demain par le plugin IA).
 import { PLUGIN_CATEGORY, type Plugin } from "../../contract.js";
+import { jsonSettings } from "../json-settings.js";
 
 export const SITE_SETTING = { site: "site", fuelPage: "page.fuel" } as const;
 
@@ -56,6 +57,8 @@ export const sitePlugin: Plugin = {
   title: { fr: "Site", en: "Site" },
   description: { fr: "Identité du site, mentions légales et choix éditoriaux des pages.", en: "Site identity, legal notice and page choices." },
   category: PLUGIN_CATEGORY.site,
+  settings: jsonSettings(parseSiteSettings, { fr: "Identité du site (adresse, éditeur, hébergeur) et choix de la page carburants. Pris en compte à la prochaine collecte.",
+    en: "Site identity (URL, publisher, host) and fuel page choices. Applied at the next collection." }),
   register(api) {
       const { site, fuelPage } = parseSiteSettings(api.settings());
       api.declareSetting({ key: SITE_SETTING.site, value: site });

@@ -11,8 +11,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { enabledIn, type EnabledState } from "@isno-open/plugin-host";
 import { parseAnchors } from "./anchors.js";
-import type { Plugin } from "./contract.js";
 import { httpContext } from "./http.js";
+import { BUILTIN_PLUGINS as BUILTINS, ENABLED_RULES as RULES, PLUGINS_ENABLED_SETTING, pluginSettingKey as settingKey } from "./plugins/builtins.js";
 import { fuelPlugin } from "./plugins/fuel/index.js";
 import { hiddenChargesPlugin } from "./plugins/hidden-charges/index.js";
 import { sitePlugin } from "./plugins/site/index.js";
@@ -22,17 +22,12 @@ import { Store } from "./store.js";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const declaration = (name: string): unknown => JSON.parse(readFileSync(join(ROOT, "declarations", name), "utf8"));
 
-/** Plugins livrés avec Winnza. */
-const BUILTINS: Record<string, Plugin> = { [fuelPlugin.id]: fuelPlugin, [hiddenChargesPlugin.id]: hiddenChargesPlugin, [sitePlugin.id]: sitePlugin };
 /** Réglages initiaux de chaque plugin, lus dans declarations/. */
 const SEEDS: Record<string, () => unknown> = {
   [fuelPlugin.id]: () => declaration("fuel.json"),
   [hiddenChargesPlugin.id]: () => declaration("hidden-charges.json"),
   [sitePlugin.id]: () => ({ site: declaration("site.json"), fuelPage: declaration("fuel-page.json") }),
 };
-const RULES = { defaults: Object.keys(BUILTINS), alwaysOn: [] as string[] };
-export const PLUGINS_ENABLED_SETTING = "plugins.enabled";
-const settingKey = (id: string) => `plugin.${id}`;
 
 function settingsOf(store: Store, id: string): unknown {
   const stored = store.settingOrNull(settingKey(id));

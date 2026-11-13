@@ -41,5 +41,6 @@ export function sitemap(site: SiteDecl, lastmod: string): string {
 }
 
 export function robots(site: SiteDecl): string {
-  return `User-agent: *\nAllow: /\n\nSitemap: ${site.url}/sitemap.xml\n`;
+  // l'administration n'a rien à faire dans un moteur de recherche (elle répond aussi « noindex »)
+  return `User-agent: *\nAllow: /\nDisallow: /admin\n\nSitemap: ${site.url}/sitemap.xml\n`;
 }

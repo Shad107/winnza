@@ -3,6 +3,7 @@
 // continu : chaque montant est un relevé daté, avec sa source, écrit en base comme une série. Une
 // charge dont le coût n'est pas publié a sa série mais aucune valeur : le site affiche « non publié ».
 import { FREQUENCY, PLUGIN_CATEGORY, UNIT, type Plugin } from "../../contract.js";
+import { jsonSettings } from "../json-settings.js";
 
 export type HiddenChargeDecl = {
   id: string; label: string; description: string;
@@ -40,6 +41,8 @@ export const hiddenChargesPlugin: Plugin = {
   description: { fr: "Ce que l'État impose aux vendeurs de carburant et qui finit dans le prix sans figurer sur le ticket.",
     en: "State obligations on fuel sellers that end up in the price without appearing on the receipt." },
   category: PLUGIN_CATEGORY.data,
+  settings: jsonSettings(parseHiddenCharges, { fr: "Chaque charge : montant par litre (null si non publié), date du relevé et source. Pris en compte à la prochaine collecte.",
+    en: "Each charge: amount per litre (null if unpublished), reading date and source. Applied at the next collection." }),
   register(api) {
       const charges = parseHiddenCharges(api.settings());
       for (const c of charges) {

@@ -3,6 +3,7 @@
 import { FREQUENCY, PLUGIN_CATEGORY, UNIT, type Plugin } from "../../contract.js";
 import { readXlsx } from "../../xlsx.js";
 import { parseFuelDecl } from "./decl.js";
+import { jsonSettings } from "../json-settings.js";
 import { deriveBrentEurPerLitre, deriveDecomposition, deriveWeeklyCrude } from "./derive.js";
 import { parseBulletinPrices, parseBulletinVat, parseEcbCsv, parseFredCsv } from "./parse.js";
 import { FUEL_CATALOG_SETTING, FUEL_PART, fuelSeriesId, OIL_SERIES } from "./series-ids.js";
@@ -13,6 +14,8 @@ export const fuelPlugin: Plugin = {
   description: { fr: "Prix, taxes et décomposition du litre dans 27 pays depuis 2005 (bulletin pétrolier européen, Brent, BCE).",
     en: "Prices, taxes and breakdown of a litre in 27 countries since 2005 (EU oil bulletin, Brent, ECB)." },
   category: PLUGIN_CATEGORY.data,
+  settings: jsonSettings(parseFuelDecl, { fr: "Sources (adresses), produits et pays suivis. Vérifié avant enregistrement ; pris en compte à la prochaine collecte.",
+    en: "Sources (URLs), products and countries. Checked before saving; applied at the next collection." }),
   register(api) {
       // ses réglages (sources, produits, pays) sont en base ; un réglage invalide fait échouer CE plugin seul
       const { sources, countries, products } = parseFuelDecl(api.settings());

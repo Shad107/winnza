@@ -94,6 +94,11 @@ dans un dépôt public partagé chez Isno-Open (AGPL)**, utilisé par les deux p
   `declarations/` n'initialise qu'une base neuve, `node dist/cli.js seed <plugin>` recharge un plugin
   depuis son fichier, `node dist/cli.js plugins` liste les plugins. Un plugin en échec est écarté sans
   rien laisser au registre ; ses ancres sont signalées comme non vérifiées.
+- **Étape 2 faite le 2026-11-14** : OpenPluginHost v0.2.0 apporte l'écran de réglages générique
+  (`SettingsForm.svelte`) et un type de réglage `json`. Winnza a son administration (`/admin`, jeton
+  `WINNZA_ADMIN_TOKEN`) : liste des plugins, activer ou éteindre, réglages validés par le plugin avant
+  d'atteindre la base. Testé de bout en bout dans un navigateur. Winnza devient la démonstration
+  technique du moteur partagé (idée d'Olivier).
 - Si le moteur s'avère trop lié aux comptes ou aux boîtiers, on s'arrête et on en reparle.
 
 Ensuite : plugin stations (E10, SP98, E85, prix quotidiens), puis plugin prévision (validé sur
