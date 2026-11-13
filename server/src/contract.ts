@@ -9,6 +9,7 @@ export const UNIT = {
   eurPerKwh: "EUR/kWh",
   eurPerYear: "EUR/an",
   usdPerBarrel: "USD/bbl",
+  usdPerGallon: "USD/gal",
   usdPerEur: "USD/EUR",
   percent: "%",
   /** nombre de stations (ex. stations qui affichent un carburant) */

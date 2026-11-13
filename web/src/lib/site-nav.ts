@@ -7,6 +7,7 @@ export const SECTIONS: readonly Section[] = [
   { href: '/taxes', label: 'Taxes', title: 'Les taxes sur le carburant', text: 'TICPE, TVA, et les charges imposées qu\'on ne voit jamais sur le ticket.' },
   { href: '/historique', label: 'Depuis 2005', title: 'Le prix du litre depuis 2005', text: 'Année par année, et ce qui a vraiment changé depuis le record du baril de 2008.' },
   { href: '/prix-du-baril', label: 'Prix du baril', title: 'Le prix du baril et la pompe', text: 'Pourquoi le baril ne fait pas le prix à la pompe, et le rôle du dollar.' },
+  { href: '/prevision', label: 'Prévision', title: 'Le carburant va-t-il baisser ?', text: 'Hausse ou baisse la semaine qui vient, d\'après le marché de gros, avec le bilan réel de la méthode.' },
   { href: '/europe', label: 'Europe', title: 'Moins cher chez nos voisins ?', text: 'Le même plein en Espagne, au Luxembourg, en Belgique, en Allemagne...' },
   { label: 'Électricité', title: 'Électricité', text: '' },
 ];

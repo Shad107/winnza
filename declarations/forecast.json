@@ -1,0 +1,27 @@
+{
+  "$comment": "Plugin prévision. Méthode validée sur l'historique le 2026-11-14 : sens du prix à la pompe la semaine suivante d'après la variation sur une semaine du produit raffiné (FRED, d'après l'EIA). Depuis 2022, juste environ 3 à 4 fois sur 5 ; le site affiche le bilan réel, recalculé à chaque collecte.",
+  "source": {
+    "id": "fred-refined",
+    "name": "Produits raffinés, prix spot quotidiens (gazole Gulf Coast, essence New York Harbor)",
+    "publisher": "Federal Reserve Bank of St. Louis (FRED), d'après l'EIA",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv",
+    "licence": "Domaine public (EIA)"
+  },
+  "country": "FR",
+  "products": [
+    {
+      "product": "diesel",
+      "fredSeries": "DDFUELUSGULF",
+      "label": "Gazole"
+    },
+    {
+      "product": "euro95",
+      "fredSeries": "DGASNYH",
+      "label": "Sans plomb 95"
+    }
+  ],
+  "windowDays": 5,
+  "threshold": 0.01,
+  "stableMove": 0.003,
+  "trackSince": "2022-01-01"
+}

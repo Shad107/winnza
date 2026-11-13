@@ -57,6 +57,7 @@ test("page carburants : tout vient de la base (séries, réglages, sources)", ()
   assert.deepEqual(page.market, { brentUsd: { reference: 144, now: 97 }, usdPerEur: { reference: 1.57, now: 1.10 } });
   assert.ok(Math.abs(LITRE_PARTS.reduce((s, k) => s + p.now[k], 0) - p.litre) < 1e-9);   // les parts refont le prix
   assert.equal(page.stations, null, "plugin stations absent : pas de bloc, pas d'erreur");
+  assert.equal(page.forecast, null, "plugin prévision absent : pas de bloc");
 });
 
 test("charges cachées : relevé daté avec sa source ; sans valeur en base = non publié", () => {

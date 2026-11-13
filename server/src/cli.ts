@@ -18,6 +18,7 @@ import { hiddenChargesPlugin } from "./plugins/hidden-charges/index.js";
 import { sitePlugin } from "./plugins/site/index.js";
 import { stationsPlugin } from "./plugins/stations/index.js";
 import { matomoPlugin } from "./plugins/matomo/index.js";
+import { forecastPlugin } from "./plugins/forecast/index.js";
 import { buildRegistry, runCollect } from "./runner.js";
 import { Store } from "./store.js";
 
@@ -31,6 +32,7 @@ const SEEDS: Record<string, () => unknown> = {
   [sitePlugin.id]: () => ({ site: declaration("site.json"), fuelPage: declaration("fuel-page.json") }),
   [stationsPlugin.id]: () => declaration("stations.json"),
   [matomoPlugin.id]: () => declaration("matomo.json"),
+  [forecastPlugin.id]: () => declaration("forecast.json"),
 };
 
 function settingsOf(store: Store, id: string): unknown {

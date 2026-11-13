@@ -7,6 +7,7 @@ import { FUEL_CATALOG_SETTING, FUEL_PART, fuelSeriesId, OIL_SERIES } from "../pl
 import { chargeSeriesId, HIDDEN_CHARGES_SETTING } from "../plugins/hidden-charges/index.js";
 import { parseFuelPageDecl, SITE_SETTING } from "../plugins/site/index.js";
 import { AREA_FRANCE, STATIONS_CATALOG_SETTING, stationSeriesId } from "../plugins/stations/index.js";
+import { FORECAST_SETTING, parseForecastDecl, signalId } from "../plugins/forecast/index.js";
 
 /** Les quatre parts d'un litre, dans l'ordre d'empilement (du bas vers le haut). */
 export const LITRE_PART = { oil: "oil", refine: "refine", excise: "excise", vat: "vat" } as const;
@@ -41,6 +42,15 @@ export type Market = { brentUsd: { reference: number; now: number }; usdPerEur: 
 /** Prix du jour en station (plugin stations) ; null si le plugin n'a jamais tourné ou est éteint. */
 export type StationsToday = { date: string; fuels: { id: string; label: string; avg: number; stations: number }[] } | null;
 
+/** Sens prévu pour la semaine qui vient. */
+export const TREND = { up: "up", down: "down", flat: "flat" } as const;
+export type Trend = (typeof TREND)[keyof typeof TREND];
+
+/** Bilan réel de la méthode : semaines où le signal était net, et combien de fois le sens était juste. */
+export type TrackRecord = { since: string; strongWeeks: number; strongHits: number; allWeeks: number; allHits: number };
+export type ProductForecast = { id: string; label: string; trend: Trend; signal: number; asOf: string; track: TrackRecord };
+export type Forecast = { products: ProductForecast[]; threshold: number } | null;
+
 export type FuelPage = {
   asOf: string;
   referenceLabel: string;
@@ -48,7 +58,37 @@ export type FuelPage = {
   hiddenCharges: HiddenCharge[];
   market: Market;
   stations: StationsToday;
+  forecast: Forecast;
 };
+
+function forecast(read: SiteReader): Forecast {
+  const raw = read.settingOrNull(FORECAST_SETTING);
+  if (raw === null) return null;
+  const decl = parseForecastDecl(raw);
+  const products = decl.products.flatMap((fp): ProductForecast[] => {
+    const signals = read.get(signalId(fp.product));
+    const ttc = read.get(fuelSeriesId(decl.country, fp.product, FUEL_PART.ttc));
+    const lastTtc = ttc.at(-1);
+    const latest = signals.at(-1);
+    // la prévision est le signal postérieur au dernier relevé de prix : sinon, rien à annoncer
+    if (!latest || !lastTtc || latest.date <= lastTtc.date) return [];
+    const sig = new Map(signals.map((o) => [o.date, o.value]));
+    const track: TrackRecord = { since: decl.trackSince, strongWeeks: 0, strongHits: 0, allWeeks: 0, allHits: 0 };
+    for (let i = 0; i + 1 < ttc.length; i++) {
+      const d = ttc[i]!.date;
+      const s = sig.get(d);
+      if (d < decl.trackSince || s === undefined) continue;
+      const move = ttc[i + 1]!.value - ttc[i]!.value;
+      if (Math.abs(move) < decl.stableMove) continue;   // semaine stable : ni juste ni fausse
+      const hit = Math.sign(move) === Math.sign(s);
+      track.allWeeks++; if (hit) track.allHits++;
+      if (Math.abs(s) > decl.threshold) { track.strongWeeks++; if (hit) track.strongHits++; }
+    }
+    const trend: Trend = Math.abs(latest.value) <= decl.threshold ? TREND.flat : latest.value > 0 ? TREND.up : TREND.down;
+    return [{ id: fp.product, label: fp.label, trend, signal: latest.value, asOf: latest.date, track }];
+  });
+  return products.length ? { products, threshold: decl.threshold } : null;
+}
 
 function stationsToday(read: SiteReader): StationsToday {
   const catalog = read.settingOrNull(STATIONS_CATALOG_SETTING) as { fuels?: { id: string; label: string }[] } | null;
@@ -164,5 +204,6 @@ export function buildFuelPage(read: SiteReader): FuelPage {
     asOf, referenceLabel: decl.reference.label, products, hiddenCharges: hiddenCharges(read),
     market: { brentUsd: marketPair(read, OIL_SERIES.brentUsd, from, to, asOf), usdPerEur: marketPair(read, OIL_SERIES.eurusd, from, to, asOf) },
     stations: stationsToday(read),
+    forecast: forecast(read),
   };
 }

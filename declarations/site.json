@@ -11,6 +11,11 @@
       "priority": 1.0
     },
     {
+      "path": "/prevision",
+      "changefreq": "daily",
+      "priority": 0.9
+    },
+    {
       "path": "/taxes",
       "changefreq": "weekly",
       "priority": 0.9

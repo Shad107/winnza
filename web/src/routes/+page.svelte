@@ -6,6 +6,7 @@
   import Jerrycan from '#lib/components/Jerrycan.svelte';
   import Icon from '#lib/components/Icon.svelte';
   import StationsToday from '#lib/components/StationsToday.svelte';
+  import TrendCard from '#lib/components/TrendCard.svelte';
   import Faq from '#lib/components/Faq.svelte';
   import NextPages from '#lib/components/NextPages.svelte';
   import Seo from '#lib/plugins/seo/Seo.svelte';
@@ -32,7 +33,7 @@
 
   const faq = [
     { q: 'Qui fixe le prix à la pompe ?', a: "Personne en particulier : en France, chaque station fixe son prix. Mais toutes achètent leur carburant aux mêmes cours, d'où des prix proches d'une station à l'autre. Les taxes, elles, sont les mêmes partout." },
-    { q: 'Le carburant va-t-il baisser ?', a: "Le prix à la pompe suit celui du pétrole avec quelques jours de retard. Winnza publiera une tendance de la semaine à venir, seulement une fois qu'elle aura fait ses preuves sur les années passées." },
+    { q: 'Le carburant va-t-il baisser ?', a: "Le prix à la pompe suit le marché de gros avec environ une semaine de retard. Winnza en tire chaque jour une tendance pour la semaine qui vient, avec le bilan réel de la méthode sur les années passées : voir la page Prévision." },
   ];
 </script>
 
@@ -71,6 +72,14 @@
     </div>
     <p class="punch">Au total, {money(taxes, perLitre)} de taxes affichées, soit {percent(taxes, total)} de ce que vous payez. Le pétrole, lui, ne pèse que {percent(now.oil, total)}. <a href="/taxes">Et il y a les taxes qu'on ne voit pas.</a></p>
   </section>
+
+  {#if fuel.forecast}
+    <section class="section" aria-labelledby="attendre">
+      <h2 class="h2" id="attendre">Plein maintenant ou j'attends&#160;?</h2>
+      <p class="lead">Ce que le marché de gros annonce pour la semaine qui vient. <a href="/prevision">Méthode et bilan réel</a>.</p>
+      <div class="grid-cards" style="margin-top: 20px">{#each fuel.forecast.products as f (f.id)}<TrendCard {f} compact />{/each}</div>
+    </section>
+  {/if}
 
   {#if fuel.stations}<StationsToday stations={fuel.stations} litres={perLitre ? 50 : litres} />{/if}
 
