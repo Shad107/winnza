@@ -74,6 +74,15 @@ dans le code.
 7. **Plugin Keyword Planner** : les phrases que les gens tapent vraiment (volume, tendance) pilotent
    les titres, les questions fréquentes et les pages à créer. Le contenu parle leurs mots.
 
+## En ligne (2026-11-14)
+
+**https://www.winnza.eu** (winnza.eu redirige vers www). VPS OVH 146.59.45.179, utilisateur `ubuntu` :
+dépôt cloné dans `~/winnza`, `docker compose up -d --build` ; conteneur `winnza-web` sur le réseau `coolify`,
+servi par le Caddy existant (`/root/winnza-proxy/Caddyfile`, bloc ajouté en fin de fichier, fichier monté
+seul : l'ÉTENDRE, jamais le remplacer). Base dans le volume `winnza-data`. Collecte chaque jour à 6 h 30
+(crontab root, journal `/var/log/winnza-collect.log`). Jeton d'administration au coffre, entrée
+« Winnza (www.winnza.eu) », copié dans `~/winnza/.env`. Mettre à jour : `git pull && docker compose up -d --build`.
+
 ## Moteur de plugins partagé avec OpenCloudApp (décision du 2026-11-13)
 
 Winnza n'a aujourd'hui que le principe d'OpenCloudApp (`register(api)`) : ses plugins sont branchés en
