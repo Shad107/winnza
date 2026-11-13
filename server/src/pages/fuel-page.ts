@@ -6,6 +6,7 @@ import { parseFuelCatalog } from "../plugins/fuel/decl.js";
 import { FUEL_CATALOG_SETTING, FUEL_PART, fuelSeriesId, OIL_SERIES } from "../plugins/fuel/series-ids.js";
 import { chargeSeriesId, HIDDEN_CHARGES_SETTING } from "../plugins/hidden-charges/index.js";
 import { parseFuelPageDecl, SITE_SETTING } from "../plugins/site/index.js";
+import { AREA_FRANCE, STATIONS_CATALOG_SETTING, stationSeriesId } from "../plugins/stations/index.js";
 
 /** Les quatre parts d'un litre, dans l'ordre d'empilement (du bas vers le haut). */
 export const LITRE_PART = { oil: "oil", refine: "refine", excise: "excise", vat: "vat" } as const;
@@ -37,13 +38,33 @@ export type ProductPage = {
 /** Cours du marché : moyenne sur la période de référence, et dernière valeur connue à la date des prix. */
 export type Market = { brentUsd: { reference: number; now: number }; usdPerEur: { reference: number; now: number } };
 
+/** Prix du jour en station (plugin stations) ; null si le plugin n'a jamais tourné ou est éteint. */
+export type StationsToday = { date: string; fuels: { id: string; label: string; avg: number; stations: number }[] } | null;
+
 export type FuelPage = {
   asOf: string;
   referenceLabel: string;
   products: ProductPage[];
   hiddenCharges: HiddenCharge[];
   market: Market;
+  stations: StationsToday;
 };
+
+function stationsToday(read: SiteReader): StationsToday {
+  const catalog = read.settingOrNull(STATIONS_CATALOG_SETTING) as { fuels?: { id: string; label: string }[] } | null;
+  if (!catalog?.fuels?.length) return null;
+  let date = "";
+  const fuels = catalog.fuels.flatMap((f) => {
+    const avg = read.get(stationSeriesId(AREA_FRANCE, f.id, "avg")).at(-1);
+    const count = read.get(stationSeriesId(AREA_FRANCE, f.id, "count")).at(-1);
+    if (!avg || !count || avg.date !== count.date) return [];
+    if (avg.date > date) date = avg.date;
+    return [{ id: f.id, label: f.label, avg: avg.value, stations: count.value, date: avg.date }];
+  });
+  // on ne montre que les carburants relevés le dernier jour : pas de mélange de dates
+  const today = fuels.filter((f) => f.date === date).map(({ date: _d, ...f }) => f);
+  return today.length ? { date, fuels: today } : null;
+}
 
 const mean = (xs: number[]) => xs.reduce((s, v) => s + v, 0) / xs.length;
 
@@ -142,5 +163,6 @@ export function buildFuelPage(read: SiteReader): FuelPage {
   return {
     asOf, referenceLabel: decl.reference.label, products, hiddenCharges: hiddenCharges(read),
     market: { brentUsd: marketPair(read, OIL_SERIES.brentUsd, from, to, asOf), usdPerEur: marketPair(read, OIL_SERIES.eurusd, from, to, asOf) },
+    stations: stationsToday(read),
   };
 }

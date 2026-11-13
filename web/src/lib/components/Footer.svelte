@@ -5,7 +5,7 @@
   import { longDate } from '#lib/format.ts';
   import type { SiteDecl } from '@winnza/core/plugins/site/index.js';
   type Link = { label: string; href: string };
-  let { asOf, sources, about, site }: { asOf: string; sources: Link[]; about: Link[]; site: SiteDecl } = $props();
+  let { asOf, sources, about, site, audience }: { asOf: string; sources: Link[]; about: Link[]; site: SiteDecl; audience: boolean } = $props();
 </script>
 
 <footer>
@@ -38,7 +38,7 @@
     <p class="publisher">
       Édité par <a href={site.publisher.url}>{site.publisher.name}</a>, code source sur <a href={site.publisher.url}>GitHub</a> (licence AGPL).
       Hébergé par <a href={site.host.url}>{site.host.name}</a>, {site.host.address}, tél. {site.host.phone}.
-      <span>{site.publisher.note} Aucun cookie, aucune donnée de visite transmise à un tiers.</span>
+      <span>{site.publisher.note} Aucun cookie.{audience ? " Mesure d'audience anonyme par le Matomo de Winnza, hébergé par nous : aucune donnée de visite n'est transmise à un tiers." : ' Aucune donnée de visite transmise à un tiers.'}</span>
     </p>
   </div>
 </footer>

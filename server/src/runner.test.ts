@@ -67,3 +67,14 @@ test("une observation d'une série non déclarée est refusée", async () => {
 test("anchors.json : un agrégat inconnu est une erreur", () => {
   assert.throws(() => parseAnchors([{ ...anchor(1), aggregate: "median" }]), /agrégat inconnu/);
 });
+
+test("éteindre un plugin efface les réglages qu'il avait écrits (le site cesse de les utiliser)", async () => {
+  const store = new Store(":memory:");
+  const avecReglage: Plugin = { ...plugin, register(api) { plugin.register(api); api.declareSetting({ key: "essai.public", value: 1 }); } };
+  await runCollect(store, await buildRegistry({ essai: avecReglage }, ["essai"], settings), noNet, []);
+  assert.equal(store.settingOrNull("essai.public"), 1);
+  store.putSetting("plugin.essai", { value: 2 });   // configuration d'administration : jamais effacée
+  await runCollect(store, await buildRegistry({ essai: avecReglage }, [], settings), noNet, []).catch(() => {});
+  assert.equal(store.settingOrNull("essai.public"), null);
+  assert.deepEqual(store.settingOrNull("plugin.essai"), { value: 2 });
+});

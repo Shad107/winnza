@@ -1,8 +1,10 @@
 <script lang="ts">
   import Logo from './Logo.svelte';
   import { longDate } from '#lib/format.ts';
+  import { page } from '$app/state';
   // Les rubriques pas encore en ligne restent visibles (« bientôt ») mais ne sont pas des liens morts.
-  let { asOf, items }: { asOf: string; items: { label: string; href?: string; current?: boolean }[] } = $props();
+  let { asOf, items }: { asOf: string; items: readonly { label: string; href?: string }[] } = $props();
+  const isCurrent = (href: string) => page.url.pathname === href;
 </script>
 
 <header>
@@ -11,7 +13,7 @@
     <nav aria-label="Rubriques">
       {#each items as it (it.label)}
         {#if it.href}
-          <a href={it.href} aria-current={it.current ? 'page' : undefined} class:current={it.current}>{it.label}</a>
+          <a href={it.href} aria-current={isCurrent(it.href) ? 'page' : undefined} class:current={isCurrent(it.href)}>{it.label}</a>
         {:else}
           <span class="soon" aria-disabled="true">{it.label}<small>bientôt</small></span>
         {/if}

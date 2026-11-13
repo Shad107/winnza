@@ -40,6 +40,7 @@ function fakeBase(neighbours: string[]): SiteReader {
     series: (id) => series[id] ?? null,
     source: (id) => sources[id] ?? null,
     setting: (k) => { if (!(k in settings)) throw new Error(`réglage absent : ${k}`); return settings[k]; },
+    settingOrNull: (k) => settings[k] ?? null,
   };
 }
 
@@ -55,6 +56,7 @@ test("page carburants : tout vient de la base (séries, réglages, sources)", ()
   assert.deepEqual(p.quarterly.map((q) => [q.year, q.quarter]), [[2008, 3], [2026, 4]]);
   assert.deepEqual(page.market, { brentUsd: { reference: 144, now: 97 }, usdPerEur: { reference: 1.57, now: 1.10 } });
   assert.ok(Math.abs(LITRE_PARTS.reduce((s, k) => s + p.now[k], 0) - p.litre) < 1e-9);   // les parts refont le prix
+  assert.equal(page.stations, null, "plugin stations absent : pas de bloc, pas d'erreur");
 });
 
 test("charges cachées : relevé daté avec sa source ; sans valeur en base = non publié", () => {

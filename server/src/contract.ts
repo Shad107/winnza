@@ -11,6 +11,8 @@ export const UNIT = {
   usdPerBarrel: "USD/bbl",
   usdPerEur: "USD/EUR",
   percent: "%",
+  /** nombre de stations (ex. stations qui affichent un carburant) */
+  stations: "stations",
 } as const;
 export type Unit = (typeof UNIT)[keyof typeof UNIT];
 
@@ -75,6 +77,8 @@ export type SiteReader = SeriesReader & {
   series: (id: string) => SeriesDecl | null;
   source: (id: string) => SourceDecl | null;
   setting: (key: string) => unknown;
+  /** réglage, ou null s'il n'existe pas (plugin jamais chargé ou éteint) */
+  settingOrNull: (key: string) => unknown;
 };
 
 /** Une dérivation calcule des séries à partir d'autres (ex. part des taxes = TTC - HT). Elle tourne

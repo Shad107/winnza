@@ -1,0 +1,433 @@
+{
+  "$comment": "Plugin stations : prix moyen du jour de chaque carburant, en France et par département, depuis le flux officiel des stations (sans clé). Seuls les prix mis à jour depuis maxAgeDays jours comptent (une station fermée garde son dernier prix affiché). Une moyenne hors des bornes plausibles fait échouer la collecte au lieu d'être publiée. La liste des départements vient de la source elle-même.",
+  "source": {
+    "id": "prix-carburants-flux",
+    "name": "Prix des carburants en France, flux instantané (version 2)",
+    "publisher": "Ministère de l'Économie, data.economie.gouv.fr",
+    "url": "https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2",
+    "licence": "Licence Ouverte / Open Licence 2.0 (Etalab)"
+  },
+  "fuels": [
+    {
+      "id": "gazole",
+      "label": "Gazole",
+      "field": "gazole"
+    },
+    {
+      "id": "sp95",
+      "label": "Sans plomb 95",
+      "field": "sp95"
+    },
+    {
+      "id": "e10",
+      "label": "SP95-E10",
+      "field": "e10"
+    },
+    {
+      "id": "sp98",
+      "label": "Sans plomb 98",
+      "field": "sp98"
+    },
+    {
+      "id": "e85",
+      "label": "Superéthanol E85",
+      "field": "e85"
+    },
+    {
+      "id": "gplc",
+      "label": "GPL carburant",
+      "field": "gplc"
+    }
+  ],
+  "maxAgeDays": 7,
+  "plausible": {
+    "min": 0.3,
+    "max": 5
+  },
+  "departments": [
+    {
+      "code": "01",
+      "label": "Ain"
+    },
+    {
+      "code": "02",
+      "label": "Aisne"
+    },
+    {
+      "code": "03",
+      "label": "Allier"
+    },
+    {
+      "code": "04",
+      "label": "Alpes-de-Haute-Provence"
+    },
+    {
+      "code": "05",
+      "label": "Hautes-Alpes"
+    },
+    {
+      "code": "06",
+      "label": "Alpes-Maritimes"
+    },
+    {
+      "code": "07",
+      "label": "Ardèche"
+    },
+    {
+      "code": "08",
+      "label": "Ardennes"
+    },
+    {
+      "code": "09",
+      "label": "Ariège"
+    },
+    {
+      "code": "10",
+      "label": "Aube"
+    },
+    {
+      "code": "11",
+      "label": "Aude"
+    },
+    {
+      "code": "12",
+      "label": "Aveyron"
+    },
+    {
+      "code": "13",
+      "label": "Bouches-du-Rhône"
+    },
+    {
+      "code": "14",
+      "label": "Calvados"
+    },
+    {
+      "code": "15",
+      "label": "Cantal"
+    },
+    {
+      "code": "16",
+      "label": "Charente"
+    },
+    {
+      "code": "17",
+      "label": "Charente-Maritime"
+    },
+    {
+      "code": "18",
+      "label": "Cher"
+    },
+    {
+      "code": "19",
+      "label": "Corrèze"
+    },
+    {
+      "code": "21",
+      "label": "Côte-d'Or"
+    },
+    {
+      "code": "22",
+      "label": "Côtes-d'Armor"
+    },
+    {
+      "code": "23",
+      "label": "Creuse"
+    },
+    {
+      "code": "24",
+      "label": "Dordogne"
+    },
+    {
+      "code": "25",
+      "label": "Doubs"
+    },
+    {
+      "code": "26",
+      "label": "Drôme"
+    },
+    {
+      "code": "27",
+      "label": "Eure"
+    },
+    {
+      "code": "28",
+      "label": "Eure-et-Loir"
+    },
+    {
+      "code": "29",
+      "label": "Finistère"
+    },
+    {
+      "code": "2A",
+      "label": "Corse-du-Sud"
+    },
+    {
+      "code": "2B",
+      "label": "Haute-Corse"
+    },
+    {
+      "code": "30",
+      "label": "Gard"
+    },
+    {
+      "code": "31",
+      "label": "Haute-Garonne"
+    },
+    {
+      "code": "32",
+      "label": "Gers"
+    },
+    {
+      "code": "33",
+      "label": "Gironde"
+    },
+    {
+      "code": "34",
+      "label": "Hérault"
+    },
+    {
+      "code": "35",
+      "label": "Ille-et-Vilaine"
+    },
+    {
+      "code": "36",
+      "label": "Indre"
+    },
+    {
+      "code": "37",
+      "label": "Indre-et-Loire"
+    },
+    {
+      "code": "38",
+      "label": "Isère"
+    },
+    {
+      "code": "39",
+      "label": "Jura"
+    },
+    {
+      "code": "40",
+      "label": "Landes"
+    },
+    {
+      "code": "41",
+      "label": "Loir-et-Cher"
+    },
+    {
+      "code": "42",
+      "label": "Loire"
+    },
+    {
+      "code": "43",
+      "label": "Haute-Loire"
+    },
+    {
+      "code": "44",
+      "label": "Loire-Atlantique"
+    },
+    {
+      "code": "45",
+      "label": "Loiret"
+    },
+    {
+      "code": "46",
+      "label": "Lot"
+    },
+    {
+      "code": "47",
+      "label": "Lot-et-Garonne"
+    },
+    {
+      "code": "48",
+      "label": "Lozère"
+    },
+    {
+      "code": "49",
+      "label": "Maine-et-Loire"
+    },
+    {
+      "code": "50",
+      "label": "Manche"
+    },
+    {
+      "code": "51",
+      "label": "Marne"
+    },
+    {
+      "code": "52",
+      "label": "Haute-Marne"
+    },
+    {
+      "code": "53",
+      "label": "Mayenne"
+    },
+    {
+      "code": "54",
+      "label": "Meurthe-et-Moselle"
+    },
+    {
+      "code": "55",
+      "label": "Meuse"
+    },
+    {
+      "code": "56",
+      "label": "Morbihan"
+    },
+    {
+      "code": "57",
+      "label": "Moselle"
+    },
+    {
+      "code": "58",
+      "label": "Nièvre"
+    },
+    {
+      "code": "59",
+      "label": "Nord"
+    },
+    {
+      "code": "60",
+      "label": "Oise"
+    },
+    {
+      "code": "61",
+      "label": "Orne"
+    },
+    {
+      "code": "62",
+      "label": "Pas-de-Calais"
+    },
+    {
+      "code": "63",
+      "label": "Puy-de-Dôme"
+    },
+    {
+      "code": "64",
+      "label": "Pyrénées-Atlantiques"
+    },
+    {
+      "code": "65",
+      "label": "Hautes-Pyrénées"
+    },
+    {
+      "code": "66",
+      "label": "Pyrénées-Orientales"
+    },
+    {
+      "code": "67",
+      "label": "Bas-Rhin"
+    },
+    {
+      "code": "68",
+      "label": "Haut-Rhin"
+    },
+    {
+      "code": "69",
+      "label": "Rhône"
+    },
+    {
+      "code": "70",
+      "label": "Haute-Saône"
+    },
+    {
+      "code": "71",
+      "label": "Saône-et-Loire"
+    },
+    {
+      "code": "72",
+      "label": "Sarthe"
+    },
+    {
+      "code": "73",
+      "label": "Savoie"
+    },
+    {
+      "code": "74",
+      "label": "Haute-Savoie"
+    },
+    {
+      "code": "75",
+      "label": "Paris"
+    },
+    {
+      "code": "76",
+      "label": "Seine-Maritime"
+    },
+    {
+      "code": "77",
+      "label": "Seine-et-Marne"
+    },
+    {
+      "code": "78",
+      "label": "Yvelines"
+    },
+    {
+      "code": "79",
+      "label": "Deux-Sèvres"
+    },
+    {
+      "code": "80",
+      "label": "Somme"
+    },
+    {
+      "code": "81",
+      "label": "Tarn"
+    },
+    {
+      "code": "82",
+      "label": "Tarn-et-Garonne"
+    },
+    {
+      "code": "83",
+      "label": "Var"
+    },
+    {
+      "code": "84",
+      "label": "Vaucluse"
+    },
+    {
+      "code": "85",
+      "label": "Vendée"
+    },
+    {
+      "code": "86",
+      "label": "Vienne"
+    },
+    {
+      "code": "87",
+      "label": "Haute-Vienne"
+    },
+    {
+      "code": "88",
+      "label": "Vosges"
+    },
+    {
+      "code": "89",
+      "label": "Yonne"
+    },
+    {
+      "code": "90",
+      "label": "Territoire de Belfort"
+    },
+    {
+      "code": "91",
+      "label": "Essonne"
+    },
+    {
+      "code": "92",
+      "label": "Hauts-de-Seine"
+    },
+    {
+      "code": "93",
+      "label": "Seine-Saint-Denis"
+    },
+    {
+      "code": "94",
+      "label": "Val-de-Marne"
+    },
+    {
+      "code": "95",
+      "label": "Val-d'Oise"
+    }
+  ]
+}

@@ -7,8 +7,28 @@
   "pages": [
     {
       "path": "/",
-      "changefreq": "weekly",
+      "changefreq": "daily",
       "priority": 1.0
+    },
+    {
+      "path": "/taxes",
+      "changefreq": "weekly",
+      "priority": 0.9
+    },
+    {
+      "path": "/historique",
+      "changefreq": "weekly",
+      "priority": 0.8
+    },
+    {
+      "path": "/prix-du-baril",
+      "changefreq": "daily",
+      "priority": 0.9
+    },
+    {
+      "path": "/europe",
+      "changefreq": "weekly",
+      "priority": 0.8
     }
   ],
   "publisher": {

@@ -34,11 +34,24 @@ export class Store implements SiteReader {
     // colonne ajoutée après la première base : migration sans perte
     const cols = (this.db.prepare("PRAGMA table_info(series)").all() as { name: string }[]).map((c) => c.name);
     if (!cols.includes("description")) this.db.exec("ALTER TABLE series ADD COLUMN description TEXT");
+    const scols = (this.db.prepare("PRAGMA table_info(setting)").all() as { name: string }[]).map((c) => c.name);
+    if (!scols.includes("owner")) this.db.exec("ALTER TABLE setting ADD COLUMN owner TEXT");   // plugin qui l'a déclaré
   }
 
-  putSetting(key: string, value: unknown): void {
-    this.db.prepare("INSERT INTO setting (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value")
-      .run(key, JSON.stringify(value));
+  /** `owner` : le plugin qui déclare ce réglage (il disparaît quand ce plugin est éteint). Sans owner :
+   *  réglage d'administration (configuration d'un plugin, liste des plugins actifs), jamais effacé ici. */
+  putSetting(key: string, value: unknown, owner: string | null = null): void {
+    this.db.prepare("INSERT INTO setting (key, value, owner) VALUES (?, ?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value, owner=excluded.owner")
+      .run(key, JSON.stringify(value), owner);
+  }
+
+  /** Efface les réglages déclarés par des plugins qui ne sont plus chargés. Rend leurs clés. */
+  dropSettingsNotOwnedBy(loaded: readonly string[]): string[] {
+    const rows = this.db.prepare("SELECT key, owner FROM setting WHERE owner IS NOT NULL").all() as { key: string; owner: string }[];
+    const gone = rows.filter((r) => !loaded.includes(r.owner)).map((r) => r.key);
+    const del = this.db.prepare("DELETE FROM setting WHERE key = ?");
+    for (const k of gone) del.run(k);
+    return gone;
   }
 
   /** Réglage, ou null s'il n'existe pas encore (base neuve). */

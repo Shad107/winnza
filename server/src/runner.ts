@@ -14,6 +14,8 @@ export type Registry = {
   collectors: Collector[];
   derivations: Derivation[];
   settings: Map<string, SettingDecl>;
+  /** plugin qui a déclaré chaque réglage */
+  settingOwner: Map<string, string>;
   loaded: string[];
   failed: { id: string; error: string }[];
 };
@@ -42,7 +44,7 @@ export async function buildRegistry(builtins: Readonly<Record<string, Plugin>>, 
     },
   });
   const report = await host.load(enabled);
-  const reg: Registry = { sources: new Map(), series: new Map(), collectors: [], derivations: [], settings: new Map(), loaded: [], failed: [...report.failed] };
+  const reg: Registry = { sources: new Map(), series: new Map(), collectors: [], derivations: [], settings: new Map(), settingOwner: new Map(), loaded: [], failed: [...report.failed] };
   for (const id of report.loaded) {
     const s = staged.get(id)!;
     const clash = [...s.sources.filter((x) => reg.sources.has(x.id)).map((x) => `source ${x.id}`),
@@ -51,7 +53,7 @@ export async function buildRegistry(builtins: Readonly<Record<string, Plugin>>, 
     if (clash.length) { reg.failed.push({ id, error: `déjà déclaré par un autre plugin : ${clash.join(", ")}` }); continue; }
     for (const x of s.sources) reg.sources.set(x.id, x);
     for (const x of s.series) reg.series.set(x.id, x);
-    for (const x of s.settings) reg.settings.set(x.key, x);
+    for (const x of s.settings) { reg.settings.set(x.key, x); reg.settingOwner.set(x.key, id); }
     reg.collectors.push(...s.collectors);
     reg.derivations.push(...s.derivations);
     reg.loaded.push(id);
@@ -92,7 +94,9 @@ export async function runCollect(store: Store, reg: Registry, ctx: CollectContex
   store.db.transaction(() => {
     for (const s of reg.sources.values()) store.upsertSource(s);
     for (const s of reg.series.values()) store.upsertSeries(s);
-    for (const s of reg.settings.values()) store.putSetting(s.key, s.value);
+    for (const s of reg.settings.values()) store.putSetting(s.key, s.value, reg.settingOwner.get(s.key) ?? null);
+    // un plugin éteint ne laisse rien derrière lui sur le site (ex. mesure d'audience coupée pour de bon)
+    store.dropSettingsNotOwnedBy(reg.loaded);
     store.putObservations(collected);
     for (const d of reg.derivations) {
       const obs = d.run(store);

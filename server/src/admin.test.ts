@@ -9,7 +9,7 @@ const charge = { id: "cee", label: "CEE", description: "d", eurPerLitre: 0.17, a
 
 test("tous les plugins livrés sont listés, actifs par défaut ; on peut en éteindre un", () => {
   const store = new Store(":memory:");
-  assert.deepEqual(listPlugins(store).map((p) => [p.id, p.enabled, p.configurable]), [["fuel", true, true], ["hidden-charges", true, true], ["site", true, true]]);
+  assert.deepEqual(listPlugins(store).map((p) => [p.id, p.enabled, p.configurable]), [["fuel", true, true], ["hidden-charges", true, true], ["site", true, true], ["stations", true, true], ["matomo", true, true]]);
   setPluginEnabled(store, "hidden-charges", false);
   assert.deepEqual(listPlugins(store).filter((p) => !p.enabled).map((p) => p.id), ["hidden-charges"]);
   setPluginEnabled(store, "hidden-charges", true);
@@ -43,4 +43,14 @@ test("une configuration refusée par le plugin n'atteint jamais la base", () => 
 test("plugin inconnu : refusé", () => {
   assert.throws(() => saveSettings(new Store(":memory:"), "pirate", {}), /plugin inconnu/);
   assert.throws(() => setPluginEnabled(new Store(":memory:"), "pirate", true), /plugin inconnu/);
+});
+
+test("Matomo : vrais champs déclarés (pas du JSON), validés par le plugin", () => {
+  const store = new Store(":memory:");
+  const screen = settingsScreen(store, "matomo")!;
+  assert.deepEqual(screen.fields.map((f) => f.kind), ["toggle", "text", "number", "choice"]);
+  saveSettings(store, "matomo", { enabled: true, url: "https://matomo.exemple.fr/", siteId: 3, mode: "dry" });
+  assert.deepEqual(store.setting(pluginSettingKey("matomo")), { enabled: true, url: "https://matomo.exemple.fr", siteId: 3, mode: "dry" });
+  assert.throws(() => saveSettings(store, "matomo", { enabled: true, url: "http://pas-https.fr", siteId: 3, mode: "live" }), /https/);
+  assert.throws(() => saveSettings(store, "matomo", { enabled: true, url: "https://ok.fr", siteId: 0, mode: "live" }), /entier positif/);
 });

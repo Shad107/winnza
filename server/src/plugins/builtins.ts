@@ -4,9 +4,12 @@ import type { Plugin } from "../contract.js";
 import { fuelPlugin } from "./fuel/index.js";
 import { hiddenChargesPlugin } from "./hidden-charges/index.js";
 import { sitePlugin } from "./site/index.js";
+import { stationsPlugin } from "./stations/index.js";
+import { matomoPlugin } from "./matomo/index.js";
 
 export const BUILTIN_PLUGINS: Readonly<Record<string, Plugin>> = {
   [fuelPlugin.id]: fuelPlugin, [hiddenChargesPlugin.id]: hiddenChargesPlugin, [sitePlugin.id]: sitePlugin,
+  [stationsPlugin.id]: stationsPlugin, [matomoPlugin.id]: matomoPlugin,
 };
 
 /** Règles des plugins actifs : tous actifs tant que rien n'est enregistré, aucun imposé d'office. */

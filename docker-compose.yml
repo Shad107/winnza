@@ -3,7 +3,8 @@
 #   docker compose run --rm collect                 une collecte (lancée chaque jour par cron)
 #
 # Le site rejoint le réseau du reverse-proxy existant (Caddy, réseau « coolify ») : pas de port public.
-# .env (jamais commité) : WINNZA_ADMIN_TOKEN, rangé dans le coffre.
+# .env (jamais commité) : WINNZA_ADMIN_TOKEN (coffre « Winnza (www.winnza.eu) ») et MATOMO_TOKEN
+# (coffre « matomo.winnza.eu », champ token).
 services:
   web:
     build: .
@@ -13,6 +14,10 @@ services:
     env_file: [.env]
     environment:
       - ORIGIN=https://www.winnza.eu
+      # vraie IP du visiteur derrière Caddy (mesure d'audience) : la dernière entrée de X-Forwarded-For,
+      # celle que Caddy ajoute lui-même (les précédentes peuvent venir du visiteur)
+      - ADDRESS_HEADER=X-Forwarded-For
+      - XFF_DEPTH=1
     volumes:
       - data:/data
     networks: [proxy]

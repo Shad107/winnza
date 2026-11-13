@@ -4,15 +4,9 @@
   import '../app.css';
   import Header from '#lib/components/Header.svelte';
   import Footer from '#lib/components/Footer.svelte';
+  import { SECTIONS } from '#lib/site-nav.ts';
   let { data, children } = $props();
 
-  const NAV = [
-    { label: 'Carburants', href: '/', current: true },
-    { label: 'Électricité' },
-    { label: 'Recharge et solaire' },
-    { label: 'Combien me coûtent 100 km' },
-    { label: 'Comprendre', href: '/#comprendre' },
-  ];
   const SOURCES = [
     { label: 'Commission européenne, bulletin pétrolier', href: 'https://energy.ec.europa.eu/data-and-analysis/weekly-oil-bulletin_en' },
     { label: 'EIA, prix du baril', href: 'https://fred.stlouisfed.org/series/DCOILBRENTEU' },
@@ -24,6 +18,6 @@
   ];
 </script>
 
-<Header asOf={data.asOf} items={NAV} />
+<Header asOf={data.asOf} items={SECTIONS} />
 {@render children()}
-<Footer asOf={data.asOf} sources={SOURCES} about={ABOUT} site={data.site} />
+<Footer asOf={data.asOf} sources={SOURCES} about={ABOUT} site={data.site} audience={data.audience} />
