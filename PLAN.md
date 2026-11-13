@@ -74,6 +74,26 @@ dans le code.
 7. **Plugin Keyword Planner** : les phrases que les gens tapent vraiment (volume, tendance) pilotent
    les titres, les questions fréquentes et les pages à créer. Le contenu parle leurs mots.
 
+## Moteur de plugins partagé avec OpenCloudApp (décision du 2026-11-13)
+
+Winnza n'a aujourd'hui que le principe d'OpenCloudApp (`register(api)`) : ses plugins sont branchés en
+dur et ses réglages viennent de fichiers. Décision : **extraire le moteur de plugins d'OpenCloudApp
+dans un dépôt public partagé chez Isno-Open (AGPL)**, utilisé par les deux projets.
+
+- **Partagé, le moteur seulement** : format d'un plugin, chargement depuis des dossiers (un plugin en
+  échec ne bloque pas), réglages déclarés stockés en base avec leur écran, puis administration,
+  catalogues, installation et mise à jour.
+- **Les spécificités restent dans chaque projet**, comme extensions de l'`api` : comptes et boîtiers
+  pour OpenCloudApp ; sources, séries, collecteurs et dérivations pour Winnza.
+- **Versions figées** par projet ; **Winnza migre en premier** ; OpenCloudApp seulement quand son test
+  de bout en bout passe sur le moteur partagé.
+- Ordre : 1) format et chargeur, Winnza branché dessus, ses fichiers JSON deviennent des réglages en
+  base ; 2) écran de réglages et administration ; 3) migration d'OpenCloudApp.
+- Si le moteur s'avère trop lié aux comptes ou aux boîtiers, on s'arrête et on en reparle.
+
+Ensuite : plugin stations (E10, SP98, E85, prix quotidiens), puis plugin prévision (validé sur
+l'historique avant publication), puis électricité, recharge et solaire.
+
 ## Ce que disent les mots-clés (Keyword Planner, France, 2026-11-13)
 
 | Requête | Recherches/mois | Ce qu'on en fait |
