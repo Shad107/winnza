@@ -2,7 +2,7 @@
 // sans figurer sur le ticket (CEE, stocks stratégiques, biocarburants). Aucune source ne les publie en
 // continu : chaque montant est un relevé daté, avec sa source, écrit en base comme une série. Une
 // charge dont le coût n'est pas publié a sa série mais aucune valeur : le site affiche « non publié ».
-import { FREQUENCY, UNIT, type Plugin } from "../../contract.js";
+import { FREQUENCY, PLUGIN_CATEGORY, UNIT, type Plugin } from "../../contract.js";
 
 export type HiddenChargeDecl = {
   id: string; label: string; description: string;
@@ -34,11 +34,14 @@ export function parseHiddenCharges(json: unknown): HiddenChargeDecl[] {
   });
 }
 
-export function hiddenChargesPlugin(charges: HiddenChargeDecl[]): Plugin {
-  return {
-    id: "hidden-charges",
-    title: "Charges cachées",
-    register(api) {
+export const hiddenChargesPlugin: Plugin = {
+  id: "hidden-charges",
+  title: { fr: "Charges cachées", en: "Hidden charges" },
+  description: { fr: "Ce que l'État impose aux vendeurs de carburant et qui finit dans le prix sans figurer sur le ticket.",
+    en: "State obligations on fuel sellers that end up in the price without appearing on the receipt." },
+  category: PLUGIN_CATEGORY.data,
+  register(api) {
+      const charges = parseHiddenCharges(api.settings());
       for (const c of charges) {
         api.declareSource({ id: chargeSourceId(c.id), name: c.source.name, publisher: c.source.name, url: c.source.url,
           licence: "Citation avec mention de la source" });
@@ -50,6 +53,5 @@ export function hiddenChargesPlugin(charges: HiddenChargeDecl[]): Plugin {
         id: "hidden-charges.readings",
         run: async () => charges.flatMap((c) => (c.eurPerLitre === null ? [] : [{ seriesId: chargeSeriesId(c.id), date: c.asOf, value: c.eurPerLitre }])),
       });
-    },
-  };
-}
+  },
+};

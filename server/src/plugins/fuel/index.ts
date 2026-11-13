@@ -1,22 +1,25 @@
 // Greffon carburants : prix TTC/HT et TVA de chaque pays de l'UE depuis 2005 (bulletin pétrolier
 // européen), Brent et euro/dollar, puis la décomposition de chaque litre (voir derive.ts).
-import { FREQUENCY, UNIT, type Plugin } from "../../contract.js";
+import { FREQUENCY, PLUGIN_CATEGORY, UNIT, type Plugin } from "../../contract.js";
 import { readXlsx } from "../../xlsx.js";
-import type { FuelDecl } from "./decl.js";
+import { parseFuelDecl } from "./decl.js";
 import { deriveBrentEurPerLitre, deriveDecomposition, deriveWeeklyCrude } from "./derive.js";
 import { parseBulletinPrices, parseBulletinVat, parseEcbCsv, parseFredCsv } from "./parse.js";
 import { FUEL_CATALOG_SETTING, FUEL_PART, fuelSeriesId, OIL_SERIES } from "./series-ids.js";
 
-export function fuelPlugin(decl: FuelDecl): Plugin {
-  const { sources, countries, products } = decl;
-  const reference = countries[0];
-  const refProduct = products[0];
-  if (!reference || !refProduct) throw new Error("fuel.json : au moins un pays et un produit");
+export const fuelPlugin: Plugin = {
+  id: "fuel",
+  title: { fr: "Carburants", en: "Fuels" },
+  description: { fr: "Prix, taxes et décomposition du litre dans 27 pays depuis 2005 (bulletin pétrolier européen, Brent, BCE).",
+    en: "Prices, taxes and breakdown of a litre in 27 countries since 2005 (EU oil bulletin, Brent, ECB)." },
+  category: PLUGIN_CATEGORY.data,
+  register(api) {
+      // ses réglages (sources, produits, pays) sont en base ; un réglage invalide fait échouer CE plugin seul
+      const { sources, countries, products } = parseFuelDecl(api.settings());
+      const reference = countries[0];
+      const refProduct = products[0];
+      if (!reference || !refProduct) throw new Error("réglages carburants : au moins un pays et un produit");
 
-  return {
-    id: "fuel",
-    title: "Carburants",
-    register(api) {
       for (const s of Object.values(sources)) api.declareSource(s);
       // le catalogue (noms des produits et des pays) est lu par les pages : il passe par la base aussi
       api.declareSetting({ key: FUEL_CATALOG_SETTING, value: { products, countries } });
@@ -57,6 +60,5 @@ export function fuelPlugin(decl: FuelDecl): Plugin {
       api.registerDerivation({ id: "fuel.brent-eur-per-litre", run: deriveBrentEurPerLitre });
       api.registerDerivation({ id: "fuel.weekly-crude", run: (read) => deriveWeeklyCrude(read, fuelSeriesId(reference.code, refProduct.id, FUEL_PART.ttc)) });
       api.registerDerivation({ id: "fuel.decomposition", run: (read) => deriveDecomposition(read, countries, products) });
-    },
-  };
-}
+  },
+};

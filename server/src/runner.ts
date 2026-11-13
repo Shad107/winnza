@@ -1,6 +1,10 @@
-// Une collecte : greffons -> téléchargements -> base -> dérivations -> ancres. Tout ce qui touche la base
+// Une collecte : plugins -> téléchargements -> base -> dérivations -> ancres. Tout ce qui touche la base
 // se fait dans UNE transaction : si une ancre ne colle pas, rien n'est écrit et la collecte échoue.
-import type { CollectContext, Collector, Derivation, Observation, Plugin, SeriesDecl, SettingDecl, SourceDecl } from "./contract.js";
+//
+// Les plugins sont chargés par OpenPluginHost : un plugin en échec est écarté et signalé, il ne bloque
+// pas les autres. Ses déclarations ne sont retenues QUE si son chargement a réussi en entier.
+import { createPluginHost } from "@isno-open/plugin-host";
+import { PLUGIN_CATEGORIES, PLUGIN_CATEGORY, type CollectContext, type Collector, type Derivation, type Observation, type Plugin, type PluginApi, type SeriesDecl, type SettingDecl, type SourceDecl } from "./contract.js";
 import { checkAnchors, type Anchor, type AnchorResult } from "./anchors.js";
 import type { Store } from "./store.js";
 
@@ -10,27 +14,47 @@ export type Registry = {
   collectors: Collector[];
   derivations: Derivation[];
   settings: Map<string, SettingDecl>;
+  loaded: string[];
+  failed: { id: string; error: string }[];
 };
 
-export function buildRegistry(plugins: readonly Plugin[]): Registry {
-  const reg: Registry = { sources: new Map(), series: new Map(), collectors: [], derivations: [], settings: new Map() };
-  for (const p of plugins) {
-    p.register({
-      declareSource: (s) => {
-        if (reg.sources.has(s.id)) throw new Error(`source déclarée deux fois : ${s.id}`);
-        reg.sources.set(s.id, s);
-      },
-      declareSeries: (s) => {
-        if (reg.series.has(s.id)) throw new Error(`série déclarée deux fois : ${s.id}`);
-        reg.series.set(s.id, s);
-      },
-      registerCollector: (c) => reg.collectors.push(c),
-      registerDerivation: (d) => reg.derivations.push(d),
-      declareSetting: (s) => {
-        if (reg.settings.has(s.key)) throw new Error(`réglage déclaré deux fois : ${s.key}`);
-        reg.settings.set(s.key, s);
-      },
-    });
+type Staged = { sources: SourceDecl[]; series: SeriesDecl[]; collectors: Collector[]; derivations: Derivation[]; settings: SettingDecl[] };
+
+/** Charge les plugins actifs et rassemble leurs déclarations. `settingsOf` : les réglages d'un plugin. */
+export async function buildRegistry(builtins: Readonly<Record<string, Plugin>>, enabled: readonly string[],
+  settingsOf: (id: string) => unknown, log?: (m: string) => void): Promise<Registry> {
+  const staged = new Map<string, Staged>();
+  const host = createPluginHost<PluginApi, (typeof PLUGIN_CATEGORIES)[number]>({
+    builtins, categories: PLUGIN_CATEGORIES, defaultCategory: PLUGIN_CATEGORY.other,
+    storedSettings: settingsOf, ...(log ? { log } : {}),
+    // chaque plugin écrit dans SON brouillon ; on ne verse au registre que ceux qui ont réussi
+    makeApi: ({ id }) => {
+      const s: Staged = { sources: [], series: [], collectors: [], derivations: [], settings: [] };
+      staged.set(id, s);
+      return {
+        declareSource: (x) => { s.sources.push(x); },
+        declareSeries: (x) => { s.series.push(x); },
+        declareSetting: (x) => { s.settings.push(x); },
+        registerCollector: (x) => { s.collectors.push(x); },
+        registerDerivation: (x) => { s.derivations.push(x); },
+        settings: () => settingsOf(id),
+      };
+    },
+  });
+  const report = await host.load(enabled);
+  const reg: Registry = { sources: new Map(), series: new Map(), collectors: [], derivations: [], settings: new Map(), loaded: [], failed: [...report.failed] };
+  for (const id of report.loaded) {
+    const s = staged.get(id)!;
+    const clash = [...s.sources.filter((x) => reg.sources.has(x.id)).map((x) => `source ${x.id}`),
+      ...s.series.filter((x) => reg.series.has(x.id)).map((x) => `série ${x.id}`),
+      ...s.settings.filter((x) => reg.settings.has(x.key)).map((x) => `réglage ${x.key}`)];
+    if (clash.length) { reg.failed.push({ id, error: `déjà déclaré par un autre plugin : ${clash.join(", ")}` }); continue; }
+    for (const x of s.sources) reg.sources.set(x.id, x);
+    for (const x of s.series) reg.series.set(x.id, x);
+    for (const x of s.settings) reg.settings.set(x.key, x);
+    reg.collectors.push(...s.collectors);
+    reg.derivations.push(...s.derivations);
+    reg.loaded.push(id);
   }
   for (const s of reg.series.values()) {
     if (!reg.sources.has(s.sourceId)) throw new Error(`série ${s.id} : source inconnue ${s.sourceId}`);
@@ -48,10 +72,10 @@ function assertDeclared(reg: Registry, obs: readonly Observation[], who: string)
   }
 }
 
-export type RunReport = { observations: number; anchors: AnchorResult[] };
+/** `skipped` : ancres sur une série dont le plugin n'est pas chargé (non vérifiées, et signalées). */
+export type RunReport = { observations: number; anchors: AnchorResult[]; skipped: Anchor[] };
 
-export async function runCollect(store: Store, plugins: readonly Plugin[], ctx: CollectContext, anchors: readonly Anchor[]): Promise<RunReport> {
-  const reg = buildRegistry(plugins);
+export async function runCollect(store: Store, reg: Registry, ctx: CollectContext, anchors: readonly Anchor[]): Promise<RunReport> {
   const batches: Observation[][] = [];
   for (const c of reg.collectors) {
     const obs = await c.run(ctx);
@@ -60,7 +84,8 @@ export async function runCollect(store: Store, plugins: readonly Plugin[], ctx: 
     batches.push(obs);   // pas de push(...obs) : des centaines de milliers d'arguments font déborder la pile
   }
   const collected = batches.flat();
-  for (const a of anchors) if (!reg.series.has(a.seriesId)) throw new Error(`ancre sur une série inconnue : ${a.seriesId}`);
+  const active = anchors.filter((a) => reg.series.has(a.seriesId));
+  const skipped = anchors.filter((a) => !reg.series.has(a.seriesId));
 
   let total = collected.length;
   let results: AnchorResult[] = [];
@@ -75,12 +100,12 @@ export async function runCollect(store: Store, plugins: readonly Plugin[], ctx: 
       store.putObservations(obs);
       total += obs.length;
     }
-    results = checkAnchors(store, anchors);
+    results = checkAnchors(store, active);
     const failed = results.filter((r) => !r.ok);
     if (failed.length) {
       throw new Error("ancres non respectées, rien n'est écrit :\n" + failed.map((r) =>
         `  ${r.anchor.seriesId} [${r.anchor.from}..${r.anchor.to}] ${r.anchor.aggregate} : attendu ${r.anchor.expected} ±${r.anchor.tolerance} (${r.anchor.publishedBy}), obtenu ${r.actual ?? "aucune donnée"}`).join("\n"));
     }
   })();
-  return { observations: total, anchors: results };
+  return { observations: total, anchors: results, skipped };
 }

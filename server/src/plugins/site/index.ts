@@ -1,6 +1,6 @@
 // Plugin « site » : identité du site (adresse, nom, description) et choix éditoriaux des pages, écrits
 // en base. Le site web ne lit que la base ; ces réglages y entrent par ici (et demain par le plugin IA).
-import type { Plugin } from "../../contract.js";
+import { PLUGIN_CATEGORY, type Plugin } from "../../contract.js";
 
 export const SITE_SETTING = { site: "site", fuelPage: "page.fuel" } as const;
 
@@ -45,13 +45,20 @@ export function parseFuelPageDecl(json: unknown): FuelPageDecl {
     reference: { label: need(ref, "label", f), from: need(ref, "from", f), to: need(ref, "to", f) } };
 }
 
-export function sitePlugin(site: SiteDecl, fuelPage: FuelPageDecl): Plugin {
-  return {
-    id: "site",
-    title: "Site",
-    register(api) {
+/** Réglages du plugin site : l'identité du site et les choix de la page carburants. */
+export function parseSiteSettings(json: unknown): { site: SiteDecl; fuelPage: FuelPageDecl } {
+  const o = (json ?? {}) as Obj;
+  return { site: parseSiteDecl(o.site), fuelPage: parseFuelPageDecl(o.fuelPage) };
+}
+
+export const sitePlugin: Plugin = {
+  id: "site",
+  title: { fr: "Site", en: "Site" },
+  description: { fr: "Identité du site, mentions légales et choix éditoriaux des pages.", en: "Site identity, legal notice and page choices." },
+  category: PLUGIN_CATEGORY.site,
+  register(api) {
+      const { site, fuelPage } = parseSiteSettings(api.settings());
       api.declareSetting({ key: SITE_SETTING.site, value: site });
       api.declareSetting({ key: SITE_SETTING.fuelPage, value: fuelPage });
-    },
-  };
-}
+  },
+};

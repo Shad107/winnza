@@ -41,6 +41,12 @@ export class Store implements SiteReader {
       .run(key, JSON.stringify(value));
   }
 
+  /** Réglage, ou null s'il n'existe pas encore (base neuve). */
+  settingOrNull(key: string): unknown {
+    const row = this.db.prepare("SELECT value FROM setting WHERE key = ?").get(key) as { value: string } | undefined;
+    return row ? JSON.parse(row.value) : null;
+  }
+
   setting(key: string): unknown {
     const row = this.db.prepare("SELECT value FROM setting WHERE key = ?").get(key) as { value: string } | undefined;
     if (!row) throw new Error(`réglage absent de la base : ${key} (collecte jamais lancée ?)`);

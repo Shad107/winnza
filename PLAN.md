@@ -89,6 +89,11 @@ dans un dépôt public partagé chez Isno-Open (AGPL)**, utilisé par les deux p
   de bout en bout passe sur le moteur partagé.
 - Ordre : 1) format et chargeur, Winnza branché dessus, ses fichiers JSON deviennent des réglages en
   base ; 2) écran de réglages et administration ; 3) migration d'OpenCloudApp.
+- **Étape 1 faite le 2026-11-13** : https://github.com/Isno-Open/OpenPluginHost (v0.1.0). Winnza charge
+  ses plugins par ce moteur, version figée. Chaque plugin lit ses réglages en base (`plugin.<id>`) ;
+  `declarations/` n'initialise qu'une base neuve, `node dist/cli.js seed <plugin>` recharge un plugin
+  depuis son fichier, `node dist/cli.js plugins` liste les plugins. Un plugin en échec est écarté sans
+  rien laisser au registre ; ses ancres sont signalées comme non vérifiées.
 - Si le moteur s'avère trop lié aux comptes ou aux boîtiers, on s'arrête et on en reparle.
 
 Ensuite : plugin stations (E10, SP98, E85, prix quotidiens), puis plugin prévision (validé sur

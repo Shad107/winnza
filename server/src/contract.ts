@@ -1,5 +1,7 @@
-// Contrat des greffons de données. Même principe qu'OpenCloudApp : un greffon n'importe pas le cœur,
-// il reçoit une `PluginApi` et y déclare ce qu'il apporte (sources, séries, collecteurs, dérivations).
+// Contrat des plugins de Winnza. Le format d'un plugin et son chargement viennent d'OpenPluginHost,
+// le moteur partagé avec OpenCloudApp ; un plugin n'importe pas le cœur, il reçoit une `PluginApi` et
+// y déclare ce qu'il apporte (sources, séries, réglages, collecteurs, dérivations).
+import type { Plugin as HostPlugin } from "@isno-open/plugin-host";
 
 /** Unités affichées. Énumérées : le code s'y réfère par leur nom, jamais par une chaîne écrite à la main. */
 export const UNIT = {
@@ -82,16 +84,21 @@ export type Derivation = {
   run: (read: SeriesReader) => Observation[];
 };
 
+/** Ce que Winnza donne à un plugin. Le moteur (OpenPluginHost) ne connaît cette api que par son type :
+ *  c'est la partie propre à Winnza, le reste du contrat est partagé avec OpenCloudApp. */
 export type PluginApi = {
   declareSource: (s: SourceDecl) => void;
   declareSeries: (s: SeriesDecl) => void;
   declareSetting: (s: SettingDecl) => void;
   registerCollector: (c: Collector) => void;
   registerDerivation: (d: Derivation) => void;
+  /** les réglages du plugin, tels qu'enregistrés en base */
+  settings: () => unknown;
 };
 
-export type Plugin = {
-  id: string;
-  title: string;
-  register: (api: PluginApi) => void;
-};
+/** Catégories de plugins reconnues par Winnza (écran d'administration). */
+export const PLUGIN_CATEGORY = { data: "data", site: "site", other: "other" } as const;
+export type PluginCategory = (typeof PLUGIN_CATEGORY)[keyof typeof PLUGIN_CATEGORY];
+export const PLUGIN_CATEGORIES: readonly PluginCategory[] = Object.values(PLUGIN_CATEGORY);
+
+export type Plugin = HostPlugin<PluginApi, PluginCategory>;

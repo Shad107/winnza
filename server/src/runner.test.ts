@@ -1,40 +1,67 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { AGGREGATE, parseAnchors, type Anchor } from "./anchors.js";
-import { FREQUENCY, UNIT, type CollectContext, type Plugin } from "./contract.js";
-import { runCollect } from "./runner.js";
+import { FREQUENCY, PLUGIN_CATEGORY, UNIT, type CollectContext, type Plugin } from "./contract.js";
+import { buildRegistry, runCollect } from "./runner.js";
 import { Store } from "./store.js";
 
 const noNet: CollectContext = { fetchBytes: async () => new Uint8Array(), fetchText: async () => "" };
 
+/** Un plugin d'essai : sa série vaut ce que dit son réglage en base. */
 const plugin: Plugin = {
-  id: "t", title: "test",
+  id: "essai", title: { fr: "Essai", en: "Test" }, category: PLUGIN_CATEGORY.data,
   register(api) {
+    const value = (api.settings() as { value: number }).value;
     api.declareSource({ id: "src", name: "s", publisher: "p", url: "u", licence: "l" });
     api.declareSeries({ id: "x", label: "x", unit: UNIT.eurPerLitre, frequency: FREQUENCY.daily, sourceId: "src" });
-    api.registerCollector({ id: "c", run: async () => [{ seriesId: "x", date: "2020-01-01", value: 2 }] });
+    api.registerCollector({ id: "c", run: async () => [{ seriesId: "x", date: "2020-01-01", value }] });
   },
 };
-const anchor = (expected: number): Anchor => ({ seriesId: "x", from: "2020-01-01", to: "2020-01-31", aggregate: AGGREGATE.mean,
+const settings = (id: string) => (id === "essai" ? { value: 2 } : null);
+const anchor = (expected: number, seriesId = "x"): Anchor => ({ seriesId, from: "2020-01-01", to: "2020-01-31", aggregate: AGGREGATE.mean,
   expected, tolerance: 0.1, publishedBy: "test", url: "u" });
 
-test("une ancre respectée : la collecte écrit", async () => {
+test("un plugin lit ses réglages en base, et l'ancre respectée laisse écrire", async () => {
   const store = new Store(":memory:");
-  const r = await runCollect(store, [plugin], noNet, [anchor(2)]);
+  const reg = await buildRegistry({ essai: plugin }, ["essai"], settings);
+  const r = await runCollect(store, reg, noNet, [anchor(2)]);
   assert.equal(r.anchors[0]!.ok, true);
-  assert.equal(store.get("x").length, 1);
+  assert.deepEqual(store.get("x").map((o) => o.value), [2]);
 });
 
 // Témoin de mutation : le contrôle doit SAVOIR échouer, et l'échec ne doit rien laisser en base.
 test("une ancre violée : la collecte échoue et la base reste vide", async () => {
   const store = new Store(":memory:");
-  await assert.rejects(runCollect(store, [plugin], noNet, [anchor(3)]), /ancres non respectées/);
+  const reg = await buildRegistry({ essai: plugin }, ["essai"], settings);
+  await assert.rejects(runCollect(store, reg, noNet, [anchor(3)]), /ancres non respectées/);
   assert.equal(store.get("x").length, 0);
+});
+
+test("un plugin en échec est écarté sans rien laisser au registre, les autres passent", async () => {
+  const casse: Plugin = { id: "casse", title: { fr: "Cassé", en: "Broken" }, register(api) {
+    api.declareSource({ id: "fantome", name: "f", publisher: "p", url: "u", licence: "l" });
+    throw new Error("réglage invalide");
+  } };
+  const reg = await buildRegistry({ essai: plugin, casse }, ["casse", "essai"], settings, () => {});
+  assert.deepEqual(reg.loaded, ["essai"]);
+  assert.deepEqual(reg.failed.map((f) => [f.id, f.error]), [["casse", "réglage invalide"]]);
+  assert.equal(reg.sources.has("fantome"), false, "ce qu'il avait déclaré avant d'échouer est oublié");
+  // ses ancres ne sont pas vérifiées, et c'est dit
+  const r = await runCollect(new Store(":memory:"), reg, noNet, [anchor(2), anchor(9, "serie-du-plugin-casse")]);
+  assert.deepEqual(r.skipped.map((a) => a.seriesId), ["serie-du-plugin-casse"]);
+});
+
+test("deux plugins qui déclarent la même série : le second est écarté", async () => {
+  const jumeau: Plugin = { ...plugin, id: "jumeau" };
+  const reg = await buildRegistry({ essai: plugin, jumeau }, ["essai", "jumeau"], (id) => (id === "jumeau" || id === "essai" ? { value: 1 } : null), () => {});
+  assert.deepEqual(reg.loaded, ["essai"]);
+  assert.match(reg.failed[0]!.error, /déjà déclaré par un autre plugin : source src, série x/);
 });
 
 test("une observation d'une série non déclarée est refusée", async () => {
   const bad: Plugin = { ...plugin, register(api) { plugin.register(api); api.registerCollector({ id: "d", run: async () => [{ seriesId: "typo", date: "2020-01-01", value: 1 }] }); } };
-  await assert.rejects(runCollect(new Store(":memory:"), [bad], noNet, []), /série non déclarée typo/);
+  const reg = await buildRegistry({ essai: bad }, ["essai"], settings);
+  await assert.rejects(runCollect(new Store(":memory:"), reg, noNet, []), /série non déclarée typo/);
 });
 
 test("anchors.json : un agrégat inconnu est une erreur", () => {
