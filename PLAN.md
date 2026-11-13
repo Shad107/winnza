@@ -57,7 +57,10 @@ dans le code.
    euro/dollar BCE), décomposition de chaque litre pour 27 pays et 4 produits depuis 2005, 8 ancres
    (dont la décomposition officielle de la Banque de France de septembre 2021, retrouvée à 0,3 centime),
    10 tests, dont un témoin de mutation sur l'appel des ancres.
-2. **Plugin carburants, côté pages** : la barre « où va mon litre », 2008 contre aujourd'hui (baril en
+2. **Plugin carburants, côté pages** : fait le 2026-11-13 (site SvelteKit en rendu serveur, `web/`).
+   Le site ne lit QUE la base ; tout y entre par un plugin (carburants, charges cachées, site).
+   Plugin SEO (`web/src/lib/plugins/seo`) : titre, description, canonique, Open Graph, données
+   structurées (FAQPage), `sitemap.xml`, `robots.txt`. Contenu prévu à l'origine : la barre « où va mon litre », 2008 contre aujourd'hui (baril en
    dollars, en euros, en euros constants), comparaison européenne, prix des stations (open data
    officiel : gazole, SP95, E10, SP98, E85, GPL).
 3. **Plugin électricité** : même barre de décomposition pour le kWh (énergie, réseau, taxes, TVA),

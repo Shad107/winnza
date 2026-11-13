@@ -1,0 +1,10 @@
+{
+  "$comment": "Identité du site, lue par le plugin SEO (adresse canonique, plan du site, données structurées).",
+  "url": "https://www.winnza.eu",
+  "name": "Winnza",
+  "locale": "fr_FR",
+  "description": "Où passe l'argent de votre plein ? Le vrai découpage du prix du carburant, chaque semaine : pétrole, raffinerie et station, TICPE, TVA et les taxes cachées. Chiffres officiels.",
+  "pages": [
+    { "path": "/", "changefreq": "weekly", "priority": 1.0 }
+  ]
+}

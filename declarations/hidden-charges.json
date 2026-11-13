@@ -1,0 +1,29 @@
+{
+  "$comment": "Charges imposées par l'État aux vendeurs de carburant et répercutées dans le prix, sans apparaître sur le ticket. Aucune source ne les publie en continu : chaque montant est un relevé daté, avec sa source. eurPerLitre null = coût réel non publié (affiché comme tel, jamais estimé au hasard). À relever de nouveau à chaque évolution.",
+  "charges": [
+    {
+      "id": "cee",
+      "label": "Certificats d'économies d'énergie (CEE)",
+      "description": "Les vendeurs de carburant doivent financer des travaux d'économie d'énergie (isolation, chaudières). Le coût est répercuté dans le prix du litre.",
+      "eurPerLitre": 0.1657,
+      "asOf": "2026-09-11",
+      "source": { "name": "Assemblée nationale, question écrite n° 18897", "url": "https://questions.assemblee-nationale.fr/q17/17-18897QE.htm" }
+    },
+    {
+      "id": "strategic-stocks",
+      "label": "Stocks stratégiques",
+      "description": "Contribution aux réserves de pétrole que la France doit garder : 90 jours de consommation.",
+      "eurPerLitre": 0.0075,
+      "asOf": "2025-12-31",
+      "source": { "name": "Selectra, d'après la SAGESS", "url": "https://selectra.info/energie/actualites/marche/stocks-strategiques-petrole-sagess-90-jours" }
+    },
+    {
+      "id": "biofuel",
+      "label": "Obligation d'incorporer des biocarburants",
+      "description": "Une pénalité frappe les vendeurs qui n'incorporent pas assez de biocarburants. Son coût, répercuté dans le prix, n'est pas publié.",
+      "eurPerLitre": null,
+      "asOf": "2026-11-13",
+      "source": { "name": "Ministère de la Transition écologique", "url": "https://www.ecologie.gouv.fr/politiques-publiques/biocarburants" }
+    }
+  ]
+}

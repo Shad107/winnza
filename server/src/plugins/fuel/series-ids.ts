@@ -18,7 +18,10 @@ export const FUEL_PART = {
 } as const;
 export type FuelPart = (typeof FUEL_PART)[keyof typeof FUEL_PART];
 
-export const fuelSeriesId = (country: string, product: string, part: FuelPart): string => `fuel.${country}.${product}.${part}`;
+/** Réglage en base : produits et pays du greffon, avec leurs noms affichés. */
+export const FUEL_CATALOG_SETTING = "fuel.catalog";
+
+export const fuelSeriesId =(country: string, product: string, part: FuelPart): string => `fuel.${country}.${product}.${part}`;
 
 export const OIL_SERIES = {
   brentUsd: "oil.brent.usd_per_barrel",

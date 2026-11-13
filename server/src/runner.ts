@@ -1,6 +1,6 @@
 // Une collecte : greffons -> téléchargements -> base -> dérivations -> ancres. Tout ce qui touche la base
 // se fait dans UNE transaction : si une ancre ne colle pas, rien n'est écrit et la collecte échoue.
-import type { CollectContext, Collector, Derivation, Observation, Plugin, SeriesDecl, SourceDecl } from "./contract.js";
+import type { CollectContext, Collector, Derivation, Observation, Plugin, SeriesDecl, SettingDecl, SourceDecl } from "./contract.js";
 import { checkAnchors, type Anchor, type AnchorResult } from "./anchors.js";
 import type { Store } from "./store.js";
 
@@ -9,10 +9,11 @@ export type Registry = {
   series: Map<string, SeriesDecl>;
   collectors: Collector[];
   derivations: Derivation[];
+  settings: Map<string, SettingDecl>;
 };
 
 export function buildRegistry(plugins: readonly Plugin[]): Registry {
-  const reg: Registry = { sources: new Map(), series: new Map(), collectors: [], derivations: [] };
+  const reg: Registry = { sources: new Map(), series: new Map(), collectors: [], derivations: [], settings: new Map() };
   for (const p of plugins) {
     p.register({
       declareSource: (s) => {
@@ -25,6 +26,10 @@ export function buildRegistry(plugins: readonly Plugin[]): Registry {
       },
       registerCollector: (c) => reg.collectors.push(c),
       registerDerivation: (d) => reg.derivations.push(d),
+      declareSetting: (s) => {
+        if (reg.settings.has(s.key)) throw new Error(`réglage déclaré deux fois : ${s.key}`);
+        reg.settings.set(s.key, s);
+      },
     });
   }
   for (const s of reg.series.values()) {
@@ -62,6 +67,7 @@ export async function runCollect(store: Store, plugins: readonly Plugin[], ctx: 
   store.db.transaction(() => {
     for (const s of reg.sources.values()) store.upsertSource(s);
     for (const s of reg.series.values()) store.upsertSeries(s);
+    for (const s of reg.settings.values()) store.putSetting(s.key, s.value);
     store.putObservations(collected);
     for (const d of reg.derivations) {
       const obs = d.run(store);

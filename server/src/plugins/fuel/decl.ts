@@ -30,16 +30,25 @@ function source(o: unknown, where: string): SourceDecl {
     url: str(s, "url", where), licence: str(s, "licence", where) };
 }
 
-export function parseFuelDecl(json: unknown): FuelDecl {
+export type FuelCatalog = { products: FuelProduct[]; countries: FuelCountry[] };
+
+/** Produits et pays : lu dans le fichier par le plugin, et en base par les pages (même contrôle). */
+export function parseFuelCatalog(json: unknown): FuelCatalog {
   const root = obj(json, "racine");
-  const src = obj(root.sources, "sources");
   return {
-    sources: { oilBulletin: source(src.oilBulletin, "sources.oilBulletin"), brent: source(src.brent, "sources.brent"),
-      eurusd: source(src.eurusd, "sources.eurusd") },
     products: list(root.products, "products").map((p, i) => ({ id: str(p, "id", `products[${i}]`),
       label: str(p, "label", `products[${i}]`), bulletinCode: str(p, "bulletinCode", `products[${i}]`),
       vatColumnLabel: str(p, "vatColumnLabel", `products[${i}]`) })),
     countries: list(root.countries, "countries").map((c, i) => ({ code: str(c, "code", `countries[${i}]`),
       label: str(c, "label", `countries[${i}]`) })),
+  };
+}
+
+export function parseFuelDecl(json: unknown): FuelDecl {
+  const src = obj(obj(json, "racine").sources, "sources");
+  return {
+    sources: { oilBulletin: source(src.oilBulletin, "sources.oilBulletin"), brent: source(src.brent, "sources.brent"),
+      eurusd: source(src.eurusd, "sources.eurusd") },
+    ...parseFuelCatalog(json),
   };
 }

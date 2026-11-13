@@ -1,0 +1,8 @@
+{
+  "$comment": "Choix éditoriaux de la page carburants. Le pays, les produits montrés, la période de comparaison et les voisins se déclarent ici. Juillet 2008 : mois du record historique du Brent.",
+  "country": "FR",
+  "products": ["diesel", "euro95"],
+  "reference": { "label": "Juillet 2008", "from": "2008-07-01", "to": "2008-07-31" },
+  "historyFrom": "2005-01-01",
+  "neighbours": ["ES", "LU", "BE", "DE", "IT", "NL"]
+}

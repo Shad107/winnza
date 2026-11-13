@@ -40,7 +40,13 @@ export type SeriesDecl = {
   sourceId: string;
   /** Séries dont celle-ci est calculée. Vide : relevée telle quelle à la source. */
   derivedFrom?: readonly string[];
+  /** Explication grand public de ce que mesure la série (affichée telle quelle). */
+  description?: string;
 };
+
+/** Un réglage écrit en base par un plugin (identité du site, choix éditoriaux d'une page, catalogue).
+ *  Le site ne lit QUE la base : ce qu'il affiche y est entré par un plugin. */
+export type SettingDecl = { key: string; value: unknown };
 
 /** Une valeur datée. `date` au format AAAA-MM-JJ. */
 export type Observation = { seriesId: string; date: string; value: number };
@@ -62,6 +68,13 @@ export type SeriesReader = {
   ids: (prefix: string) => string[];
 };
 
+/** Tout ce que les pages lisent : séries, leur description, leurs sources, les réglages. */
+export type SiteReader = SeriesReader & {
+  series: (id: string) => SeriesDecl | null;
+  source: (id: string) => SourceDecl | null;
+  setting: (key: string) => unknown;
+};
+
 /** Une dérivation calcule des séries à partir d'autres (ex. part des taxes = TTC - HT). Elle tourne
  *  après tous les collecteurs, dans l'ordre de déclaration. */
 export type Derivation = {
@@ -72,6 +85,7 @@ export type Derivation = {
 export type PluginApi = {
   declareSource: (s: SourceDecl) => void;
   declareSeries: (s: SeriesDecl) => void;
+  declareSetting: (s: SettingDecl) => void;
   registerCollector: (c: Collector) => void;
   registerDerivation: (d: Derivation) => void;
 };

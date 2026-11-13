@@ -5,7 +5,7 @@ import { readXlsx } from "../../xlsx.js";
 import type { FuelDecl } from "./decl.js";
 import { deriveBrentEurPerLitre, deriveDecomposition, deriveWeeklyCrude } from "./derive.js";
 import { parseBulletinPrices, parseBulletinVat, parseEcbCsv, parseFredCsv } from "./parse.js";
-import { FUEL_PART, fuelSeriesId, OIL_SERIES } from "./series-ids.js";
+import { FUEL_CATALOG_SETTING, FUEL_PART, fuelSeriesId, OIL_SERIES } from "./series-ids.js";
 
 export function fuelPlugin(decl: FuelDecl): Plugin {
   const { sources, countries, products } = decl;
@@ -18,6 +18,8 @@ export function fuelPlugin(decl: FuelDecl): Plugin {
     title: "Carburants",
     register(api) {
       for (const s of Object.values(sources)) api.declareSource(s);
+      // le catalogue (noms des produits et des pays) est lu par les pages : il passe par la base aussi
+      api.declareSetting({ key: FUEL_CATALOG_SETTING, value: { products, countries } });
 
       api.declareSeries({ id: OIL_SERIES.brentUsd, label: "Baril de Brent", unit: UNIT.usdPerBarrel, frequency: FREQUENCY.daily, sourceId: sources.brent.id });
       api.declareSeries({ id: OIL_SERIES.eurusd, label: "Dollars pour un euro", unit: UNIT.usdPerEur, frequency: FREQUENCY.daily, sourceId: sources.eurusd.id });

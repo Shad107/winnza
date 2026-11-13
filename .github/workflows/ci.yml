@@ -27,3 +27,16 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm test
+
+  web:
+    # le site se construit contre le socle compilé : socle d'abord, puis contrôle des types et build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: "26"
+      - run: npm ci && npm run build
+        working-directory: server
+      - run: npm ci && npm run check && npm run build
+        working-directory: web

@@ -6,6 +6,8 @@ import { parseAnchors } from "./anchors.js";
 import { httpContext } from "./http.js";
 import { parseFuelDecl } from "./plugins/fuel/decl.js";
 import { fuelPlugin } from "./plugins/fuel/index.js";
+import { hiddenChargesPlugin, parseHiddenCharges } from "./plugins/hidden-charges/index.js";
+import { parseFuelPageDecl, parseSiteDecl, sitePlugin } from "./plugins/site/index.js";
 import { runCollect } from "./runner.js";
 import { Store } from "./store.js";
 
@@ -18,7 +20,13 @@ async function main(): Promise<void> {
     console.error("usage : node dist/cli.js collect [chemin-base]");
     process.exit(2);
   }
-  const plugins = [fuelPlugin(parseFuelDecl(declaration("fuel.json")))];
+  // Les fichiers de declarations/ sont les ENTRÉES des plugins ; seuls les plugins écrivent en base,
+  // et le site ne lit que la base.
+  const plugins = [
+    fuelPlugin(parseFuelDecl(declaration("fuel.json"))),
+    hiddenChargesPlugin(parseHiddenCharges(declaration("hidden-charges.json"))),
+    sitePlugin(parseSiteDecl(declaration("site.json")), parseFuelPageDecl(declaration("fuel-page.json"))),
+  ];
   const anchors = parseAnchors(declaration("anchors.json"));
   const store = new Store(dbPath);
   const started = new Date().toISOString();
