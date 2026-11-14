@@ -106,5 +106,16 @@
     "publishedBy": "impots.gouv.fr",
     "url": "https://www.impots.gouv.fr/actualite/accise-sur-les-gaz-naturels-et-lelectricite-informations-sur-les-nouveaux-tarifs",
     "note": "Accise sur l'électricité des ménages et assimilés : 33,70 €/MWh au 1er février 2025, fin du bouclier tarifaire."
+  },
+  {
+    "seriesId": "elec.wholesale.FR",
+    "from": "2022-01-01",
+    "to": "2022-12-31",
+    "aggregate": "mean",
+    "expected": 0.27588,
+    "tolerance": 0.002,
+    "publishedBy": "EPEX SPOT, bilan annuel 2022",
+    "url": "https://www.epexspot.com/en/news/epex-spot-annual-market-review-2022",
+    "note": "Prix day-ahead moyen de la France en 2022 : 275,88 €/MWh, l'année record de la crise."
   }
 ]

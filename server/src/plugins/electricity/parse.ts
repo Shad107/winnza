@@ -1,8 +1,9 @@
 // Lecture des trois formats de source : le CSV de la CRE, le JSON-stat d'Eurostat, la liste Tempo.
 // Une colonne ou une dimension se repère par son NOM, déclaré dans electricity.json, jamais par sa position.
 import type { Observation } from "../../contract.js";
+import { KWH_PER_MWH, parisDate } from "../../units.js";
 import type { ElecCatalog, TrvOption } from "./decl.js";
-import { EU_PART, euSeriesId, SUBSCRIPTION, TEMPO_SERIES, TRV_PART, trvSeriesId, type EuPart } from "./series-ids.js";
+import { EU_PART, euSeriesId, SUBSCRIPTION, TEMPO_SERIES, TRV_PART, trvSeriesId, wholesaleSeriesId, type EuPart } from "./series-ids.js";
 
 /** « 0,1361 » -> 0.1361 ; cellule vide -> null */
 function frNumber(cell: string | undefined): number | null {
@@ -132,4 +133,40 @@ export function parseTempo(text: string, cat: ElecCatalog): Observation[] {
     out.push({ seriesId: TEMPO_SERIES, date: r.dateJour, value: r.codeJour });
   }
   return out;
+}
+
+/** Un jour compte s'il est couvert sur au moins 23 heures (le jour du passage à l'heure d'été en a 23). */
+const FULL_DAY_SECONDS = 23 * 3600;
+/** Pas le plus long de la source (horaire) : un trou dans les données ne compte pas comme couvert. */
+const MAX_STEP_SECONDS = 3600;
+
+/** Prix de gros (Energy-Charts) : moyenne de chaque jour complet, en heure de Paris, pondérée par la durée
+ *  de chaque pas (horaire, puis quart d'heure). Un jour incomplet (le lendemain pas encore publié en entier)
+ *  est laissé de côté ; une moyenne hors des bornes déclarées fait refuser la réponse. */
+export function parseWholesale(text: string, cat: ElecCatalog): Observation[] {
+  let d: { unix_seconds?: number[]; price?: (number | null)[]; unit?: string };
+  try { d = JSON.parse(text); } catch { throw new Error("prix de gros : la réponse n'est pas du JSON"); }
+  const ts = d.unix_seconds, price = d.price;
+  if (!Array.isArray(ts) || !Array.isArray(price) || ts.length !== price.length) throw new Error("prix de gros : réponse sans unix_seconds et price de même longueur");
+  if (d.unit !== "EUR / MWh") throw new Error(`prix de gros : unité inattendue « ${d.unit ?? ""} »`);
+  const days = new Map<string, { sum: number; seconds: number }>();
+  for (let i = 0; i < ts.length; i++) {
+    const p = price[i];
+    // durée du pas : jusqu'au point suivant (le dernier reprend le pas précédent), une heure au plus
+    const next = ts[i + 1] ?? ts[i]! + (i > 0 ? ts[i]! - ts[i - 1]! : MAX_STEP_SECONDS);
+    const step = Math.min(next - ts[i]!, MAX_STEP_SECONDS);
+    if (p === null || p === undefined || step <= 0) continue;
+    const day = parisDate(new Date(ts[i]! * 1000));
+    const acc = days.get(day) ?? days.set(day, { sum: 0, seconds: 0 }).get(day)!;
+    acc.sum += p * step; acc.seconds += step;
+  }
+  const { min, max } = cat.wholesale.plausible;
+  const out: Observation[] = [];
+  for (const [date, { sum, seconds }] of days) {
+    if (seconds < FULL_DAY_SECONDS) continue;
+    const value = sum / seconds / KWH_PER_MWH;
+    if (value < min || value > max) throw new Error(`prix de gros : ${value.toFixed(4)} €/kWh le ${date}, hors des bornes ${min} à ${max}`);
+    out.push({ seriesId: wholesaleSeriesId(cat.wholesale.area), date, value });
+  }
+  return out.sort((a, b) => a.date.localeCompare(b.date));
 }

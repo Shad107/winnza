@@ -1,34 +1,192 @@
 {
   "$comment": "Coût aux 100 km. Les prix viennent des autres plugins (stations : prix du jour ; électricité : tarif réglementé) ou, faute de flux public, d'un relevé déclaré ici avec sa source et sa date. Les consommations sont des moyennes publiées, que le visiteur peut remplacer par celle de sa voiture. Le GNV et l'hydrogène n'y sont pas : aucune source trouvée le 2026-11-14 ne donne un prix daté et toutes taxes comprises ; on ne les affichera pas sur une estimation.",
   "distance": {
-    "default": 12200, "min": 2000, "max": 40000, "step": 100,
-    "source": { "name": "SDES, bilan de la circulation 2019 : 12 200 km par voiture et par an", "url": "https://www.statistiques.developpement-durable.gouv.fr/stabilite-de-la-circulation-routiere-en-france-en-2019" }
+    "default": 12200,
+    "min": 2000,
+    "max": 40000,
+    "step": 100,
+    "source": {
+      "name": "SDES, bilan de la circulation 2019 : 12 200 km par voiture et par an",
+      "url": "https://www.statistiques.developpement-durable.gouv.fr/stabilite-de-la-circulation-routiere-en-france-en-2019"
+    }
   },
   "consumptions": [
-    { "id": "petrol", "value": 6.7, "unit": "L", "label": "voiture essence, moyenne du parc en circulation",
-      "source": { "name": "CCFA, l'industrie automobile française 2025, d'après le SDES", "url": "https://ccfa.fr/wp-content/uploads/2026/05/CCFA-2025-FR-53-54.pdf" } },
-    { "id": "diesel", "value": 5.9, "unit": "L", "label": "voiture diesel, moyenne du parc en circulation",
-      "source": { "name": "CCFA, l'industrie automobile française 2025, d'après le SDES", "url": "https://ccfa.fr/wp-content/uploads/2026/05/CCFA-2025-FR-53-54.pdf" } },
-    { "id": "ev", "value": 19.7, "unit": "kWh", "label": "voiture électrique, moyenne des modèles testés par l'ADAC en 2023",
-      "source": { "name": "Vision Mobility, d'après l'ADAC", "url": "https://vision-mobility.de/en/news/adac-analysis-range-of-electric-cars-increases-to-nearly-400-kilometers-304745.html" } }
+    {
+      "id": "petrol",
+      "value": 6.7,
+      "unit": "L",
+      "label": "voiture essence, moyenne du parc en circulation",
+      "source": {
+        "name": "CCFA, l'industrie automobile française 2025, d'après le SDES",
+        "url": "https://ccfa.fr/wp-content/uploads/2026/05/CCFA-2025-FR-53-54.pdf"
+      }
+    },
+    {
+      "id": "diesel",
+      "value": 5.9,
+      "unit": "L",
+      "label": "voiture diesel, moyenne du parc en circulation",
+      "source": {
+        "name": "CCFA, l'industrie automobile française 2025, d'après le SDES",
+        "url": "https://ccfa.fr/wp-content/uploads/2026/05/CCFA-2025-FR-53-54.pdf"
+      }
+    },
+    {
+      "id": "ev",
+      "value": 19.7,
+      "unit": "kWh",
+      "label": "voiture électrique, moyenne des modèles testés par l'ADAC en 2023",
+      "source": {
+        "name": "Vision Mobility, d'après l'ADAC",
+        "url": "https://vision-mobility.de/en/news/adac-analysis-range-of-electric-cars-increases-to-nearly-400-kilometers-304745.html"
+      }
+    }
   ],
   "references": [
-    { "id": "fast-charge", "label": "Recharge rapide sur borne publique, sans abonnement (médiane)", "eurPerUnit": 0.51, "unit": "kWh", "asOf": "2026-10-30",
-      "source": { "name": "Meilleurecharge, médiane des relevés en recharge rapide", "url": "https://www.meilleurecharge.fr/blog/prix-recharge-voiture-electrique" } }
+    {
+      "id": "fast-charge",
+      "label": "Recharge rapide sur borne publique, sans abonnement (médiane)",
+      "eurPerUnit": 0.51,
+      "unit": "kWh",
+      "asOf": "2026-10-30",
+      "source": {
+        "name": "Meilleurecharge, médiane des relevés en recharge rapide",
+        "url": "https://www.meilleurecharge.fr/blog/prix-recharge-voiture-electrique"
+      }
+    },
+    {
+      "id": "solar-surplus",
+      "label": "kWh de ses panneaux solaires : ce que rapporterait sa revente au réseau (installation raccordée depuis le 5 juin 2026)",
+      "eurPerUnit": 0.011,
+      "unit": "kWh",
+      "asOf": "2026-06-05",
+      "source": {
+        "name": "Arrêté du 1er juin 2026, tarif d'achat du surplus, 9 kWc ou moins",
+        "url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000054190669"
+      }
+    }
   ],
   "vehicles": [
-    { "id": "gazole", "label": "Diesel, au gazole", "consumption": "diesel", "price": { "station": "gazole" } },
-    { "id": "e10", "label": "Essence, au SP95-E10", "consumption": "petrol", "price": { "station": "e10" },
-      "factor": { "value": 1.01, "why": "environ 1 % de plus qu'au SP95", "source": { "name": "SNPAA, cité par Connaissance des énergies", "url": "https://www.connaissancedesenergies.org/malgre-la-crise-quelques-bonnes-nouvelles-pour-la-filiere-du-bioethanol-en-2020-210126" } } },
-    { "id": "sp95", "label": "Essence, au SP95", "consumption": "petrol", "price": { "station": "sp95" } },
-    { "id": "sp98", "label": "Essence, au SP98", "consumption": "petrol", "price": { "station": "sp98" } },
-    { "id": "e85", "label": "Essence convertie, au superéthanol E85", "consumption": "petrol", "price": { "station": "e85" },
-      "factor": { "value": 1.25, "why": "environ 25 % de litres en plus qu'à l'essence", "source": { "name": "Collective du bioéthanol, dossier de presse 2024", "url": "https://www.bioethanolcarburant.com/wp-content/uploads/2021/08/DP-Collective-Bioethanol-Fevrier-2024-Web.pdf" } } },
-    { "id": "gpl", "label": "Essence et GPL, au GPL", "consumption": "petrol", "price": { "station": "gplc" },
-      "factor": { "value": 1.2, "why": "environ 20 % de litres en plus qu'à l'essence", "source": { "name": "TotalEnergies, le GPL carburant", "url": "https://services.totalenergies.fr/particuliers/energies-vehicules/carburants-thermiques/gaz/gpl" } } },
-    { "id": "ev-base", "label": "Électrique, rechargée à la maison (tarif Base)", "consumption": "ev", "price": { "trv": { "option": "base", "period": "kwh" } } },
-    { "id": "ev-hc", "label": "Électrique, rechargée la nuit (heures creuses)", "consumption": "ev", "price": { "trv": { "option": "hphc", "period": "hc" } } },
-    { "id": "ev-tempo", "label": "Électrique, rechargée la nuit en Tempo (jour bleu)", "consumption": "ev", "price": { "trv": { "option": "tempo", "period": "blue-hc" } } },
-    { "id": "ev-fast", "label": "Électrique, sur borne rapide", "consumption": "ev", "price": { "reference": "fast-charge" } }
+    {
+      "id": "gazole",
+      "label": "Diesel, au gazole",
+      "consumption": "diesel",
+      "price": {
+        "station": "gazole"
+      }
+    },
+    {
+      "id": "e10",
+      "label": "Essence, au SP95-E10",
+      "consumption": "petrol",
+      "price": {
+        "station": "e10"
+      },
+      "factor": {
+        "value": 1.01,
+        "why": "environ 1 % de plus qu'au SP95",
+        "source": {
+          "name": "SNPAA, cité par Connaissance des énergies",
+          "url": "https://www.connaissancedesenergies.org/malgre-la-crise-quelques-bonnes-nouvelles-pour-la-filiere-du-bioethanol-en-2020-210126"
+        }
+      }
+    },
+    {
+      "id": "sp95",
+      "label": "Essence, au SP95",
+      "consumption": "petrol",
+      "price": {
+        "station": "sp95"
+      }
+    },
+    {
+      "id": "sp98",
+      "label": "Essence, au SP98",
+      "consumption": "petrol",
+      "price": {
+        "station": "sp98"
+      }
+    },
+    {
+      "id": "e85",
+      "label": "Essence convertie, au superéthanol E85",
+      "consumption": "petrol",
+      "price": {
+        "station": "e85"
+      },
+      "factor": {
+        "value": 1.25,
+        "why": "environ 25 % de litres en plus qu'à l'essence",
+        "source": {
+          "name": "Collective du bioéthanol, dossier de presse 2024",
+          "url": "https://www.bioethanolcarburant.com/wp-content/uploads/2021/08/DP-Collective-Bioethanol-Fevrier-2024-Web.pdf"
+        }
+      }
+    },
+    {
+      "id": "gpl",
+      "label": "Essence et GPL, au GPL",
+      "consumption": "petrol",
+      "price": {
+        "station": "gplc"
+      },
+      "factor": {
+        "value": 1.2,
+        "why": "environ 20 % de litres en plus qu'à l'essence",
+        "source": {
+          "name": "TotalEnergies, le GPL carburant",
+          "url": "https://services.totalenergies.fr/particuliers/energies-vehicules/carburants-thermiques/gaz/gpl"
+        }
+      }
+    },
+    {
+      "id": "ev-base",
+      "label": "Électrique, rechargée à la maison (tarif Base)",
+      "consumption": "ev",
+      "price": {
+        "trv": {
+          "option": "base",
+          "period": "kwh"
+        }
+      }
+    },
+    {
+      "id": "ev-hc",
+      "label": "Électrique, rechargée la nuit (heures creuses)",
+      "consumption": "ev",
+      "price": {
+        "trv": {
+          "option": "hphc",
+          "period": "hc"
+        }
+      }
+    },
+    {
+      "id": "ev-tempo",
+      "label": "Électrique, rechargée la nuit en Tempo (jour bleu)",
+      "consumption": "ev",
+      "price": {
+        "trv": {
+          "option": "tempo",
+          "period": "blue-hc"
+        }
+      }
+    },
+    {
+      "id": "ev-solar",
+      "label": "Électrique, rechargée avec ses panneaux solaires",
+      "consumption": "ev",
+      "price": {
+        "reference": "solar-surplus"
+      }
+    },
+    {
+      "id": "ev-fast",
+      "label": "Électrique, sur borne rapide",
+      "consumption": "ev",
+      "price": {
+        "reference": "fast-charge"
+      }
+    }
   ]
 }

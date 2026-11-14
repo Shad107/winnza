@@ -4,6 +4,9 @@
 /** Un baril de pétrole : 42 gallons américains, soit exactement 158,987294928 litres. */
 export const LITRES_PER_BARREL = 158.987294928;
 
+/** 1 MWh = 1 000 kWh (prix de gros publiés en €/MWh). */
+export const KWH_PER_MWH = 1000;
+
 /** Les prix du bulletin pétrolier européen sont donnés pour 1 000 litres. */
 export const LITRES_PER_BULLETIN_UNIT = 1000;
 

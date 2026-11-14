@@ -64,7 +64,7 @@ dans le code.
    dollars, en euros, en euros constants), comparaison européenne, prix des stations (open data
    officiel : gazole, SP95, E10, SP98, E85, GPL).
 3. **Plugin électricité** (fait le 14/11, sauf ENTSO-E) : même barre de décomposition pour le kWh (énergie, réseau, taxes, TVA),
-   tarifs réglementés CRE depuis 2012, Tempo, prix de gros ENTSO-E (l'équivalent du baril).
+   tarifs réglementés CRE depuis 2012, Tempo, prix de gros (l'équivalent du baril, fait le 14/11 par Energy-Charts).
 4. **Coût aux 100 km** (fait le 14/11, sauf GNV, hydrogène, hybride, solaire) : toutes les motorisations côte à côte. Essence, gazole, E85, GPL, GNV,
    hydrogène, hybride, électrique à la maison (Base, heures creuses, Tempo), sur borne, avec ses
    propres panneaux solaires (PVGIS). GNV et hydrogène n'ont pas de flux de prix public : prix de
@@ -114,6 +114,12 @@ chère, écart au département et à la France, chaque station, 8 villes voisine
 le 21/11. **Plugin mots-clés** (Keyword Planner, /admin/mots-cles) : 100 idées par groupe de pages, source
 d'appoint. ⚠️ Le jeton Google expire tous les 7 jours tant que l'écran de consentement OAuth du projet
 isno-512816 est en mode Test : à passer en Production (console Google Cloud, par Olivier).
+
+**14/11, 13 h** : titres et questions fréquentes tirés de Keyword Planner ; **prix de gros** de l'électricité
+(Energy-Charts, CC BY 4.0, sans clé : ENTSO-E inutile) depuis 2015, ancré sur la moyenne 2022 d'EPEX SPOT
+(275,88 €/MWh) ; recharge solaire au coût de revente du surplus (1,1 c€/kWh, arrêté du 1er juin 2026).
+Les collecteurs de séries peuvent être des sources d'appoint (ils nomment les séries qu'ils produisent).
+Reste de l'étape 4 : production solaire selon le lieu (PVGIS, testé, sans clé).
 
 ## Moteur de plugins partagé avec OpenCloudApp (décision du 2026-11-13)
 

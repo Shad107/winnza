@@ -10,7 +10,7 @@ const TEMPO_COLORS: readonly TempoColor[] = Object.values(TEMPO_COLOR);
 /** Les sources que le plugin connaît, par rôle. */
 export const ELEC_SOURCE = {
   trvBase: "trvBase", trvHphc: "trvHphc", trvTempo: "trvTempo",
-  components: "components", prices: "prices", tempo: "tempo",
+  components: "components", prices: "prices", tempo: "tempo", wholesale: "wholesale",
 } as const;
 export type ElecSourceKey = (typeof ELEC_SOURCE)[keyof typeof ELEC_SOURCE];
 const TRV_SOURCES: readonly ElecSourceKey[] = [ELEC_SOURCE.trvBase, ELEC_SOURCE.trvHphc, ELEC_SOURCE.trvTempo];
@@ -39,13 +39,14 @@ export type ElecCatalog = {
     reference: string;
     countries: { code: string; label: string }[];
   };
+  wholesale: { area: string; since: number; plausible: { min: number; max: number } };
   tempo: {
     codes: Record<string, TempoColor>;
     seasonStartMonth: number;
     quota: { white: number; red: number };
     quotaSource: Link;
   };
-  page: { consumption: { default: number; min: number; max: number; step: number } };
+  page: { consumption: { default: number; min: number; max: number; step: number }; compareWith: { option: string; period: string } };
 };
 export type ElecDecl = ElecCatalog & { sources: Record<ElecSourceKey, SourceDecl> };
 
@@ -106,6 +107,13 @@ export function parseElecCatalog(json: unknown): ElecCatalog {
   const reference = str(e, "reference", "eurostat");
   if (!countries.some((c) => c.code === reference)) fail("eurostat", `le pays de référence ${reference} n'est pas dans la liste`);
 
+  const ws = obj(root.wholesale, "wholesale");
+  const since = num(ws, "since", "wholesale");
+  if (!Number.isInteger(since) || since < 2000) fail("wholesale", "since : une année");
+  const wp = obj(ws.plausible, "wholesale.plausible");
+  const area = str(ws, "area", "wholesale");
+  if (!/^[A-Z0-9-]+$/.test(area)) fail("wholesale", "area : un code de zone (FR, DE-LU...)");
+
   const tp = obj(root.tempo, "tempo");
   const codes: Record<string, TempoColor> = {};
   for (const [k, v] of Object.entries(obj(tp.codes, "tempo.codes"))) codes[k] = TEMPO_COLORS.find((c) => c === v) ?? fail("tempo.codes", `couleur inconnue « ${String(v)} » pour le code ${k}`);
@@ -119,6 +127,10 @@ export function parseElecCatalog(json: unknown): ElecCatalog {
   // hors de la grille du curseur, le navigateur arrondit en silence et affiche une autre consommation
   const steps = (consumption.default - consumption.min) / consumption.step;
   if (Math.abs(steps - Math.round(steps)) > 1e-9) fail("page.consumption", "la valeur par défaut doit tomber sur un pas du curseur (min + n × step)");
+
+  const cw = obj(obj(root.page, "page").compareWith, "page.compareWith");
+  const compareWith = { option: str(cw, "option", "page.compareWith"), period: str(cw, "period", "page.compareWith") };
+  if (!options.find((o) => o.id === compareWith.option)?.periods.some((p) => p.id === compareWith.period)) fail("page.compareWith", `tarif inconnu « ${compareWith.option} / ${compareWith.period} »`);
 
   return {
     trv: {
@@ -135,12 +147,13 @@ export function parseElecCatalog(json: unknown): ElecCatalog {
       check: { tolerance: num(check, "tolerance", "eurostat.check"), minAgreement },
       reference, countries,
     },
+    wholesale: { area, since, plausible: { min: num(wp, "min", "wholesale.plausible"), max: num(wp, "max", "wholesale.plausible") } },
     tempo: {
       codes, seasonStartMonth: startMonth,
       quota: { white: num(quota, "white", "tempo.quota"), red: num(quota, "red", "tempo.quota") },
       quotaSource: link(tp.quotaSource, "tempo.quotaSource"),
     },
-    page: { consumption },
+    page: { consumption, compareWith },
   };
 }
 
@@ -148,6 +161,7 @@ export function parseElecDecl(json: unknown): ElecDecl {
   const src = obj(obj(json, "racine").sources, "sources");
   const one = (k: ElecSourceKey) => source(src[k], `sources.${k}`);
   const sources = { trvBase: one(ELEC_SOURCE.trvBase), trvHphc: one(ELEC_SOURCE.trvHphc), trvTempo: one(ELEC_SOURCE.trvTempo),
-    components: one(ELEC_SOURCE.components), prices: one(ELEC_SOURCE.prices), tempo: one(ELEC_SOURCE.tempo) } satisfies Record<ElecSourceKey, SourceDecl>;
+    components: one(ELEC_SOURCE.components), prices: one(ELEC_SOURCE.prices), tempo: one(ELEC_SOURCE.tempo),
+    wholesale: one(ELEC_SOURCE.wholesale) } satisfies Record<ElecSourceKey, SourceDecl>;
   return { ...parseElecCatalog(json), sources };
 }

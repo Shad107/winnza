@@ -4,7 +4,7 @@ import type { Observation, SiteReader } from "../contract.js";
 import { addDays, parisDate } from "../units.js";
 import { parseElecCatalog, TEMPO_COLOR, type Link, type TempoColor } from "../plugins/electricity/decl.js";
 import { tempoSeason } from "../plugins/electricity/parse.js";
-import { ELEC_CATALOG_SETTING, EU_PART, euSeriesId, SUBSCRIPTION, TEMPO_SERIES, TRV_PART, trvSeriesId } from "../plugins/electricity/series-ids.js";
+import { ELEC_CATALOG_SETTING, EU_PART, euSeriesId, SUBSCRIPTION, TEMPO_SERIES, TRV_PART, trvSeriesId, wholesaleSeriesId } from "../plugins/electricity/series-ids.js";
 
 /** Les quatre parts d'un kWh, dans l'ordre d'empilement (du bas vers le haut). */
 export const KWH_PART = { energy: "energy", network: "network", taxes: "taxes", vat: "vat" } as const;
@@ -43,6 +43,17 @@ export type ElectricityPage = {
     countries: { code: string; label: string; price: number | null; parts: KwhBreakdown | null }[];
   };
   tempo: TempoToday | null;
+  /** prix de gros (marché de la veille pour le lendemain), en €/kWh */
+  wholesale: {
+    area: string;
+    latest: { date: string; value: number };
+    /** le prix de demain, s'il est déjà publié */
+    tomorrow: { date: string; value: number } | null;
+    /** moyenne de l'année en cours, jusqu'à aujourd'hui */
+    yearAvg: { year: number; value: number };
+    /** moyenne de chaque mois, et le tarif Base TTC en vigueur le 1er du mois (première puissance) */
+    monthly: { months: string[]; wholesale: number[]; base: number[] };
+  } | null;
   sources: { name: string; publisher: string; url: string }[];
 };
 
@@ -137,14 +148,37 @@ export function buildElectricityPage(read: SiteReader, today: string = parisDate
     tempo = { date: today, color, tomorrow: next ? colorOf(next.value) : null, season, used, quota: cat.tempo.quota, quotaSource: cat.tempo.quotaSource };
   }
 
+  // prix de gros : le jour, demain, et chaque mois face au tarif Base
+  let wholesale: ElectricityPage["wholesale"] = null;
+  const ws = read.get(wholesaleSeriesId(cat.wholesale.area));
+  const upToToday = ws.filter((o) => o.date <= today);
+  const latest = upToToday.at(-1);
+  if (latest) {
+    const next = ws.find((o) => o.date === addDays(today, 1));
+    const year = Number(today.slice(0, 4));
+    const thisYear = upToToday.filter((o) => o.date.startsWith(String(year)));
+    const cw = cat.page.compareWith;
+    const baseObs = read.get(trvSeriesId(cw.option, kva, cw.period, TRV_PART.ttc));
+    const byMonth = new Map<string, number[]>();
+    for (const o of upToToday) (byMonth.get(o.date.slice(0, 7)) ?? byMonth.set(o.date.slice(0, 7), []).get(o.date.slice(0, 7))!).push(o.value);
+    // seulement les mois où le tarif était déjà en vigueur : un « 0 » ferait plonger la courbe
+    const months = [...byMonth.keys()].sort().filter((m) => inForce(baseObs, `${m}-01`) !== null);
+    wholesale = {
+      area: cat.wholesale.area, latest: { date: latest.date, value: latest.value }, tomorrow: next ? { date: next.date, value: next.value } : null,
+      yearAvg: { year, value: thisYear.reduce((s, o) => s + o.value, 0) / (thisYear.length || 1) },
+      monthly: { months: months.map((m) => `${m}-01`), wholesale: months.map((m) => { const v = byMonth.get(m)!; return v.reduce((s, x) => s + x, 0) / v.length; }),
+        base: months.map((m) => inForce(baseObs, `${m}-01`)!) },
+    };
+  }
+
   const sourceIds = new Set<string>();
   for (const o of trv.options) { const s = read.series(trvSeriesId(o.id, kva, SUBSCRIPTION, TRV_PART.ttc)); if (s) sourceIds.add(s.sourceId); }
-  for (const id of [euSeriesId(ref, EU_PART.energy), euSeriesId(ref, EU_PART.price), TEMPO_SERIES]) { const s = read.series(id); if (s) sourceIds.add(s.sourceId); }
+  for (const id of [euSeriesId(ref, EU_PART.energy), euSeriesId(ref, EU_PART.price), TEMPO_SERIES, wholesaleSeriesId(cat.wholesale.area)]) { const s = read.series(id); if (s) sourceIds.add(s.sourceId); }
   const sources = [...sourceIds].flatMap((id) => { const s = read.source(id); return s ? [{ name: s.name, publisher: s.publisher, url: s.url }] : []; });
 
   return {
     asOf, consumption: cat.page.consumption, bandLabel: eurostat.bandLabel, kwhVat: trv.kwhVat, options, history, annual,
     europe: { reference: ref, year: Number(compDate.slice(0, 4)), semester, countries },
-    tempo, sources,
+    tempo, wholesale, sources,
   };
 }

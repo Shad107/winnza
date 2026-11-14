@@ -157,6 +157,30 @@
     </section>
   {/if}
 
+  {#if el.wholesale}
+    {@const w = el.wholesale}
+    <section class="section" aria-labelledby="gros">
+      <h2 class="h2" id="gros">Le prix de gros : ce que vaut le kWh sur le marché</h2>
+      <p class="lead">L'équivalent du baril pour l'électricité : le prix auquel elle s'échange la veille pour le lendemain. Les fournisseurs l'achètent en partie à ce prix, puis s'ajoutent le réseau, les taxes et leur marge.</p>
+      <div class="card pad">
+        <div class="headline" style="margin-top: 0">
+          <span class="mid">{eur4(w.latest.value)}</span>
+          <span class="sub">le kWh sur le marché de gros le {longDate(w.latest.date)}, soit {Math.round(w.latest.value * 1000)} € le MWh{#if w.tomorrow}. Demain : {eur4(w.tomorrow.value)}{/if}.</span>
+        </div>
+        {#if baseKwh}<p class="sub-line">En {w.yearAvg.year}, {eur4(w.yearAvg.value)} en moyenne sur le marché, contre {eur4(baseKwh.ttc)} payés au tarif Base.</p>{/if}
+        {#if w.monthly.months.length > 1}
+          <div style="margin-top: 18px">
+            <LineChart labels={w.monthly.months.map(monthLabel)} axis={AXIS.kwh}
+              years={w.monthly.months.flatMap((m, i) => (m.endsWith('-01-01') && Number(m.slice(0, 4)) % 2 === 0 ? [{ index: i, label: m.slice(0, 4) }] : []))}
+              series={[{ key: 'base', label: 'Tarif Base, toutes taxes comprises', color: 'var(--ink)', values: w.monthly.base },
+                       { key: 'gros', label: 'Prix de gros, moyenne du mois', color: 'var(--s1)', values: w.monthly.wholesale }]}
+              label="Prix de gros de l'électricité, moyenne de chaque mois, face au tarif Base toutes taxes comprises. Flèches gauche et droite pour parcourir." />
+          </div>
+        {/if}
+      </div>
+    </section>
+  {/if}
+
   {#if el.history.series.length}
     <section class="section" aria-labelledby="histoire">
       <h2 class="h2" id="histoire">Le tarif réglementé depuis {el.history.months[0]?.slice(0, 4)}</h2>

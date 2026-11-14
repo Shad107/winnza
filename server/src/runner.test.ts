@@ -121,3 +121,33 @@ test("instantané d'appoint : sa source ne répond pas, la collecte continue et 
   assert.match(r.warnings[0]!, /serveur saturé/);
   assert.deepEqual(store.get("x").map((o) => o.value), [2], "le reste est écrit");
 });
+
+/** Un plugin à deux sources : une principale, une d'appoint dont on choisit si elle répond. */
+const twoSources = (appointOk: boolean, strays = false): Plugin => ({
+  id: "deux", title: { fr: "Deux", en: "Two" }, category: PLUGIN_CATEGORY.data,
+  register(api) {
+    api.declareSource({ id: "src", name: "s", publisher: "p", url: "u", licence: "l" });
+    api.declareSeries({ id: "main", label: "m", unit: UNIT.eurPerLitre, frequency: FREQUENCY.daily, sourceId: "src" });
+    api.declareSeries({ id: "extra", label: "e", unit: UNIT.eurPerLitre, frequency: FREQUENCY.daily, sourceId: "src" });
+    api.registerCollector({ id: "main", run: async () => [{ seriesId: "main", date: "2020-01-01", value: 1 }] });
+    api.registerCollector({ id: "extra", optional: true, produces: strays ? ["extra-autre"] : ["extra"], run: async () => {
+      if (!appointOk) throw new Error("HTTP 429");
+      return [{ seriesId: "extra", date: "2020-01-01", value: 5 }];
+    } });
+  },
+});
+
+// Témoin : la source d'appoint tombe, la principale est écrite, l'ancre de l'appoint est mise de côté et dite.
+test("collecteur d'appoint en panne : la collecte continue, ses ancres sont mises de côté", async () => {
+  const store = new Store(":memory:");
+  const r = await runCollect(store, await buildRegistry({ deux: twoSources(false) }, ["deux"], () => null), noNet, [anchor(5, "extra")]);
+  assert.deepEqual(store.get("main").map((o) => o.value), [1]);
+  assert.match(r.warnings[0]!, /extra : HTTP 429/);
+  assert.deepEqual(r.skipped.map((a) => a.seriesId), ["extra"]);
+});
+
+test("collecteur principal en panne : tout s'arrête ; appoint qui écrit hors de sa liste : refusé", async () => {
+  const failing: Plugin = { ...plugin, register(api) { plugin.register(api); api.registerCollector({ id: "panne", run: async () => { throw new Error("HTTP 500"); } }); } };
+  await assert.rejects(runCollect(new Store(":memory:"), await buildRegistry({ essai: failing }, ["essai"], settings), noNet, []), /HTTP 500/);
+  await assert.rejects(runCollect(new Store(":memory:"), await buildRegistry({ deux: twoSources(true, true) }, ["deux"], () => null), noNet, []), /absente de la liste/);
+});

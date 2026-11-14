@@ -73,7 +73,13 @@ export type CollectContext = {
 export type Collector = {
   id: string;
   run: (ctx: CollectContext) => Promise<Observation[]>;
-};
+} & (
+  | { optional?: false }
+  /** source d'appoint (ex. prix de gros) : si elle ne répond pas, la collecte continue, l'échec est signalé et
+   *  les dernières valeurs en base restent. Elle nomme les séries qu'elle produit : en cas d'échec, seules les
+   *  ancres de ces séries sont mises de côté ; en cas de succès, elle ne peut rien écrire d'autre. */
+  | { optional: true; produces: readonly string[] }
+);
 
 /** Instantané daté : l'état d'un ensemble d'éléments un jour donné (ex. chaque station, sa position et ses
  *  prix). Pour ce qui n'est pas une série de nombres. Le cœur garde `keepDays` jours, puis efface. */

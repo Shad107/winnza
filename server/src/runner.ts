@@ -112,15 +112,29 @@ function memoized(ctx: CollectContext): CollectContext {
 export async function runCollect(store: Store, reg: Registry, rawCtx: CollectContext, anchors: readonly Anchor[]): Promise<RunReport> {
   const ctx = memoized(rawCtx);
   const batches: Observation[][] = [];
+  const warnings: string[] = [];
+  /** séries d'une source d'appoint qui n'a pas répondu : leurs ancres ne peuvent pas être vérifiées ce jour-là */
+  const unavailable = new Set<string>();
   for (const c of reg.collectors) {
-    const obs = await c.run(ctx);
-    assertDeclared(reg, obs, `collecteur ${c.id}`);
-    if (!obs.length) throw new Error(`collecteur ${c.id} : aucune donnée (source changée ?)`);
+    let obs: Observation[];
+    try {
+      obs = await c.run(ctx);
+      if (!obs.length) throw new Error(`collecteur ${c.id} : aucune donnée (source changée ?)`);
+    } catch (e) {
+      if (!c.optional) throw e;
+      warnings.push(`${c.id} : ${e instanceof Error ? e.message : String(e)} (dernières valeurs gardées)`);
+      for (const id of c.produces) unavailable.add(id);
+      continue;
+    }
+    assertDeclared(reg, obs, `collecteur ${c.id}`);   // une série non déclarée reste une erreur, appoint ou pas
+    if (c.optional) {
+      const stray = obs.find((o) => !c.produces.includes(o.seriesId));
+      if (stray) throw new Error(`collecteur ${c.id} : série ${stray.seriesId} absente de la liste des séries qu'il annonce`);
+    }
     batches.push(obs);   // pas de push(...obs) : des centaines de milliers d'arguments font déborder la pile
   }
   const collected = batches.flat();
   const snaps: { c: SnapshotCollector; snap: Snapshot }[] = [];
-  const warnings: string[] = [];
   for (const c of reg.snapshotCollectors) {
     try {
       const snap = await c.run(ctx);
@@ -131,8 +145,8 @@ export async function runCollect(store: Store, reg: Registry, rawCtx: CollectCon
       warnings.push(`${c.id} : ${e instanceof Error ? e.message : String(e)} (dernier relevé gardé)`);
     }
   }
-  const active = anchors.filter((a) => reg.series.has(a.seriesId));
-  const skipped = anchors.filter((a) => !reg.series.has(a.seriesId));
+  const active = anchors.filter((a) => reg.series.has(a.seriesId) && !unavailable.has(a.seriesId));
+  const skipped = anchors.filter((a) => !reg.series.has(a.seriesId) || unavailable.has(a.seriesId));
 
   let total = collected.length;
   let results: AnchorResult[] = [];

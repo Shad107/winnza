@@ -42,82 +42,290 @@
       "publisher": "api-couleur-tempo.fr",
       "url": "https://www.api-couleur-tempo.fr/api/joursTempo",
       "licence": "Données publiques de RTE, service gratuit"
+    },
+    "wholesale": {
+      "id": "energy-charts-price",
+      "name": "Prix de gros de l'électricité, marché day-ahead (veille pour le lendemain)",
+      "publisher": "Energy-Charts (Fraunhofer ISE), d'après Bundesnetzagentur | SMARD.de",
+      "url": "https://api.energy-charts.info/price?bzn={area}&start={start}&end={end}",
+      "licence": "CC BY 4.0"
     }
   },
   "trv": {
-    "columns": { "from": "DATE_DEBUT", "power": "P_SOUSCRITE", "subscriptionHt": "PART_FIXE_HT", "subscriptionTtc": "PART_FIXE_TTC" },
-    "powers": [6, 9],
+    "columns": {
+      "from": "DATE_DEBUT",
+      "power": "P_SOUSCRITE",
+      "subscriptionHt": "PART_FIXE_HT",
+      "subscriptionTtc": "PART_FIXE_TTC"
+    },
+    "powers": [
+      6,
+      9
+    ],
     "kwhVat": {
       "rate": 0.2,
       "$comment": "Taux normal sur le kWh consommé depuis 2012 ; le taux réduit de 5,5 % ne portait que sur l'abonnement, jusqu'au 31 juillet 2025.",
-      "source": { "name": "Code général des impôts, article 278-0 bis", "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000044986851" }
+      "source": {
+        "name": "Code général des impôts, article 278-0 bis",
+        "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000044986851"
+      }
     },
-    "plausibleExcise": { "min": -0.001, "max": 0.1 },
+    "plausibleExcise": {
+      "min": -0.001,
+      "max": 0.1
+    },
     "options": [
-      { "id": "base", "label": "Base", "source": "trvBase", "periods": [
-        { "id": "kwh", "label": "Toutes heures", "ht": "PART_VARIABLE_HT", "ttc": "PART_VARIABLE_TTC" }
-      ] },
-      { "id": "hphc", "label": "Heures creuses", "source": "trvHphc", "periods": [
-        { "id": "hc", "label": "Heures creuses", "ht": "PART_VARIABLE_HC_HT", "ttc": "PART_VARIABLE_HC_TTC" },
-        { "id": "hp", "label": "Heures pleines", "ht": "PART_VARIABLE_HP_HT", "ttc": "PART_VARIABLE_HP_TTC" }
-      ] },
-      { "id": "tempo", "label": "Tempo", "source": "trvTempo", "periods": [
-        { "id": "blue-hc", "label": "Jour bleu, heures creuses", "tempo": "blue", "ht": "PART_VARIABLE_HCBleu_HT", "ttc": "PART_VARIABLE_HCBleu_TTC" },
-        { "id": "blue-hp", "label": "Jour bleu, heures pleines", "tempo": "blue", "ht": "PART_VARIABLE_HPBleu_HT", "ttc": "PART_VARIABLE_HPBleu_TTC" },
-        { "id": "white-hc", "label": "Jour blanc, heures creuses", "tempo": "white", "ht": "PART_VARIABLE_HCBlanc_HT", "ttc": "PART_VARIABLE_HCBlanc_TTC" },
-        { "id": "white-hp", "label": "Jour blanc, heures pleines", "tempo": "white", "ht": "PART_VARIABLE_HPBlanc_HT", "ttc": "PART_VARIABLE_HPBlanc_TTC" },
-        { "id": "red-hc", "label": "Jour rouge, heures creuses", "tempo": "red", "ht": "PART_VARIABLE_HCRouge_HT", "ttc": "PART_VARIABLE_HCRouge_TTC" },
-        { "id": "red-hp", "label": "Jour rouge, heures pleines", "tempo": "red", "ht": "PART_VARIABLE_HPRouge_HT", "ttc": "PART_VARIABLE_HPRouge_TTC" }
-      ] }
+      {
+        "id": "base",
+        "label": "Base",
+        "source": "trvBase",
+        "periods": [
+          {
+            "id": "kwh",
+            "label": "Toutes heures",
+            "ht": "PART_VARIABLE_HT",
+            "ttc": "PART_VARIABLE_TTC"
+          }
+        ]
+      },
+      {
+        "id": "hphc",
+        "label": "Heures creuses",
+        "source": "trvHphc",
+        "periods": [
+          {
+            "id": "hc",
+            "label": "Heures creuses",
+            "ht": "PART_VARIABLE_HC_HT",
+            "ttc": "PART_VARIABLE_HC_TTC"
+          },
+          {
+            "id": "hp",
+            "label": "Heures pleines",
+            "ht": "PART_VARIABLE_HP_HT",
+            "ttc": "PART_VARIABLE_HP_TTC"
+          }
+        ]
+      },
+      {
+        "id": "tempo",
+        "label": "Tempo",
+        "source": "trvTempo",
+        "periods": [
+          {
+            "id": "blue-hc",
+            "label": "Jour bleu, heures creuses",
+            "tempo": "blue",
+            "ht": "PART_VARIABLE_HCBleu_HT",
+            "ttc": "PART_VARIABLE_HCBleu_TTC"
+          },
+          {
+            "id": "blue-hp",
+            "label": "Jour bleu, heures pleines",
+            "tempo": "blue",
+            "ht": "PART_VARIABLE_HPBleu_HT",
+            "ttc": "PART_VARIABLE_HPBleu_TTC"
+          },
+          {
+            "id": "white-hc",
+            "label": "Jour blanc, heures creuses",
+            "tempo": "white",
+            "ht": "PART_VARIABLE_HCBlanc_HT",
+            "ttc": "PART_VARIABLE_HCBlanc_TTC"
+          },
+          {
+            "id": "white-hp",
+            "label": "Jour blanc, heures pleines",
+            "tempo": "white",
+            "ht": "PART_VARIABLE_HPBlanc_HT",
+            "ttc": "PART_VARIABLE_HPBlanc_TTC"
+          },
+          {
+            "id": "red-hc",
+            "label": "Jour rouge, heures creuses",
+            "tempo": "red",
+            "ht": "PART_VARIABLE_HCRouge_HT",
+            "ttc": "PART_VARIABLE_HCRouge_TTC"
+          },
+          {
+            "id": "red-hp",
+            "label": "Jour rouge, heures pleines",
+            "tempo": "red",
+            "ht": "PART_VARIABLE_HPRouge_HT",
+            "ttc": "PART_VARIABLE_HPRouge_TTC"
+          }
+        ]
+      }
     ]
   },
   "eurostat": {
     "band": "KWH2500-4999",
-    "bandLabel": "ménage qui consomme de 2\u00a0500 à 5\u00a0000\u00a0kWh par an",
-    "parts": { "energy": "NRG_SUP", "network": "NETC", "taxesWithVat": "TAX_FEE_LEV_CHRG", "vat": "VAT" },
+    "bandLabel": "ménage qui consomme de 2 500 à 5 000 kWh par an",
+    "parts": {
+      "energy": "NRG_SUP",
+      "network": "NETC",
+      "taxesWithVat": "TAX_FEE_LEV_CHRG",
+      "vat": "VAT"
+    },
     "totalTax": "I_TAX",
     "$comment_check": "Énergie + réseau + taxes (TVA comprise) doit retomber sur la moyenne des deux semestres TTC, à `tolerance` près, pour au moins `minAgreement` des couples pays-année. Sinon, notre lecture des rubriques est fausse et la collecte s'arrête.",
-    "check": { "tolerance": 0.01, "minAgreement": 0.9 },
+    "check": {
+      "tolerance": 0.01,
+      "minAgreement": 0.9
+    },
     "reference": "FR",
     "countries": [
-      { "code": "FR", "label": "France" },
-      { "code": "EU27_2020", "label": "Moyenne de l'Union" },
-      { "code": "DE", "label": "Allemagne" },
-      { "code": "AT", "label": "Autriche" },
-      { "code": "BE", "label": "Belgique" },
-      { "code": "BG", "label": "Bulgarie" },
-      { "code": "CY", "label": "Chypre" },
-      { "code": "HR", "label": "Croatie" },
-      { "code": "DK", "label": "Danemark" },
-      { "code": "ES", "label": "Espagne" },
-      { "code": "EE", "label": "Estonie" },
-      { "code": "FI", "label": "Finlande" },
-      { "code": "EL", "label": "Grèce" },
-      { "code": "HU", "label": "Hongrie" },
-      { "code": "IE", "label": "Irlande" },
-      { "code": "IT", "label": "Italie" },
-      { "code": "LV", "label": "Lettonie" },
-      { "code": "LT", "label": "Lituanie" },
-      { "code": "LU", "label": "Luxembourg" },
-      { "code": "MT", "label": "Malte" },
-      { "code": "NL", "label": "Pays-Bas" },
-      { "code": "PL", "label": "Pologne" },
-      { "code": "PT", "label": "Portugal" },
-      { "code": "CZ", "label": "Tchéquie" },
-      { "code": "RO", "label": "Roumanie" },
-      { "code": "SK", "label": "Slovaquie" },
-      { "code": "SI", "label": "Slovénie" },
-      { "code": "SE", "label": "Suède" }
+      {
+        "code": "FR",
+        "label": "France"
+      },
+      {
+        "code": "EU27_2020",
+        "label": "Moyenne de l'Union"
+      },
+      {
+        "code": "DE",
+        "label": "Allemagne"
+      },
+      {
+        "code": "AT",
+        "label": "Autriche"
+      },
+      {
+        "code": "BE",
+        "label": "Belgique"
+      },
+      {
+        "code": "BG",
+        "label": "Bulgarie"
+      },
+      {
+        "code": "CY",
+        "label": "Chypre"
+      },
+      {
+        "code": "HR",
+        "label": "Croatie"
+      },
+      {
+        "code": "DK",
+        "label": "Danemark"
+      },
+      {
+        "code": "ES",
+        "label": "Espagne"
+      },
+      {
+        "code": "EE",
+        "label": "Estonie"
+      },
+      {
+        "code": "FI",
+        "label": "Finlande"
+      },
+      {
+        "code": "EL",
+        "label": "Grèce"
+      },
+      {
+        "code": "HU",
+        "label": "Hongrie"
+      },
+      {
+        "code": "IE",
+        "label": "Irlande"
+      },
+      {
+        "code": "IT",
+        "label": "Italie"
+      },
+      {
+        "code": "LV",
+        "label": "Lettonie"
+      },
+      {
+        "code": "LT",
+        "label": "Lituanie"
+      },
+      {
+        "code": "LU",
+        "label": "Luxembourg"
+      },
+      {
+        "code": "MT",
+        "label": "Malte"
+      },
+      {
+        "code": "NL",
+        "label": "Pays-Bas"
+      },
+      {
+        "code": "PL",
+        "label": "Pologne"
+      },
+      {
+        "code": "PT",
+        "label": "Portugal"
+      },
+      {
+        "code": "CZ",
+        "label": "Tchéquie"
+      },
+      {
+        "code": "RO",
+        "label": "Roumanie"
+      },
+      {
+        "code": "SK",
+        "label": "Slovaquie"
+      },
+      {
+        "code": "SI",
+        "label": "Slovénie"
+      },
+      {
+        "code": "SE",
+        "label": "Suède"
+      }
     ]
   },
+  "wholesale": {
+    "$comment": "Prix de la veille pour le lendemain, au pas horaire puis au quart d'heure, en €/MWh ; on garde la moyenne de chaque jour complet (heure de Paris), en €/kWh. Une seule requête depuis le 1er janvier de `since` (une par année déclenchait la limite de débit).",
+    "area": "FR",
+    "since": 2015,
+    "plausible": {
+      "min": -0.5,
+      "max": 3
+    }
+  },
   "tempo": {
-    "codes": { "1": "blue", "2": "white", "3": "red" },
+    "codes": {
+      "1": "blue",
+      "2": "white",
+      "3": "red"
+    },
     "seasonStartMonth": 9,
-    "quota": { "white": 43, "red": 22 },
-    "quotaSource": { "name": "EDF, conditions de l'option Tempo du tarif Bleu", "url": "https://particulier.edf.fr/fr/accueil/gestion-contrat/options/tempo.html" }
+    "quota": {
+      "white": 43,
+      "red": 22
+    },
+    "quotaSource": {
+      "name": "EDF, conditions de l'option Tempo du tarif Bleu",
+      "url": "https://particulier.edf.fr/fr/accueil/gestion-contrat/options/tempo.html"
+    }
   },
   "page": {
     "$comment": "Consommation proposée par défaut : milieu de la tranche Eurostat ci-dessus, pour que nos calculs et la comparaison européenne parlent du même ménage.",
-    "consumption": { "default": 3750, "min": 1000, "max": 15000, "step": 250 }
+    "consumption": {
+      "default": 3750,
+      "min": 1000,
+      "max": 15000,
+      "step": 250
+    },
+    "compareWith": {
+      "$comment": "Le tarif mis face au prix de gros sur la page.",
+      "option": "base",
+      "period": "kwh"
+    }
   }
 }

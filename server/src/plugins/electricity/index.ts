@@ -6,11 +6,11 @@
 //   - couleur de chaque jour Tempo, saison en cours et précédente.
 import { FREQUENCY, PLUGIN_CATEGORY, UNIT, type Plugin } from "../../contract.js";
 import { jsonSettings } from "../json-settings.js";
-import { parisDate } from "../../units.js";
+import { addDays, parisDate } from "../../units.js";
 import { parseElecDecl } from "./decl.js";
 import { deriveEuTaxes, deriveTrvTaxes } from "./derive.js";
-import { parseEuComponents, parseEuPrices, parseTempo, parseTrvCsv, tempoSeason } from "./parse.js";
-import { ELEC_CATALOG_SETTING, EU_PART, euSeriesId, SUBSCRIPTION, TEMPO_SERIES, TRV_PART, trvSeriesId, type EuPart, type TrvPart } from "./series-ids.js";
+import { parseEuComponents, parseEuPrices, parseTempo, parseTrvCsv, parseWholesale, tempoSeason } from "./parse.js";
+import { ELEC_CATALOG_SETTING, EU_PART, euSeriesId, SUBSCRIPTION, TEMPO_SERIES, TRV_PART, trvSeriesId, wholesaleSeriesId, type EuPart, type TrvPart } from "./series-ids.js";
 
 const TRV_PART_LABEL = {
   [TRV_PART.ht]: "hors taxes", [TRV_PART.ttc]: "toutes taxes comprises",
@@ -73,6 +73,17 @@ export const electricityPlugin: Plugin = {
       const seasons = [`${from - 1}-${from}`, current];
       const lists = await Promise.all(seasons.map(async (s) => parseTempo(await ctx.fetchText(`${sources.tempo.url}?periode%5B%5D=${s}`), decl)));
       return lists.flat();
+    } });
+
+    // prix de gros : UNE requête pour tout l'historique, jusqu'à demain (publié la veille vers 13 h) ; une
+    // requête par année déclenchait la limite de débit de la source (HTTP 429, mesuré le 2026-11-14)
+    const ws = decl.wholesale;
+    api.declareSeries({ id: wholesaleSeriesId(ws.area), label: `Prix de gros de l'électricité (${ws.area}), moyenne du jour`, unit: UNIT.eurPerKwh,
+      frequency: FREQUENCY.daily, sourceId: sources.wholesale.id,
+      description: "Le prix auquel l'électricité s'échange la veille pour le lendemain sur le marché de gros : l'équivalent du baril pour le kWh." });
+    api.registerCollector({ id: "electricity.wholesale", optional: true, produces: [wholesaleSeriesId(ws.area)], run: async (ctx) => {
+      const url = sources.wholesale.url.replace("{area}", ws.area).replace("{start}", `${ws.since}-01-01`).replace("{end}", addDays(parisDate(), 1));
+      return parseWholesale(await ctx.fetchText(url), decl);
     } });
 
     api.registerDerivation({ id: "electricity.trv-taxes", run: (read) => deriveTrvTaxes(read, decl) });

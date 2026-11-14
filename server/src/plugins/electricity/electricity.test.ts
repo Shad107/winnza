@@ -8,8 +8,8 @@ import { NO_POST_NO_SECRET } from "../../test-net.js";
 import { electricityPlugin } from "./index.js";
 import { buildElectricityPage } from "../../pages/electricity-page.js";
 import { parseElecCatalog, parseElecDecl } from "./decl.js";
-import { parseTempo, parseTrvCsv, tempoSeason } from "./parse.js";
-import { EU_PART, euSeriesId, SUBSCRIPTION, TEMPO_SERIES, TRV_PART, trvSeriesId } from "./series-ids.js";
+import { parseTempo, parseTrvCsv, parseWholesale, tempoSeason } from "./parse.js";
+import { EU_PART, euSeriesId, SUBSCRIPTION, TEMPO_SERIES, TRV_PART, trvSeriesId, wholesaleSeriesId } from "./series-ids.js";
 
 // la vraie déclaration : les tests portent sur ce qui part en production
 const DECL = JSON.parse(readFileSync(join(import.meta.dirname, "../../../../declarations/electricity.json"), "utf8")) as Record<string, unknown>;
@@ -50,8 +50,28 @@ test("déclaration : couleur Tempo inconnue ou pays de référence absent refus�
   assert.throws(() => parseElecCatalog({ ...DECL, tempo }), /couleur inconnue « bleu »/);
   const eurostat = { ...(DECL.eurostat as object), reference: "XX" };
   assert.throws(() => parseElecCatalog({ ...DECL, eurostat }), /référence XX/);
-  const page = { consumption: { default: 3700, min: 1000, max: 15000, step: 250 } };
+  const page = { ...(DECL.page as object), consumption: { default: 3700, min: 1000, max: 15000, step: 250 } };
   assert.throws(() => parseElecCatalog({ ...DECL, page }), /pas du curseur/);
+  assert.throws(() => parseElecCatalog({ ...DECL, page: { ...(DECL.page as object), compareWith: { option: "base", period: "hp" } } }), /tarif inconnu/);
+});
+
+/** Réponse Energy-Charts : un jour complet (le 2 janvier, heure de Paris) au pas horaire, prix constant. */
+function wholesale(eurPerMwh: number, opts: { hours?: number; unit?: string } = {}): string {
+  const start = Date.UTC(2026, 0, 1, 23) / 1000;   // 2 janvier, 0 h à Paris (heure d'hiver)
+  const n = opts.hours ?? 24;
+  return JSON.stringify({ unix_seconds: Array.from({ length: n }, (_, i) => start + i * 3600), price: Array.from({ length: n }, () => eurPerMwh), unit: opts.unit ?? "EUR / MWh" });
+}
+
+test("prix de gros : moyenne du jour en heure de Paris, en €/kWh ; jour incomplet laissé, unité ou bornes refusées", () => {
+  const id = wholesaleSeriesId("FR");
+  assert.deepEqual(parseWholesale(wholesale(120), cat), [{ seriesId: id, date: "2026-01-02", value: 0.12 }]);
+  assert.deepEqual(parseWholesale(wholesale(120, { hours: 12 }), cat), [], "demain, publié à moitié : pas de moyenne");
+  assert.throws(() => parseWholesale(wholesale(120, { unit: "EUR / kWh" }), cat), /unité inattendue/);
+  assert.throws(() => parseWholesale(wholesale(120_000), cat), /hors des bornes/);
+  // un trou de 10 heures ne compte pas comme couvert
+  const holed = JSON.parse(wholesale(120)) as { unix_seconds: number[]; price: number[] };
+  holed.unix_seconds.splice(5, 10); holed.price.splice(5, 10);
+  assert.deepEqual(parseWholesale(JSON.stringify({ ...holed, unit: "EUR / MWh" }), cat), []);
 });
 
 // --- collecte complète sur de petites réponses fabriquées ---
@@ -95,6 +115,7 @@ function fakeNet(opts: { swapHtTtc?: boolean; vatInsideTaxes?: boolean } = {}) {
       if (url.includes("nrg_pc_204_c")) return comp;
       if (url.includes("nrg_pc_204")) return sem;
       if (url.includes("joursTempo")) { tempoUrls.push(url); return '[{"dateJour":"2026-11-14","codeJour":1}]'; }
+      if (url.includes("energy-charts")) return wholesale(100);
       const k = Object.keys(trv).find((f) => url.includes(f));
       if (!k) throw new Error(`adresse inattendue ${url}`);
       return trv[k]!;
@@ -144,5 +165,8 @@ test("page : tarif en vigueur, accise, Europe et Tempo, tout lu en base", async 
   assert.ok(Math.abs(fr.parts!.taxes - 0.04) < 1e-9);
   assert.equal(page.tempo?.color, "blue");
   assert.equal(page.tempo?.used.blue, 1);
+  assert.deepEqual(page.wholesale?.latest, { date: "2026-01-02", value: 0.1 });
+  assert.equal(page.wholesale?.tomorrow, null);
+  assert.deepEqual(page.wholesale?.monthly.months, [], "janvier 2026 : aucun tarif Base encore en vigueur dans ces données, pas de point à zéro");
   assert.equal(buildElectricityPage(new Store(":memory:")), null, "plugin jamais passé : pas de page");
 });

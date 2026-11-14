@@ -42,5 +42,8 @@ export type EuPart = (typeof EU_PART)[keyof typeof EU_PART];
 
 export const euSeriesId = (country: string, part: EuPart): string => `elec.eu.${country}.${part}`;
 
+/** Prix de gros moyen de chaque jour (marché day-ahead), en €/kWh, pour une zone : `elec.wholesale.FR`. */
+export const wholesaleSeriesId = (area: string): string => `elec.wholesale.${area}`;
+
 /** Couleur Tempo de chaque jour, sous forme de code (voir la déclaration). */
 export const TEMPO_SERIES = "elec.tempo.color";

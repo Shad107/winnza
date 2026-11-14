@@ -94,7 +94,7 @@
             {#if r.priceKind === PRICE_KIND.pump}, relevé le {longDate(r.priceDate)}{:else if r.priceKind === PRICE_KIND.regulated}, en vigueur depuis le {longDate(r.priceDate)}{:else}, relevé du {longDate(r.priceDate)} (<a href={r.priceSource?.url}>{r.priceSource?.name}</a>){/if}.</li>
         {/each}
       </ul>
-      <p class="caption">Distance par défaut : <a href={cost.distance.source.url}>{cost.distance.source.name}</a>. Le GNV et l'hydrogène ne figurent pas ici : aucun prix public, daté et toutes taxes comprises n'a été trouvé. Ils seront ajoutés quand il y en aura un.</p>
+      <p class="caption">Distance par défaut : <a href={cost.distance.source.url}>{cost.distance.source.name}</a>. Recharge solaire : le coût compté est ce que le kWh aurait rapporté s'il avait été revendu au réseau, pas le prix des panneaux ; il ne vaut que pour une recharge en journée, quand ils produisent. Le GNV et l'hydrogène ne figurent pas ici : aucun prix public, daté et toutes taxes comprises n'a été trouvé. Ils seront ajoutés quand il y en aura un.</p>
     </div>
   </section>
 
