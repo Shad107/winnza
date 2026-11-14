@@ -2,11 +2,12 @@
 //   node dist/cli.js collect [base]          collecte ; réglages absents initialisés depuis declarations/
 //   node dist/cli.js seed <plugin> [base]    recharge les réglages d'un plugin depuis son fichier
 //   node dist/cli.js plugins [base]          liste les plugins, actifs ou non
+//   node dist/cli.js outlines <geojson> <declaration.json>   contours des départements (plugin carte)
 //
 // La base est la seule vérité : un plugin lit ses réglages en base. Les fichiers de declarations/ ne
 // servent qu'à INITIALISER une base neuve (ou à recharger un plugin avec `seed`), en attendant l'écran
 // d'administration et le plugin IA.
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { enabledIn, type EnabledState } from "@isno-open/plugin-host";
@@ -19,6 +20,7 @@ import { sitePlugin } from "./plugins/site/index.js";
 import { stationsPlugin } from "./plugins/stations/index.js";
 import { matomoPlugin } from "./plugins/matomo/index.js";
 import { forecastPlugin } from "./plugins/forecast/index.js";
+import { mapPlugin, outlinesFromGeoJson, parseMapDecl } from "./plugins/map/index.js";
 import { buildRegistry, runCollect } from "./runner.js";
 import { Store } from "./store.js";
 
@@ -33,6 +35,7 @@ const SEEDS: Record<string, () => unknown> = {
   [stationsPlugin.id]: () => declaration("stations.json"),
   [matomoPlugin.id]: () => declaration("matomo.json"),
   [forecastPlugin.id]: () => declaration("forecast.json"),
+  [mapPlugin.id]: () => declaration("map.json"),
 };
 
 function settingsOf(store: Store, id: string): unknown {
@@ -46,6 +49,15 @@ function settingsOf(store: Store, id: string): unknown {
 
 async function main(): Promise<void> {
   const [command, a, b] = process.argv.slice(2);
+  if (command === "outlines") {
+    if (!a || !b) throw new Error("usage : node dist/cli.js outlines <departements.geojson> <declaration.json>");
+    const current = JSON.parse(readFileSync(b, "utf8")) as Record<string, unknown>;
+    const next = { ...current, ...outlinesFromGeoJson(JSON.parse(readFileSync(a, "utf8")), 600) };
+    parseMapDecl(next);   // on n'écrit qu'une déclaration que le plugin acceptera
+    writeFileSync(b, JSON.stringify(next) + "\n");
+    console.log(`${next.shapes.length} départements, ${JSON.stringify(next).length} octets`);
+    return;
+  }
   const dbPath = (command === "seed" ? b : a) ?? join(ROOT, "data", "energy.db");
   const store = new Store(dbPath);
   try {

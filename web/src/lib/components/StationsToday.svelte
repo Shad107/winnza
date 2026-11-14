@@ -20,7 +20,7 @@
       </div>
     {/each}
   </div>
-  <p class="caption">Source : flux officiel des prix des carburants (ministère de l'Économie). Le superéthanol E85 et le GPL sont moins chers au litre, mais un moteur en consomme davantage : le vrai calcul est celui du coût aux 100 km, bientôt sur Winnza.</p>
+  <p class="caption">Source : flux officiel des prix des carburants (ministère de l'Économie). Le superéthanol E85 et le GPL sont moins chers au litre, mais un moteur en consomme davantage : le vrai calcul est celui du coût aux 100 km, bientôt sur Winnza. <a href="/prix-par-departement">Le prix dans votre département</a>.</p>
 </section>
 
 <style>

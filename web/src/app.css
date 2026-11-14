@@ -11,6 +11,8 @@
   --brand: #2a78d6;
   --shadow: 0 1px 2px rgba(17, 20, 24, 0.04), 0 8px 24px rgba(17, 20, 24, 0.06);
   --radius: 24px;
+  /* rampe séquentielle (une teinte, du moins cher au plus cher) : pas 150, 300, 400, 550, 700 du bleu validé */
+  --q1: #b7d3f6; --q2: #6da7ec; --q3: #3987e5; --q4: #1c5cab; --q5: #0d366b;
 }
 @media (prefers-color-scheme: dark) {
   :root:where(:not([data-theme='light'])) {
@@ -19,6 +21,7 @@
     --line: #2c2c2a; --grid: #262624; --soft: #232321;
     --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
     --on-s4: #0b0b0b; --brand: #3987e5; --shadow: none;
+    --q1: #184f95; --q2: #256abf; --q3: #3987e5; --q4: #6da7ec; --q5: #b7d3f6;
   }
 }
 :root[data-theme='dark'] {
@@ -27,6 +30,8 @@
   --line: #2c2c2a; --grid: #262624; --soft: #232321;
   --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
   --on-s4: #0b0b0b; --brand: #3987e5; --shadow: none;
+  /* en sombre, le plus cher est le plus lumineux : l'écart au fond porte la grandeur */
+  --q1: #184f95; --q2: #256abf; --q3: #3987e5; --q4: #6da7ec; --q5: #b7d3f6;
 }
 
 * { box-sizing: border-box; }
