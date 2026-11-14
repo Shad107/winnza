@@ -24,6 +24,8 @@ RUN if grep -rlq "api.anthropic.com" web/build; then echo "le SDK d'Anthropic es
 RUN cd server && npm prune --omit=dev && cd ../web && npm prune --omit=dev
 
 FROM node:26.13.1-trixie-slim
+# police des images de partage (routes/partage) : le rendu lit l'OpenType, pas le woff2 du site
+RUN apt-get update && apt-get install -y --no-install-recommends fonts-inter && rm -rf /var/lib/apt/lists/*
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=build /app/server/package.json server/

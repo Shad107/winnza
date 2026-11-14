@@ -18,14 +18,14 @@ export * from "./model.js";
 
 const ProposalsSchema = z.object({
   proposals: z.array(z.object({
-    path: z.string(), title: z.string(), description: z.string(),
+    path: z.string(), title: z.string(), description: z.string(), shareText: z.string(),
     keywords: z.array(z.string()), reason: z.string(),
   })),
 });
 
 /** Les consignes, avec les limites de la déclaration (sans elles, l'IA dépassait toutes les longueurs : mesuré le 2026-11-14). */
 const system = (decl: EditorDecl) => `${SYSTEM}
-Longueurs maximales, espaces compris, à respecter strictement : titre ${decl.limits.title} caractères, description ${decl.limits.description} caractères (c'est ce que les moteurs affichent ; au-delà, le texte est coupé). Une description fait au moins 50 caractères.`;
+Longueurs maximales, espaces compris, à respecter strictement : titre ${decl.limits.title} caractères, description ${decl.limits.description} caractères, accroche ${decl.limits.share} caractères (c'est ce que les moteurs affichent ; au-delà, le texte est coupé). Une description fait au moins 50 caractères.`;
 
 const SYSTEM = `Tu rédiges, en français, le titre et la description que les moteurs de recherche affichent pour chaque page d'un site d'information grand public sur le prix de l'énergie (carburant, électricité).
 Pour chaque page, tu reçois ce qu'elle montre aujourd'hui (titre, description, titre visible, introduction) et les recherches que les gens tapent vraiment, avec leur volume mensuel.
@@ -35,7 +35,8 @@ Règles :
 - pas le nom du site dans le titre : il est ajouté automatiquement ;
 - pas de tiret cadratin ni demi-cadratin ; ton factuel, sans superlatif publicitaire ni point d'exclamation ;
 - si le titre actuel est déjà le meilleur, le reproposer tel quel et le dire dans la raison.
-Pour chaque page, donne le chemin exact reçu, le titre, la description, les recherches visées, et une raison courte.`;
+Pour chaque page, écris aussi l'accroche de son image de partage (réseaux sociaux) : une phrase courte qui donne envie de cliquer, sans chiffre (le chiffre du jour est ajouté sur l'image), sans point d'exclamation.
+Pour chaque page, donne le chemin exact reçu, le titre, la description, l'accroche, les recherches visées, et une raison courte.`;
 
 /** fetch pour le SDK, branché sur le contexte de collecte : même chemin réseau que les autres sources, et testable. */
 function fetchVia(ctx: CollectContext): typeof fetch {
@@ -109,8 +110,8 @@ export const editorPlugin: Plugin = {
         const p = parsed.proposals.find((x) => x.path === page.path);
         if (!p) continue;   // une page oubliée par l'IA n'a pas de proposition cette semaine
         const proposal: Proposal = { path: page.path, label: page.label, current: { title: page.now.title, description: page.now.description },
-          proposed: { title: p.title.trim(), description: p.description.trim() }, keywords: p.keywords, reason: p.reason,
-          problems: checkProposal({ title: p.title.trim(), description: p.description.trim() }, page.now, decl), runId };
+          proposed: { title: p.title.trim(), description: p.description.trim(), shareText: p.shareText.trim() }, keywords: p.keywords, reason: p.reason,
+          problems: checkProposal({ title: p.title.trim(), description: p.description.trim(), shareText: p.shareText.trim() }, page.now, decl), runId };
         items.push({ key: page.path, value: proposal });
       }
       return { date: today, items };

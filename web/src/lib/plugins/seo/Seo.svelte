@@ -7,6 +7,8 @@
   const override = $derived(appPage.data.seoOverrides?.[declared.path]);
   const page = $derived(override ? { ...declared, title: `${override.title} | ${site.name}`, description: override.description } : declared);
   const canonical = $derived(site.url + page.path);
+  // image de partage engendrée pour chaque page (routes/partage) : chiffre du jour et accroche de l'IA
+  const shareImage = $derived(`${site.url}/partage/${page.path === '/' ? 'accueil' : page.path.slice(1)}.png`);
   const ld = $derived(`<script type="application/ld+json">${jsonLd(site, page)}</` + `script>`);
 </script>
 
@@ -20,6 +22,9 @@
   <meta property="og:title" content={page.title} />
   <meta property="og:description" content={page.description} />
   <meta property="og:url" content={canonical} />
-  <meta name="twitter:card" content="summary" />
+  <meta property="og:image" content={shareImage} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
   {@html ld}
 </svelte:head>

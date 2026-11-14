@@ -29,6 +29,8 @@ test("contrôles : longueur, tiret cadratin, marque, chiffre inventé ; une bonn
   assert.match(checkProposal({ ...good, title: "Coût aux 100 km | Winnza" }, now, decl).join(), /Winnza/);
   assert.match(checkProposal({ ...good, description: good.description + " Dès 2,67 € les 100 km." }, now, decl).join(), /chiffre « 2,67 »/);
   assert.match(checkProposal({ ...good, title: "Coût aux 200 km" }, now, decl).join(), /chiffre « 200 »/, "un nombre absent, même rond");
+  assert.match(checkProposal({ ...good, shareText: "x".repeat(decl.limits.share + 1) }, now, decl).join(), /accroche de/);
+  assert.match(checkProposal({ ...good, shareText: "Jusqu'à 400 € d'économie" }, now, decl).join(), /chiffre « 400 »/, "l'accroche aussi : aucun chiffre inventé");
 });
 
 test("déclaration : une clé collée à la place du nom de variable est refusée", () => {
@@ -51,7 +53,7 @@ function fake(opts: { key?: boolean; proposal?: object } = {}) {
     fetchBytes: async () => new Uint8Array(),
     fetchText: async (url) => { if (url !== `${decl.site}/cout-aux-100-km`) throw new Error(`GET inattendu ${url}`); return HTML; },
     secret: (n) => (opts.key === false ? null : n === decl.api.keySecret ? "cle-de-test" : null),
-    postText: async (url) => { posts.push(url); return MESSAGE(opts.proposal ?? { path: "/cout-aux-100-km", title: "Prix de la recharge et coût aux 100 km", description: "Diesel, essence, E85, GPL, électrique à la maison ou sur borne : ce que coûtent vraiment 100 km aujourd'hui.", keywords: ["prix recharge voiture electrique"], reason: "volume" }); },
+    postText: async (url) => { posts.push(url); return MESSAGE(opts.proposal ?? { path: "/cout-aux-100-km", title: "Prix de la recharge et coût aux 100 km", description: "Diesel, essence, E85, GPL, électrique à la maison ou sur borne : ce que coûtent vraiment 100 km aujourd'hui.", shareText: "Électrique ou essence : qui roule le moins cher ?", keywords: ["prix recharge voiture electrique"], reason: "volume" }); },
   };
   return { ctx, posts };
 }
@@ -105,7 +107,7 @@ test("clé absente : aucun appel, la variable est nommée", async () => {
 
 test("proposition avec un chiffre inventé : gardée, mais marquée, donc non publiable", async () => {
   const store = seeded();
-  await collect(store, fake({ proposal: { path: "/cout-aux-100-km", title: "100 km dès 2,67 €", description: "Le coût aux 100 km de chaque motorisation, au prix du jour, du diesel à l'électrique.", keywords: [], reason: "" } }).ctx);
+  await collect(store, fake({ proposal: { path: "/cout-aux-100-km", title: "100 km dès 2,67 €", description: "Le coût aux 100 km de chaque motorisation, au prix du jour, du diesel à l'électrique.", shareText: "Le vrai coût de vos 100 km", keywords: [], reason: "" } }).ctx);
   const p = latest(store).find((i) => i.key === "/cout-aux-100-km")!.value as Proposal;
   assert.match(p.problems.join(), /2,67/);
 });

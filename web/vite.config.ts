@@ -14,6 +14,6 @@ export default defineConfig({
     // le socle est empaqueté dans le serveur ; better-sqlite3 (natif) reste externe, et le SDK de l'IA aussi :
     // seule la collecte l'appelle (import dynamique), le site ne doit pas l'embarquer
     noExternal: ['@winnza/core'],
-    external: ['better-sqlite3', '@anthropic-ai/sdk'],
+    external: ['better-sqlite3', '@anthropic-ai/sdk', '@resvg/resvg-js'],   // resvg : rendu natif des images de partage
   },
 });

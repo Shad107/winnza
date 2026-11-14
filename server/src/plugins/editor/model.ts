@@ -15,7 +15,7 @@ export type EditorDecl = {
   pricing: { inputUsdPerMTok: number; outputUsdPerMTok: number; asOf: string; source: { name: string; url: string } };
   budget: { monthlyUsd: number; everyDays: number };
   site: string; brand: string;
-  limits: { title: number; description: number };
+  limits: { title: number; description: number; share: number };
   keywordsPerPage: number; keepDays: number;
 };
 
@@ -25,7 +25,8 @@ export type PageNow = { title: string; description: string; h1: string; intro: s
 export type Proposal = {
   path: string; label: string;
   current: { title: string; description: string };
-  proposed: { title: string; description: string };
+  /** shareText : l'accroche de l'image de partage (absente des propositions antérieures au 2026-11-14) */
+  proposed: { title: string; description: string; shareText?: string };
   keywords: string[]; reason: string;
   problems: string[];
   runId: string;
@@ -70,7 +71,7 @@ export function parseEditorDecl(json: unknown): EditorDecl {
       source: { name: str(ps, "name", "pricing.source"), url: str(ps, "url", "pricing.source") } },
     budget: { monthlyUsd: pos(b, "monthlyUsd", "budget"), everyDays: pos(b, "everyDays", "budget") },
     site, brand: str(root, "brand", "racine"),
-    limits: { title: pos(l, "title", "limits"), description: pos(l, "description", "limits") },
+    limits: { title: pos(l, "title", "limits"), description: pos(l, "description", "limits"), share: pos(l, "share", "limits") },
     keywordsPerPage: pos(root, "keywordsPerPage", "racine"), keepDays: pos(root, "keepDays", "racine"),
   };
 }
@@ -86,18 +87,19 @@ export function readPage(html: string): PageNow {
 }
 
 /** Les contrôles d'une proposition. Chacun rend une phrase lisible quand il échoue. */
-export function checkProposal(p: { title: string; description: string }, now: PageNow, decl: EditorDecl): string[] {
+export function checkProposal(p: { title: string; description: string; shareText?: string }, now: PageNow, decl: EditorDecl): string[] {
   const problems: string[] = [];
   if (p.title.length > decl.limits.title) problems.push(`titre de ${p.title.length} caractères (au plus ${decl.limits.title})`);
   if (p.description.length > decl.limits.description) problems.push(`description de ${p.description.length} caractères (au plus ${decl.limits.description})`);
   if (p.description.length < 50) problems.push("description trop courte");
-  if (/[\u2013\u2014]/.test(p.title + p.description)) problems.push("tiret cadratin ou demi-cadratin");
-  if (p.title.toLowerCase().includes(decl.brand.toLowerCase())) problems.push(`le nom ${decl.brand} est ajouté par le site, pas dans le titre`);
+  if (p.shareText !== undefined && p.shareText.length > decl.limits.share) problems.push(`accroche de ${p.shareText.length} caractères (au plus ${decl.limits.share})`);
+  if (/[\u2013\u2014]/.test(p.title + p.description + (p.shareText ?? ""))) problems.push("tiret cadratin ou demi-cadratin");
+  if ((p.title + " " + (p.shareText ?? "")).toLowerCase().includes(decl.brand.toLowerCase())) problems.push(`le nom ${decl.brand} est ajouté par le site, pas dans le titre`);
   // un nombre que la page ne porte pas est inventé (les prix changent chaque jour : la page les écrit elle-même).
   // Les chiffres collés à des lettres sont des noms (SP95, E10, E85), pas des nombres.
   const known = `${now.title} ${now.description} ${now.h1} ${now.intro}`;
   const NUMBER = /(?<![\p{L}\d])\d+(?:[,.]\d+)?(?![\p{L}\d])/gu;
-  for (const n of new Set((p.title + " " + p.description).match(NUMBER) ?? [])) if (!known.includes(n)) problems.push(`chiffre « ${n} » absent de la page`);
+  for (const n of new Set((p.title + " " + p.description + " " + (p.shareText ?? "")).match(NUMBER) ?? [])) if (!known.includes(n)) problems.push(`chiffre « ${n} » absent de la page`);
   return problems;
 }
 
@@ -112,7 +114,7 @@ export function spentThisMonth(read: CollectReader, today: string): number {
 }
 
 /** Titre et description validés pour une page (sans le nom du site, ajouté à l'affichage). */
-export type Override = { title: string; description: string; approvedOn: string };
+export type Override = { title: string; description: string; approvedOn: string; shareText?: string };
 /** Les titres validés, lus en base : une valeur mal formée est une erreur, jamais un titre vide en ligne. */
 export function parseOverrides(json: unknown): Record<string, Override> {
   if (json === null || json === undefined) return {};
@@ -121,7 +123,8 @@ export function parseOverrides(json: unknown): Record<string, Override> {
   for (const [path, v] of Object.entries(root)) {
     if (!path.startsWith("/")) throw new Error(`editor.overrides : chemin invalide « ${path} »`);
     const o = obj(v, `editor.overrides[${path}]`);
-    out[path] = { title: str(o, "title", path), description: str(o, "description", path), approvedOn: str(o, "approvedOn", path) };
+    out[path] = { title: str(o, "title", path), description: str(o, "description", path), approvedOn: str(o, "approvedOn", path),
+      ...(typeof o.shareText === "string" && o.shareText ? { shareText: o.shareText } : {}) };
   }
   return out;
 }
@@ -146,7 +149,8 @@ export function liveOverrides(read: CollectReader): Record<string, Override> {
     for (const i of items) {
       if (i.key === RUN_KEY) continue;
       const p = i.value as Proposal;
-      if (!p.problems.length && run) out[p.path] = { title: p.proposed.title, description: p.proposed.description, approvedOn: run.date };
+      if (!p.problems.length && run) out[p.path] = { title: p.proposed.title, description: p.proposed.description, approvedOn: run.date,
+        ...(p.proposed.shareText ? { shareText: p.proposed.shareText } : {}) };
     }
   }
   for (const [path, o] of Object.entries(manual)) out[path] = o;

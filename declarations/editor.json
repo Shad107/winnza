@@ -32,7 +32,8 @@
   "brand": "Winnza",
   "limits": {
     "title": 62,
-    "description": 158
+    "description": 158,
+    "share": 70
   },
   "keywordsPerPage": 40,
   "keepDays": 120
