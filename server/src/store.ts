@@ -1,6 +1,6 @@
 // Base SQLite : sources, séries, observations, et le journal des collectes.
 import Database from "better-sqlite3";
-import { UNIT, FREQUENCY, type Frequency, type Observation, type SeriesDecl, type SiteReader, type SourceDecl, type Unit } from "./contract.js";
+import { UNIT, FREQUENCY, type Frequency, type Observation, type SeriesDecl, type SiteReader, type Snapshot, type SnapshotItem, type SourceDecl, type Unit } from "./contract.js";
 
 const isUnit = (u: string): u is Unit => (Object.values(UNIT) as string[]).includes(u);
 const isFrequency = (f: string): f is Frequency => (Object.values(FREQUENCY) as string[]).includes(f);
@@ -30,12 +30,41 @@ export class Store implements SiteReader {
         id INTEGER PRIMARY KEY AUTOINCREMENT, started_at TEXT NOT NULL, finished_at TEXT,
         ok INTEGER NOT NULL DEFAULT 0, observations INTEGER NOT NULL DEFAULT 0, message TEXT);
       CREATE TABLE IF NOT EXISTS setting (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS snapshot_item (
+        snapshot TEXT NOT NULL, date TEXT NOT NULL, key TEXT NOT NULL, value TEXT NOT NULL,
+        PRIMARY KEY (snapshot, date, key)) WITHOUT ROWID;
     `);
     // colonne ajoutée après la première base : migration sans perte
     const cols = (this.db.prepare("PRAGMA table_info(series)").all() as { name: string }[]).map((c) => c.name);
     if (!cols.includes("description")) this.db.exec("ALTER TABLE series ADD COLUMN description TEXT");
     const scols = (this.db.prepare("PRAGMA table_info(setting)").all() as { name: string }[]).map((c) => c.name);
     if (!scols.includes("owner")) this.db.exec("ALTER TABLE setting ADD COLUMN owner TEXT");   // plugin qui l'a déclaré
+  }
+
+  /** Remplace l'instantané du jour (le relevé du jour fait foi en entier), puis efface ce qui a plus de
+   *  `keepDays` jours. */
+  putSnapshot(id: string, snap: Snapshot, keepDays: number): void {
+    this.db.prepare("DELETE FROM snapshot_item WHERE snapshot = ? AND date = ?").run(id, snap.date);
+    const ins = this.db.prepare("INSERT INTO snapshot_item (snapshot, date, key, value) VALUES (?, ?, ?, ?)");
+    for (const it of snap.items) ins.run(id, snap.date, it.key, JSON.stringify(it.value));
+    const limit = new Date(Date.parse(snap.date + "T00:00:00Z") - keepDays * 86_400_000).toISOString().slice(0, 10);
+    this.db.prepare("DELETE FROM snapshot_item WHERE snapshot = ? AND date < ?").run(id, limit);
+  }
+
+  snapshotDates(id: string): string[] {
+    if (!this.hasTable("snapshot_item")) return [];
+    return (this.db.prepare("SELECT DISTINCT date FROM snapshot_item WHERE snapshot = ? ORDER BY date").all(id) as { date: string }[]).map((r) => r.date);
+  }
+
+  snapshot(id: string, date: string): SnapshotItem[] {
+    if (!this.hasTable("snapshot_item")) return [];
+    return (this.db.prepare("SELECT key, value FROM snapshot_item WHERE snapshot = ? AND date = ?").all(id, date) as { key: string; value: string }[])
+      .map((r) => ({ key: r.key, value: JSON.parse(r.value) as unknown }));
+  }
+
+  /** une base ouverte en lecture seule peut précéder la table (le site démarre avant la collecte) */
+  private hasTable(name: string): boolean {
+    return this.db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?").get(name) !== undefined;
   }
 
   /** `owner` : le plugin qui déclare ce réglage (il disparaît quand ce plugin est éteint). Sans owner :

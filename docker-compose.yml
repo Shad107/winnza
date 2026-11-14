@@ -18,8 +18,11 @@ services:
       # celle que Caddy ajoute lui-même (les précédentes peuvent venir du visiteur)
       - ADDRESS_HEADER=X-Forwarded-For
       - XFF_DEPTH=1
+      # fond de carte, polices et icônes de la carte des stations (scripts/fetch-map.sh, environ 10 Go)
+      - WINNZA_MAP_DIR=/map
     volumes:
       - data:/data
+      - /home/ubuntu/winnza-tiles:/map:ro
     networks: [proxy]
 
   collect:

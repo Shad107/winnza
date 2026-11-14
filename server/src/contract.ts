@@ -67,6 +67,22 @@ export type Collector = {
   run: (ctx: CollectContext) => Promise<Observation[]>;
 };
 
+/** Instantané daté : l'état d'un ensemble d'éléments un jour donné (ex. chaque station, sa position et ses
+ *  prix). Pour ce qui n'est pas une série de nombres. Le cœur garde `keepDays` jours, puis efface. */
+export type SnapshotDecl = { id: string; label: string; sourceId: string; keepDays: number };
+export type SnapshotItem = { key: string; value: unknown };
+export type Snapshot = { date: string; items: SnapshotItem[] };
+export type SnapshotCollector = {
+  id: string;
+  snapshot: string;
+  run: (ctx: CollectContext) => Promise<Snapshot>;
+};
+export type SnapshotReader = {
+  /** jours disponibles, du plus ancien au plus récent */
+  snapshotDates: (id: string) => string[];
+  snapshot: (id: string, date: string) => SnapshotItem[];
+};
+
 /** Lecture des séries déjà en base, pour les dérivations. */
 export type SeriesReader = {
   get: (seriesId: string) => Observation[];
@@ -74,7 +90,7 @@ export type SeriesReader = {
 };
 
 /** Tout ce que les pages lisent : séries, leur description, leurs sources, les réglages. */
-export type SiteReader = SeriesReader & {
+export type SiteReader = SeriesReader & SnapshotReader & {
   series: (id: string) => SeriesDecl | null;
   source: (id: string) => SourceDecl | null;
   setting: (key: string) => unknown;
@@ -97,6 +113,8 @@ export type PluginApi = {
   declareSetting: (s: SettingDecl) => void;
   registerCollector: (c: Collector) => void;
   registerDerivation: (d: Derivation) => void;
+  declareSnapshot: (s: SnapshotDecl) => void;
+  registerSnapshotCollector: (c: SnapshotCollector) => void;
   /** les réglages du plugin, tels qu'enregistrés en base */
   settings: () => unknown;
 };

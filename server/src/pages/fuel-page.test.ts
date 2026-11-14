@@ -41,6 +41,7 @@ function fakeBase(neighbours: string[]): SiteReader {
     source: (id) => sources[id] ?? null,
     setting: (k) => { if (!(k in settings)) throw new Error(`réglage absent : ${k}`); return settings[k]; },
     settingOrNull: (k) => settings[k] ?? null,
+    snapshotDates: () => [], snapshot: () => [],
   };
 }
 

@@ -13,6 +13,8 @@
   --radius: 24px;
   /* rampe séquentielle (une teinte, du moins cher au plus cher) : pas 150, 300, 400, 550, 700 du bleu validé */
   --q1: #b7d3f6; --q2: #6da7ec; --q3: #3987e5; --q4: #1c5cab; --q5: #0d366b;
+  /* divergente (variation de prix) : bleu = baisse, rouge = hausse, gris neutre (--muted) au milieu */
+  --down-strong: #1c5cab; --down: #86b6ef; --up: #f3a9a8; --up-strong: #c93a39;
 }
 @media (prefers-color-scheme: dark) {
   :root:where(:not([data-theme='light'])) {
@@ -22,6 +24,7 @@
     --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
     --on-s4: #0b0b0b; --brand: #3987e5; --shadow: none;
     --q1: #184f95; --q2: #256abf; --q3: #3987e5; --q4: #6da7ec; --q5: #b7d3f6;
+    --down-strong: #6da7ec; --down: #256abf; --up: #a43a39; --up-strong: #e66767;
   }
 }
 :root[data-theme='dark'] {
@@ -32,6 +35,7 @@
   --on-s4: #0b0b0b; --brand: #3987e5; --shadow: none;
   /* en sombre, le plus cher est le plus lumineux : l'écart au fond porte la grandeur */
   --q1: #184f95; --q2: #256abf; --q3: #3987e5; --q4: #6da7ec; --q5: #b7d3f6;
+  --down-strong: #6da7ec; --down: #256abf; --up: #a43a39; --up-strong: #e66767;
 }
 
 * { box-sizing: border-box; }

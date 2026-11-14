@@ -78,3 +78,33 @@ test("éteindre un plugin efface les réglages qu'il avait écrits (le site cess
   assert.equal(store.settingOrNull("essai.public"), null);
   assert.deepEqual(store.settingOrNull("plugin.essai"), { value: 2 });
 });
+
+const snapPlugin = (items: { key: string; value: unknown }[], date = "2026-11-20"): Plugin => ({
+  id: "photo", title: { fr: "p", en: "p" }, description: { fr: "p", en: "p" },
+  register(api) {
+    plugin.register(api);
+    api.declareSnapshot({ id: "photo.jour", label: "l", sourceId: "src", keepDays: 7 });
+    api.registerSnapshotCollector({ id: "photo", snapshot: "photo.jour", run: async () => ({ date, items }) });
+  },
+});
+
+test("instantané : le relevé du jour remplace celui du même jour, et les jours trop anciens s'effacent", async () => {
+  const store = new Store(":memory:");
+  const run = async (items: { key: string; value: unknown }[], date: string) =>
+    runCollect(store, await buildRegistry({ photo: snapPlugin(items, date) }, ["photo"], () => ({ value: 2 })), noNet, []);
+  await run([{ key: "a", value: 1 }, { key: "b", value: 2 }], "2026-11-01");
+  await run([{ key: "a", value: 3 }], "2026-11-05");
+  await run([{ key: "a", value: 4 }], "2026-11-05");
+  assert.deepEqual(store.snapshot("photo.jour", "2026-11-05"), [{ key: "a", value: 4 }], "même jour : remplacé en entier");
+  await run([{ key: "a", value: 5 }], "2026-11-10");
+  assert.deepEqual(store.snapshotDates("photo.jour"), ["2026-11-05", "2026-11-10"], "plus de 7 jours : effacé");
+});
+
+test("instantané vide ou avec une clé en double : la collecte échoue sans rien écrire", async () => {
+  const store = new Store(":memory:");
+  for (const items of [[], [{ key: "a", value: 1 }, { key: "a", value: 2 }]]) {
+    const reg = await buildRegistry({ photo: snapPlugin(items) }, ["photo"], () => ({ value: 2 }));
+    await assert.rejects(runCollect(store, reg, noNet, []), /instantané vide|clés en double/);
+  }
+  assert.deepEqual(store.snapshotDates("photo.jour"), []);
+});

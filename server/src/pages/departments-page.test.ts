@@ -10,7 +10,7 @@ const catalog = { fuels: [{ id: "gazole", label: "Gazole" }] };
 const o = (id: string, date: string, value: number): Observation => ({ seriesId: id, date, value });
 const reader = (obs: Observation[], settings: Record<string, unknown>): SiteReader => ({
   get: (id) => obs.filter((x) => x.seriesId === id).sort((a, b) => a.date.localeCompare(b.date)), ids: () => [],
-  setting: (k) => settings[k], settingOrNull: (k) => settings[k] ?? null, series: () => null, source: () => null,
+  setting: (k) => settings[k], settingOrNull: (k) => settings[k] ?? null, series: () => null, source: () => null, snapshotDates: () => [], snapshot: () => [],
 });
 
 test("départements : prix du jour de la France, variation seulement si le relevé d'il y a 7 jours existe", () => {

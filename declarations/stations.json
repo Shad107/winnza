@@ -1,5 +1,5 @@
 {
-  "$comment": "Plugin stations : prix moyen du jour de chaque carburant, en France et par département, depuis le flux officiel des stations (sans clé). Seuls les prix mis à jour depuis maxAgeDays jours comptent (une station fermée garde son dernier prix affiché). Une moyenne hors des bornes plausibles fait échouer la collecte au lieu d'être publiée. La liste des départements vient de la source elle-même.",
+  "$comment": "Plugin stations : prix moyen du jour de chaque carburant, en France et par département, depuis le flux officiel des stations (sans clé). Seuls les prix mis à jour depuis maxAgeDays jours comptent (une station fermée garde son dernier prix affiché). Une moyenne hors des bornes plausibles fait échouer la collecte au lieu d'être publiée. La liste des départements vient de la source elle-même. keepDays : jours gardés des relevés station par station (carte des stations, variation sur 7 jours).",
   "source": {
     "id": "prix-carburants-flux",
     "name": "Prix des carburants en France, flux instantané (version 2)",
@@ -429,5 +429,6 @@
       "code": "95",
       "label": "Val-d'Oise"
     }
-  ]
+  ],
+  "keepDays": 35
 }
