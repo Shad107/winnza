@@ -14,7 +14,7 @@ comptes rendus. Les **identifiants du code sont en anglais** (fonctions, variabl
 **Le tiret cadratin et le demi-cadratin sont interdits**, partout : site, code, commentaires, commits. Une
 incise se met entre virgules ou parenthèses ; une rupture, avec un point ou deux-points ; une énumération,
 avec un tiret court en début de ligne. Ne pas remplacer un cadratin par « - » entouré d'espaces : reformuler.
-Dans le code, un test qui en a besoin l'écrit en séquence d'échappement (`—`).
+Dans le code, un test qui en a besoin l'écrit en séquence d'échappement (`\u2014` pour le cadratin).
 
 ## Architecture
 
