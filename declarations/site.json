@@ -44,6 +44,11 @@
       "path": "/europe",
       "changefreq": "weekly",
       "priority": 0.8
+    },
+    {
+      "path": "/electricite",
+      "changefreq": "daily",
+      "priority": 0.9
     }
   ],
   "publisher": {

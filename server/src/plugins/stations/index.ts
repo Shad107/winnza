@@ -10,7 +10,7 @@
 // doit pas peser dans la moyenne.
 import { FREQUENCY, PLUGIN_CATEGORY, UNIT, type Observation, type Plugin, type SnapshotItem, type SourceDecl } from "../../contract.js";
 import { jsonSettings } from "../json-settings.js";
-import { addDays } from "../../units.js";
+import { addDays, parisDate } from "../../units.js";
 
 export type StationFuel = { id: string; label: string; field: string };
 export type StationsDecl = {
@@ -151,9 +151,7 @@ export function stationAverages(items: readonly SnapshotItem[], date: string, de
   });
 }
 
-/** Date du jour à Paris (AAAA-MM-JJ) : la journée des automobilistes, pas celle du serveur. */
-export const parisDate = (now: Date = new Date()): string =>
-  new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
+export { parisDate };
 
 export const stationsPlugin: Plugin = {
   id: "stations",

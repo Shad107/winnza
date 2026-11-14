@@ -10,7 +10,7 @@
   import Faq from '#lib/components/Faq.svelte';
   import NextPages from '#lib/components/NextPages.svelte';
   import Seo from '#lib/plugins/seo/Seo.svelte';
-  import { LITRE_PARTS, ICON } from '#lib/parts.ts';
+  import { LITRE_PARTS, LITRE_SEGMENTS, ICON } from '#lib/parts.ts';
   import { eur2, money, percent, longDate } from '#lib/format.ts';
   import { scaled, sum, allText, shareText, describe } from '#lib/view.ts';
   import { PAGES } from '#lib/site-nav.ts';
@@ -66,7 +66,7 @@
       <Jerrycan values={now} texts={allText(now, perLitre)} label={describe(now, perLitre ? `Un litre à ${money(total, true)}` : `Votre plein de ${money(total, false)}`, perLitre)} />
     </div>
 
-    <div class="bar-wrap"><StackedBar values={now} texts={shareText(now, total)} label={describe(now, 'Répartition', perLitre)} /></div>
+    <div class="bar-wrap"><StackedBar parts={LITRE_SEGMENTS} values={now} texts={shareText(now, total)} label={describe(now, 'Répartition', perLitre)} /></div>
     <div class="grid-cards parts">
       {#each LITRE_PARTS as key (key)}<PartCard part={key} value={money(now[key], perLitre)} share={percent(now[key], total)} />{/each}
     </div>

@@ -14,6 +14,8 @@ export const UNIT = {
   percent: "%",
   /** nombre de stations (ex. stations qui affichent un carburant) */
   stations: "stations",
+  /** code de couleur d'un jour Tempo, tel que la source le donne (sa signification est déclarée) */
+  tempoCode: "code Tempo",
 } as const;
 export type Unit = (typeof UNIT)[keyof typeof UNIT];
 
@@ -22,6 +24,7 @@ export const FREQUENCY = {
   daily: "daily",
   weekly: "weekly",
   semiannual: "semiannual",
+  annual: "annual",
   onChange: "onChange",
 } as const;
 export type Frequency = (typeof FREQUENCY)[keyof typeof FREQUENCY];

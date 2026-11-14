@@ -11,7 +11,7 @@ export const SECTIONS: readonly Section[] = [
   { href: '/prix-par-departement', label: 'Départements', title: 'Le prix dans votre département', text: 'La carte de France du prix du jour, les départements les moins chers et les plus chers.' },
   { href: '/prevision', label: 'Prévision', title: 'Le carburant va-t-il baisser ?', text: 'Hausse ou baisse la semaine qui vient, d\'après le marché de gros, avec le bilan réel de la méthode.' },
   { href: '/europe', label: 'Europe', title: 'Moins cher chez nos voisins ?', text: 'Le même plein en Espagne, au Luxembourg, en Belgique, en Allemagne...' },
-  { label: 'Électricité', title: 'Électricité', text: '' },
+  { href: '/electricite', label: 'Électricité', title: 'Le vrai prix du kWh', text: 'Le kWh découpé en énergie, réseau, taxes et TVA, le tarif réglementé depuis 2012, Tempo et nos voisins européens.' },
 ];
 
 export const PAGES = SECTIONS.filter((s): s is Section & { href: string } => !!s.href);

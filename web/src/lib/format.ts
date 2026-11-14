@@ -5,6 +5,9 @@ const dateLong = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long
 
 /** 2,18 € */
 export const eur2 = (v: number): string => cents.format(v);
+const kwh = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', minimumFractionDigits: 4, maximumFractionDigits: 4 });
+/** 0,2001 € : le prix du kWh se publie au dix-millième d'euro */
+export const eur4 = (v: number): string => kwh.format(v);
 /** 109 € */
 export const eur0 = (v: number): string => whole.format(v);
 /** au centime pour un litre, à l'euro pour un plein */
@@ -14,4 +17,4 @@ export const signed = (v: number, perLitre: boolean): string => (v >= 0 ? '+' : 
 export const NBSP_PERCENT = ' %';
 export const percent = (part: number, whole_: number): string => `${Math.round((part / whole_) * 100)}${NBSP_PERCENT}`;
 /** 2026-11-09 -> 9 novembre 2026 */
-export const longDate = (iso: string): string => dateLong.format(new Date(iso + 'T00:00:00Z'));
+export const longDate = (iso: string): string => dateLong.format(new Date(iso + 'T00:00:00Z')).replace(/^1 /, '1er ');

@@ -21,3 +21,7 @@ export function excelSerialToIso(serial: number): string {
 export function addDays(iso: string, days: number): string {
   return new Date(Date.parse(iso + "T00:00:00Z") + days * MS_PER_DAY).toISOString().slice(0, 10);
 }
+
+/** Date du jour à Paris (AAAA-MM-JJ) : la journée des Français, pas celle du serveur. */
+export const parisDate = (now: Date = new Date()): string =>
+  new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit" }).format(now);

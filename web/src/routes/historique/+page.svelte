@@ -7,7 +7,7 @@
   import Faq from '#lib/components/Faq.svelte';
   import NextPages from '#lib/components/NextPages.svelte';
   import Seo from '#lib/plugins/seo/Seo.svelte';
-  import { LITRE_PARTS, PART_META, ICON } from '#lib/parts.ts';
+  import { LITRE_PARTS, LITRE_SEGMENTS, PART_META, ICON } from '#lib/parts.ts';
   import { eur2, signed, longDate } from '#lib/format.ts';
   import { sum, fitText, describe } from '#lib/view.ts';
   import { PAGES } from '#lib/site-nav.ts';
@@ -49,7 +49,7 @@
     <h2 class="h2" id="annees">Un litre de {name}, année par année</h2>
     <p class="lead">La TICPE a peu bougé depuis 2018. Ce qui grossit, cette année, c'est la part de la raffinerie et de la station.</p>
     <figure class="card fig">
-      <ColumnsChart rows={p.annual} highlight={[refYear, lastYear]} label="Décomposition du prix d'un litre de {name} par année depuis {firstYear}, en quatre parts : pétrole, raffinerie et station, TICPE, TVA." />
+      <ColumnsChart parts={LITRE_SEGMENTS} rows={p.annual} highlight={[refYear, lastYear]} label="Décomposition du prix d'un litre de {name} par année depuis {firstYear}, en quatre parts : pétrole, raffinerie et station, TICPE, TVA." />
       <figcaption class="caption">Moyenne de chaque année, en euros par litre, France. {lastYear} : jusqu'au {longDate(fuel.asOf)}. Survolez une colonne pour le détail.</figcaption>
     </figure>
   </section>
@@ -63,7 +63,7 @@
           <div class="row">
             <span class="row-title">{row.title}</span>
             <div class="row-bar">
-              <StackedBar values={row.values} texts={fitText(row.values, row.tot, true, row.tot / maxTotal)} scale={row.tot / maxTotal} label={describe(row.values, row.title, true)} />
+              <StackedBar parts={LITRE_SEGMENTS} values={row.values} texts={fitText(row.values, row.tot, true, row.tot / maxTotal)} scale={row.tot / maxTotal} label={describe(row.values, row.title, true)} />
               <span class="row-total">{eur2(row.tot)}</span>
             </div>
           </div>

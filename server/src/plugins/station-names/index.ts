@@ -6,7 +6,7 @@
 // répond pas, la collecte garde les derniers noms et continue (instantané `optional`).
 import { PLUGIN_CATEGORY, type Plugin, type SnapshotItem, type SourceDecl } from "../../contract.js";
 import { jsonSettings } from "../json-settings.js";
-import { parisDate } from "../stations/index.js";
+import { parisDate } from "../../units.js";
 
 export type StationNamesDecl = { source: SourceDecl; overpassUrl: string; bbox: [number, number, number, number]; keepDays: number };
 export type StationName = { name: string };
