@@ -1,0 +1,21 @@
+{
+  "$comment": "Plugin Search Console : ce que Google fait des pages de winnza.eu (recherches sur lesquelles elles apparaissent, impressions, clics, position), sur les derniers jours. Compte de service Google en LECTURE SEULE (portée webmasters.readonly) ; sa clé n'est jamais ici : seulement le NOM de la variable de collect.env qui porte son JSON encodé en base64. Les données de la Search Console arrivent avec quelques jours de retard (delayDays).",
+  "source": {
+    "id": "google-search-console",
+    "name": "Google Search Console (performances de recherche)",
+    "publisher": "Google",
+    "url": "https://search.google.com/search-console",
+    "licence": "Données du propriétaire du site, usage éditorial interne (non publiées telles quelles)"
+  },
+  "site": "https://www.winnza.eu/",
+  "api": {
+    "tokenUrl": "https://oauth2.googleapis.com/token",
+    "scope": "https://www.googleapis.com/auth/webmasters.readonly",
+    "queryUrl": "https://www.googleapis.com/webmasters/v3/sites/{site}/searchAnalytics/query",
+    "secret": "GSC_SERVICE_ACCOUNT_B64"
+  },
+  "days": 28,
+  "delayDays": 3,
+  "rowLimit": 2000,
+  "keepDays": 120
+}

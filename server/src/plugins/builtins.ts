@@ -13,6 +13,7 @@ import { electricityPlugin } from "./electricity/index.js";
 import { runningCostPlugin } from "./running-cost/index.js";
 import { keywordsPlugin } from "./keywords/index.js";
 import { editorPlugin } from "./editor/index.js";
+import { searchConsolePlugin } from "./search-console/index.js";
 
 export const BUILTIN_PLUGINS: Readonly<Record<string, Plugin>> = {
   [fuelPlugin.id]: fuelPlugin, [hiddenChargesPlugin.id]: hiddenChargesPlugin, [sitePlugin.id]: sitePlugin,
@@ -24,6 +25,7 @@ export const BUILTIN_PLUGINS: Readonly<Record<string, Plugin>> = {
   [runningCostPlugin.id]: runningCostPlugin,
   [keywordsPlugin.id]: keywordsPlugin,
   [editorPlugin.id]: editorPlugin,
+  [searchConsolePlugin.id]: searchConsolePlugin,
 };
 
 /** Règles des plugins actifs : tous actifs tant que rien n'est enregistré, aucun imposé d'office. */

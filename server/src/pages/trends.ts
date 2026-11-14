@@ -8,6 +8,31 @@ import { AREA_FRANCE, STATIONS_CATALOG_SETTING, stationSeriesId } from "../plugi
 import { OIL_SERIES } from "../plugins/fuel/series-ids.js";
 import { ELEC_CATALOG_SETTING, TRV_PART, trvSeriesId, wholesaleSeriesId } from "../plugins/electricity/series-ids.js";
 import { parseElecCatalog } from "../plugins/electricity/decl.js";
+import { PERIOD_KEY, SEARCH_CONSOLE_SNAPSHOT, type SearchPeriod, type SearchRow } from "../plugins/search-console/index.js";
+
+/** Ce que Google fait de nos pages : les recherches qui comptent, les occasions (position 4 à 20, déjà vues),
+ *  les pages vues mais peu cliquées. Null tant que le plugin n'a rien relevé. */
+export const OPPORTUNITY = { minImpressions: 20, fromPosition: 4, toPosition: 20 } as const;
+function searchConsole(read: SiteReader) {
+  const date = read.snapshotDates(SEARCH_CONSOLE_SNAPSHOT).at(-1);
+  if (!date) return null;
+  const items = read.snapshot(SEARCH_CONSOLE_SNAPSHOT, date);
+  const period = items.find((i) => i.key === PERIOD_KEY)?.value as SearchPeriod | undefined;
+  const rows = items.filter((i) => i.key !== PERIOD_KEY).map((i) => i.value as SearchRow);
+  const byPage = new Map<string, { page: string; impressions: number; clicks: number }>();
+  for (const r of rows) {
+    const p = byPage.get(r.page) ?? byPage.set(r.page, { page: r.page, impressions: 0, clicks: 0 }).get(r.page)!;
+    p.impressions += r.impressions; p.clicks += r.clicks;
+  }
+  return {
+    period: period ?? null,
+    totals: { impressions: rows.reduce((s, r) => s + r.impressions, 0), clicks: rows.reduce((s, r) => s + r.clicks, 0), queries: rows.length },
+    topQueries: [...rows].sort((a, b) => b.impressions - a.impressions).slice(0, TOP),
+    opportunities: rows.filter((r) => r.impressions >= OPPORTUNITY.minImpressions && r.position >= OPPORTUNITY.fromPosition && r.position <= OPPORTUNITY.toPosition)
+      .sort((a, b) => b.impressions - a.impressions).slice(0, TOP),
+    seenNotClicked: [...byPage.values()].filter((p) => p.impressions >= OPPORTUNITY.minImpressions && p.clicks === 0).sort((a, b) => b.impressions - a.impressions).slice(0, TOP),
+  };
+}
 
 /** Une recherche ne compte comme tendance qu'au-delà de ce volume mensuel (en dessous, le bruit domine). */
 export const MIN_TREND_VOLUME = 500;
@@ -52,6 +77,7 @@ export function buildTrends(read: SiteReader, today: string) {
       biggest: [...ideas].sort((a, b) => b.volume - a.volume).slice(0, TOP),
     },
     prices: moves,
+    searchConsole: searchConsole(read),
     regulatedTariff: elec && base.length ? { what: `tarif Bleu ${elec.page.compareWith.option} ${elec.page.compareWith.period}, ${elec.trv.powers[0]} kVA, kWh TTC`, latest: base.at(-1)!, previous: base.at(-2) ?? null } : null,
   };
 }
