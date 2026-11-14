@@ -19,14 +19,21 @@ let cache: { mtime: number; page: FuelPage; departments: DepartmentsPage | null;
 
 /** Page optionnelle (son plugin peut être éteint ou mal réglé) : une erreur la retire, journalisée, au
  *  lieu de faire tomber tout le site. Les pages carburant, elles, restent obligatoires. */
+/** Pages retirées au dernier calcul, avec la raison : publiées dans /etat.json pour qui doit réparer. */
+let pageErrors: string[] = [];
 function optional<T>(name: string, build: () => T | null): T | null {
-  try { return build(); } catch (e) { console.error(`page ${name} retirée : ${e instanceof Error ? e.message : String(e)}`); return null; }
+  try { return build(); } catch (e) {
+    const why = `page ${name} retirée : ${e instanceof Error ? e.message : String(e)}`;
+    console.error(why); pageErrors.push(why); return null;
+  }
 }
+export const currentPageErrors = (): readonly string[] => { load(); return pageErrors; };
 
 function load() {
   const mtime = statSync(DB).mtimeMs;
   if (cache && cache.mtime === mtime) return cache;
   const store = new Store(DB, { readonly: true });
+  pageErrors = [];
   try {
     const a = store.settingOrNull(ANALYTICS_SETTING);
     const stations = optional('carte des stations', () => buildStationsMap(store));

@@ -92,8 +92,7 @@ async function main(): Promise<void> {
       const reg = await buildRegistry(BUILTINS, enabled, (id) => settingsOf(store, id));
       const report = await runCollect(store, reg, httpContext, parseAnchors(declaration("anchors.json")));
       const msg = reg.failed.map((f) => `${f.id} : ${f.error}`).join(" ; ");
-      store.db.prepare("INSERT INTO collect_run (started_at, finished_at, ok, observations, message) VALUES (?, ?, ?, ?, ?)")
-        .run(started, new Date().toISOString(), reg.failed.length ? 0 : 1, report.observations, msg || null);
+      store.recordRun({ startedAt: started, ok: !reg.failed.length, observations: report.observations, message: msg || null, warnings: report.warnings });
       console.log(`collecte : ${report.observations} valeurs, plugins ${reg.loaded.join(", ")}, ${report.anchors.length} ancres vérifiées`);
       for (const r of report.anchors) console.log(`  ✓ ${r.anchor.seriesId} ${r.anchor.aggregate} [${r.anchor.from}..${r.anchor.to}] = ${r.actual?.toFixed(4)} (attendu ${r.anchor.expected} ±${r.anchor.tolerance}, ${r.anchor.publishedBy})`);
       for (const w of report.warnings) console.log(`  ! source d'appoint absente : ${w}`);
@@ -101,8 +100,7 @@ async function main(): Promise<void> {
       // un plugin écarté ne bloque pas les autres, mais la collecte le signale par son code de sortie
       if (reg.failed.length) { console.error(`plugins écartés : ${msg}`); process.exitCode = 1; }
     } catch (e) {
-      store.db.prepare("INSERT INTO collect_run (started_at, finished_at, ok, message) VALUES (?, ?, 0, ?)")
-        .run(started, new Date().toISOString(), String(e instanceof Error ? e.message : e));
+      store.recordRun({ startedAt: started, ok: false, observations: 0, message: String(e instanceof Error ? e.message : e), warnings: [] });
       console.error(`collecte en échec : ${e instanceof Error ? e.message : e}`);
       process.exitCode = 1;
     }

@@ -39,6 +39,24 @@ export class Store implements SiteReader {
     if (!cols.includes("description")) this.db.exec("ALTER TABLE series ADD COLUMN description TEXT");
     const scols = (this.db.prepare("PRAGMA table_info(setting)").all() as { name: string }[]).map((c) => c.name);
     if (!scols.includes("owner")) this.db.exec("ALTER TABLE setting ADD COLUMN owner TEXT");   // plugin qui l'a déclaré
+    const rcols = (this.db.prepare("PRAGMA table_info(collect_run)").all() as { name: string }[]).map((c) => c.name);
+    if (!rcols.includes("warnings")) this.db.exec("ALTER TABLE collect_run ADD COLUMN warnings TEXT");   // sources d'appoint absentes (JSON)
+  }
+
+  /** Une collecte terminée : réussie ou non, ce qu'elle a écrit, son message d'erreur, ses avertissements. */
+  recordRun(run: { startedAt: string; ok: boolean; observations: number; message: string | null; warnings: readonly string[] }): void {
+    this.db.prepare("INSERT INTO collect_run (started_at, finished_at, ok, observations, message, warnings) VALUES (?, ?, ?, ?, ?, ?)")
+      .run(run.startedAt, new Date().toISOString(), run.ok ? 1 : 0, run.observations, run.message, JSON.stringify(run.warnings));
+  }
+
+  /** Les dernières collectes, de la plus récente à la plus ancienne. */
+  recentRuns(n: number): { startedAt: string; finishedAt: string | null; ok: boolean; observations: number; message: string | null; warnings: string[] }[] {
+    if (!this.hasTable("collect_run")) return [];
+    const hasWarnings = (this.db.prepare("PRAGMA table_info(collect_run)").all() as { name: string }[]).some((c) => c.name === "warnings");
+    const rows = this.db.prepare(`SELECT started_at, finished_at, ok, observations, message${hasWarnings ? ", warnings" : ""} FROM collect_run ORDER BY id DESC LIMIT ?`).all(n) as
+      { started_at: string; finished_at: string | null; ok: number; observations: number; message: string | null; warnings?: string | null }[];
+    return rows.map((r) => ({ startedAt: r.started_at, finishedAt: r.finished_at, ok: r.ok === 1, observations: r.observations, message: r.message,
+      warnings: r.warnings ? (JSON.parse(r.warnings) as string[]) : [] }));
   }
 
   /** Remplace l'instantané du jour (le relevé du jour fait foi en entier), puis efface ce qui a plus de

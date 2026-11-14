@@ -22,9 +22,12 @@ services:
       - XFF_DEPTH=1
       # fond de carte, polices et icônes de la carte des stations (scripts/fetch-map.sh, environ 10 Go)
       - WINNZA_MAP_DIR=/map
+      # état du dernier déploiement (scripts/deploy-when-green.sh), publié dans /etat.json
+      - WINNZA_STATE_DIR=/state
     volumes:
       - data:/data
       - /home/ubuntu/winnza-tiles:/map:ro
+      - /var/lib/winnza:/state:ro
     networks: [proxy]
 
   collect:
