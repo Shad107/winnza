@@ -4,6 +4,7 @@
 import type { SiteReader } from "../contract.js";
 import { addDays } from "../units.js";
 import { STATIONS_CATALOG_SETTING, STATIONS_SNAPSHOT, type StationRecord } from "../plugins/stations/index.js";
+import { STATION_NAMES_SNAPSHOT, type StationName } from "../plugins/station-names/index.js";
 import { CHANGE_DAYS } from "./departments-page.js";
 
 /** Préfixes des propriétés par carburant : prix, variation, prix ancien. */
@@ -36,9 +37,15 @@ export function buildStationsMap(read: SiteReader): StationsMap {
   const compareDate = dates.includes(addDays(date, -CHANGE_DAYS)) ? addDays(date, -CHANGE_DAYS) : null;
   const before = new Map(compareDate ? read.snapshot(STATIONS_SNAPSHOT, compareDate).map((i) => [i.key, i.value as StationRecord]) : []);
 
+  // noms : le dernier relevé disponible (source d'appoint, pas forcément du jour)
+  const namesDate = read.snapshotDates(STATION_NAMES_SNAPSHOT).at(-1);
+  const names = new Map(namesDate ? read.snapshot(STATION_NAMES_SNAPSHOT, namesDate).map((i) => [i.key, (i.value as StationName).name]) : []);
+
   const features = read.snapshot(STATIONS_SNAPSHOT, date).map((item): StationFeature => {
     const st = item.value as StationRecord;
     const props: Record<string, string | number> = { k: item.key, a: st.address, c: st.city, cp: st.cp, h: st.h24 ? 1 : 0 };
+    const name = names.get(item.key);
+    if (name) props.n = name;
     for (const f of catalog.fuels!) {
       const p = st.prices[f.id];
       if (!p) continue;

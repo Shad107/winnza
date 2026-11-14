@@ -69,7 +69,12 @@ export type Collector = {
 
 /** Instantané daté : l'état d'un ensemble d'éléments un jour donné (ex. chaque station, sa position et ses
  *  prix). Pour ce qui n'est pas une série de nombres. Le cœur garde `keepDays` jours, puis efface. */
-export type SnapshotDecl = { id: string; label: string; sourceId: string; keepDays: number };
+export type SnapshotDecl = {
+  id: string; label: string; sourceId: string; keepDays: number;
+  /** source d'appoint (ex. noms des stations) : si elle ne répond pas, la collecte continue et garde le
+   *  dernier instantané valable, au lieu d'échouer ; l'échec est signalé dans le compte rendu */
+  optional?: boolean;
+};
 export type SnapshotItem = { key: string; value: unknown };
 export type Snapshot = { date: string; items: SnapshotItem[] };
 export type SnapshotCollector = {

@@ -95,7 +95,7 @@ function assertSnapshot(reg: Registry, c: SnapshotCollector, snap: Snapshot): vo
 }
 
 /** `skipped` : ancres sur une série dont le plugin n'est pas chargé (non vérifiées, et signalées). */
-export type RunReport = { observations: number; anchors: AnchorResult[]; skipped: Anchor[] };
+export type RunReport = { observations: number; anchors: AnchorResult[]; skipped: Anchor[]; warnings: string[] };
 
 export async function runCollect(store: Store, reg: Registry, ctx: CollectContext, anchors: readonly Anchor[]): Promise<RunReport> {
   const batches: Observation[][] = [];
@@ -107,10 +107,16 @@ export async function runCollect(store: Store, reg: Registry, ctx: CollectContex
   }
   const collected = batches.flat();
   const snaps: { c: SnapshotCollector; snap: Snapshot }[] = [];
+  const warnings: string[] = [];
   for (const c of reg.snapshotCollectors) {
-    const snap = await c.run(ctx);
-    assertSnapshot(reg, c, snap);
-    snaps.push({ c, snap });
+    try {
+      const snap = await c.run(ctx);
+      assertSnapshot(reg, c, snap);
+      snaps.push({ c, snap });
+    } catch (e) {
+      if (!reg.snapshots.get(c.snapshot)?.optional) throw e;
+      warnings.push(`${c.id} : ${e instanceof Error ? e.message : String(e)} (dernier relevé gardé)`);
+    }
   }
   const active = anchors.filter((a) => reg.series.has(a.seriesId));
   const skipped = anchors.filter((a) => !reg.series.has(a.seriesId));
@@ -138,5 +144,5 @@ export async function runCollect(store: Store, reg: Registry, ctx: CollectContex
         `  ${r.anchor.seriesId} [${r.anchor.from}..${r.anchor.to}] ${r.anchor.aggregate} : attendu ${r.anchor.expected} ±${r.anchor.tolerance} (${r.anchor.publishedBy}), obtenu ${r.actual ?? "aucune donnée"}`).join("\n"));
     }
   })();
-  return { observations: total, anchors: results, skipped };
+  return { observations: total, anchors: results, skipped, warnings };
 }

@@ -21,6 +21,7 @@ import { stationsPlugin } from "./plugins/stations/index.js";
 import { matomoPlugin } from "./plugins/matomo/index.js";
 import { forecastPlugin } from "./plugins/forecast/index.js";
 import { mapPlugin, outlinesFromGeoJson, parseMapDecl } from "./plugins/map/index.js";
+import { stationNamesPlugin } from "./plugins/station-names/index.js";
 import { buildRegistry, runCollect } from "./runner.js";
 import { Store } from "./store.js";
 
@@ -36,6 +37,7 @@ const SEEDS: Record<string, () => unknown> = {
   [matomoPlugin.id]: () => declaration("matomo.json"),
   [forecastPlugin.id]: () => declaration("forecast.json"),
   [mapPlugin.id]: () => declaration("map.json"),
+  [stationNamesPlugin.id]: () => declaration("station-names.json"),
 };
 
 function settingsOf(store: Store, id: string): unknown {
@@ -86,6 +88,7 @@ async function main(): Promise<void> {
         .run(started, new Date().toISOString(), reg.failed.length ? 0 : 1, report.observations, msg || null);
       console.log(`collecte : ${report.observations} valeurs, plugins ${reg.loaded.join(", ")}, ${report.anchors.length} ancres vérifiées`);
       for (const r of report.anchors) console.log(`  ✓ ${r.anchor.seriesId} ${r.anchor.aggregate} [${r.anchor.from}..${r.anchor.to}] = ${r.actual?.toFixed(4)} (attendu ${r.anchor.expected} ±${r.anchor.tolerance}, ${r.anchor.publishedBy})`);
+      for (const w of report.warnings) console.log(`  ! source d'appoint absente : ${w}`);
       for (const s of report.skipped) console.log(`  - ancre non vérifiée (plugin inactif) : ${s.seriesId}`);
       // un plugin écarté ne bloque pas les autres, mais la collecte le signale par son code de sortie
       if (reg.failed.length) { console.error(`plugins écartés : ${msg}`); process.exitCode = 1; }

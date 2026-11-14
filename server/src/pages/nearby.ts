@@ -2,7 +2,7 @@
 // navigateur), les stations proches les moins chères pour un carburant. Seuls les prix à jour comptent.
 import { STATION_PROP, type StationFeature } from "./stations-map.js";
 
-export type NearbyStation = { key: string; address: string; city: string; price: number; km: number; lon: number; lat: number };
+export type NearbyStation = { key: string; name: string; address: string; city: string; price: number; km: number; lon: number; lat: number };
 export type Nearby = { radiusKm: number; count: number; average: number; cheapest: NearbyStation[]; dearest: number } | null;
 
 const EARTH_KM = 6371;
@@ -20,7 +20,7 @@ export function nearby(features: readonly StationFeature[], fuelId: string, lon:
     if (typeof p !== "number" || f.properties[stale]) return [];
     const [flon, flat] = f.geometry.coordinates;
     const km = distanceKm(lon, lat, flon, flat);
-    return km <= radiusKm ? [{ key: String(f.properties.k), address: String(f.properties.a ?? ""), city: String(f.properties.c ?? ""), price: p, km, lon: flon, lat: flat }] : [];
+    return km <= radiusKm ? [{ key: String(f.properties.k), name: String(f.properties.n ?? ""), address: String(f.properties.a ?? ""), city: String(f.properties.c ?? ""), price: p, km, lon: flon, lat: flat }] : [];
   });
   if (!around.length) return null;
   // à prix égal, la plus proche d'abord

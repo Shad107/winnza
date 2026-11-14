@@ -108,3 +108,15 @@ test("instantané vide ou avec une clé en double : la collecte échoue sans rie
   }
   assert.deepEqual(store.snapshotDates("photo.jour"), []);
 });
+
+test("instantané d'appoint : sa source ne répond pas, la collecte continue et le signale", async () => {
+  const store = new Store(":memory:");
+  const flaky: Plugin = { id: "appoint", title: { fr: "a", en: "a" }, register(api) {
+    plugin.register(api);
+    api.declareSnapshot({ id: "appoint.jour", label: "l", sourceId: "src", keepDays: 7, optional: true });
+    api.registerSnapshotCollector({ id: "appoint", snapshot: "appoint.jour", run: async () => { throw new Error("serveur saturé"); } });
+  } };
+  const r = await runCollect(store, await buildRegistry({ appoint: flaky }, ["appoint"], () => ({ value: 2 })), noNet, []);
+  assert.match(r.warnings[0]!, /serveur saturé/);
+  assert.deepEqual(store.get("x").map((o) => o.value), [2], "le reste est écrit");
+});

@@ -1,0 +1,18 @@
+{
+  "$comment": "Plugin noms des stations. Le flux officiel n'a que l'adresse ; OpenStreetMap donne le nom ou l'enseigne des stations qui portent l'identifiant du flux (ref:FR:prix-carburants). Source d'appoint : si Overpass est saturé, la collecte garde les derniers noms.",
+  "source": {
+    "id": "osm-overpass",
+    "name": "OpenStreetMap, stations-service avec l'identifiant du flux officiel",
+    "publisher": "Contributeurs OpenStreetMap, via Overpass API",
+    "url": "https://www.openstreetmap.org/copyright",
+    "licence": "ODbL 1.0"
+  },
+  "overpassUrl": "https://overpass-api.de/api/interpreter",
+  "bbox": [
+    41.2,
+    -5.6,
+    51.3,
+    9.8
+  ],
+  "keepDays": 14
+}

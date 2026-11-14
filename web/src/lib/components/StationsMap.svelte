@@ -8,7 +8,7 @@
   import { MAP_MODE, type MapMode } from '#lib/map-mode.ts';
   import { eur2, longDate } from '#lib/format.ts';
 
-  let { fuelId, mode, onloaded, onlegend, onlocated, onlocateerror, zoomTo }: {
+  let { fuelId, mode, onloaded, onlegend, onlocated, onlocateerror, zoomTo, highlight }: {
     fuelId: string;
     mode: MapMode;
     onloaded: (m: NonNullable<StationsMap>) => void;
@@ -19,6 +19,8 @@
     onlegend: (l: { color: string; text: string }[]) => void;
     /** demande de recentrage (code postal), ou null */
     zoomTo: [number, number, number, number] | null;
+    /** station entourée (la moins chère autour du visiteur, ou celle qu'il a choisie dans la liste) */
+    highlight: string | null;
   } = $props();
 
   let el: HTMLDivElement;
@@ -73,6 +75,7 @@
   }
 
   $effect(() => { void fuelId; void mode; if (ready) paint(); });
+  $effect(() => { const k = highlight ?? ''; if (ready && map) map.setFilter('stations-highlight', ['==', ['get', 'k'], k]); });
   $effect(() => { if (zoomTo && map) map.fitBounds([[zoomTo[0], zoomTo[1]], [zoomTo[2], zoomTo[3]]], { padding: 60, maxZoom: 14 }); });
 
   /** Fiche d'une station : construite nœud par nœud (les adresses viennent d'une source externe). */
@@ -80,7 +83,9 @@
     const root = document.createElement('div');
     root.className = 'st-card';
     const line = (tag: string, text: string, cls = '') => { const e = document.createElement(tag); e.textContent = text; if (cls) e.className = cls; root.append(e); return e; };
-    line('strong', String(p.a || 'Adresse non renseignée'));
+    // nom ou enseigne (OpenStreetMap) quand on l'a, puis l'adresse du flux officiel
+    if (p.n) { line('strong', String(p.n)); line('div', String(p.a || ''), 'st-muted'); }
+    else line('strong', String(p.a || 'Adresse non renseignée'));
     line('div', `${String(p.cp ?? '')} ${String(p.c ?? '')}${p.h ? ' · automate 24 h/24' : ''}`, 'st-muted');
     const table = document.createElement('table');
     for (const f of data!.fuels) {
@@ -151,6 +156,10 @@
             'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 2, 8, 3.5, 11, 6, 14, 9],
             'circle-stroke-color': css('--card'), 'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 4, 0.3, 10, 1.2],
           } });
+          // l'anneau autour de la station mise en avant
+          map.addLayer({ id: 'stations-highlight', type: 'circle', source: 'stations', filter: ['==', ['get', 'k'], ''], paint: {
+            'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 6, 11, 11, 14, 15], 'circle-color': 'rgba(0,0,0,0)',
+            'circle-stroke-color': css('--ink'), 'circle-stroke-width': 3 } });
           // le prix écrit sous chaque pastille, quand on est assez près pour lire la rue
           map.addLayer({ id: 'stations-label', type: 'symbol', source: 'stations', minzoom: 11, layout: {
             'text-font': ['Noto Sans Medium'], 'text-size': 13, 'text-offset': [0, 1.1], 'text-anchor': 'top', 'text-allow-overlap': false,

@@ -8,12 +8,14 @@ import { stationsPlugin } from "./stations/index.js";
 import { matomoPlugin } from "./matomo/index.js";
 import { forecastPlugin } from "./forecast/index.js";
 import { mapPlugin } from "./map/index.js";
+import { stationNamesPlugin } from "./station-names/index.js";
 
 export const BUILTIN_PLUGINS: Readonly<Record<string, Plugin>> = {
   [fuelPlugin.id]: fuelPlugin, [hiddenChargesPlugin.id]: hiddenChargesPlugin, [sitePlugin.id]: sitePlugin,
   [stationsPlugin.id]: stationsPlugin, [matomoPlugin.id]: matomoPlugin,
   [forecastPlugin.id]: forecastPlugin,
   [mapPlugin.id]: mapPlugin,
+  [stationNamesPlugin.id]: stationNamesPlugin,
 };
 
 /** Règles des plugins actifs : tous actifs tant que rien n'est enregistré, aucun imposé d'office. */

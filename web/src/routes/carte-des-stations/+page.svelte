@@ -35,7 +35,17 @@
   const franceAvg = $derived(fuels.find((f) => f.id === fuelId)?.avg ?? null);
   const km = (v: number) => (v < 1 ? `${Math.round(v * 1000 / 50) * 50} m` : `${v.toLocaleString('fr-FR', { maximumFractionDigits: 1 })} km`);
   function locateMe() { locating = true; cpMessage = ''; if (!mapRef?.locate()) { locating = false; cpMessage = "La localisation n'est pas disponible sur cet appareil : utilisez votre code postal."; } }
-  function showStation(lon: number, lat: number) { zoomTo = [lon - 0.004, lat - 0.003, lon + 0.004, lat + 0.003]; }
+  let highlight = $state<string | null>(null);
+  function showStation(key: string, lon: number, lat: number) { highlight = key; zoomTo = [lon - 0.004, lat - 0.003, lon + 0.004, lat + 0.003]; }
+  // dès qu'on sait où est le visiteur (ou qu'il change de carburant) : la carte cadre à la fois sa position
+  // et la station la moins chère autour de lui, entourée
+  $effect(() => {
+    const best = around?.cheapest[0];
+    if (!best || !here) return;
+    highlight = best.key;
+    const pad = 0.004;
+    zoomTo = [Math.min(here.lon, best.lon) - pad, Math.min(here.lat, best.lat) - pad, Math.max(here.lon, best.lon) + pad, Math.max(here.lat, best.lat) + pad];
+  });
 
   function search(e: SubmitEvent) {
     e.preventDefault();
@@ -86,8 +96,8 @@
         </p>
         <ol class="near-list">
           {#each around.cheapest as st (st.key)}
-            <li><button type="button" onclick={() => showStation(st.lon, st.lat)}>
-              <span class="where"><span class="addr">{st.address || 'Adresse non renseignée'}</span><span class="city">{st.city} · {km(st.km)}</span></span>
+            <li><button type="button" class:on={highlight === st.key} onclick={() => showStation(st.key, st.lon, st.lat)}>
+              <span class="where"><span class="addr">{st.name || st.address || 'Adresse non renseignée'}</span><span class="city">{st.name ? `${st.address}, ` : ''}{st.city} · {km(st.km)}</span></span>
               <strong>{eur2(st.price)}</strong>
             </button></li>
           {/each}
@@ -97,7 +107,7 @@
     {:else if here && loaded}
       <div class="card pad near"><p class="sum">Aucune station à jour à moins de 10 km {here.label} pour ce carburant.</p></div>
     {/if}
-    <StationsMap bind:this={mapRef} {fuelId} {mode} {zoomTo} onloaded={(m) => (loaded = m)} onlegend={(l) => (legend = l)}
+    <StationsMap bind:this={mapRef} {fuelId} {mode} {zoomTo} {highlight} onloaded={(m) => (loaded = m)} onlegend={(l) => (legend = l)}
       onlocated={(lon, lat) => { here = { lon, lat, label: 'autour de vous' }; locating = false; }}
       onlocateerror={() => { locating = false; cpMessage = 'Position non disponible (refusée ou introuvable) : utilisez votre code postal.'; }} />
     {#if legend.length}
@@ -108,7 +118,7 @@
     <p class="caption">
       {#if loaded}{loaded.features.length.toLocaleString('fr-FR')} stations, prix relevés le {longDate(loaded.date)}.{/if}
       {#if !hasChange}La variation sur 7 jours de chaque station apparaîtra dès qu'une semaine de relevés sera disponible.{/if}
-      Source : flux officiel des prix des carburants (ministère de l'Économie). Fond de carte : © contributeurs OpenStreetMap, Protomaps, servi par Winnza : votre navigateur ne contacte aucun autre site. <a href="/prix-par-departement">Les prix par département</a>.
+      Source : flux officiel des prix des carburants (ministère de l'Économie). Noms des stations et fond de carte : © contributeurs OpenStreetMap (ODbL), Protomaps, servis par Winnza : votre navigateur ne contacte aucun autre site. <a href="/prix-par-departement">Les prix par département</a>.
     </p>
   </section>
 
@@ -131,6 +141,8 @@
   .near-list li { border-top: 1px solid var(--line); }
   .near-list button { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 52px; padding: 8px 0;
     border: 0; background: none; color: var(--ink); font: 15px 'Inter Variable', system-ui, sans-serif; text-align: left; cursor: pointer; }
+  .near-list button.on { font-weight: 700; }
+  .near-list button.on .addr::before { content: '● '; }
   .where { display: flex; flex-direction: column; min-width: 0; }
   .addr { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .city { font-size: 13px; color: var(--muted); }
