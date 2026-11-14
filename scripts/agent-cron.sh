@@ -20,6 +20,11 @@ install -o root -g root -m 755 scripts/agent-run.sh "$LIB/agent-run.sh"
 install -o root -g root -m 644 declarations/agent.json "$LIB/agent.json"
 PROMPT_FILE=$(python3 -c 'import json; print(json.load(open("declarations/agent.json"))["promptFile"])')
 install -o root -g root -m 644 "$PROMPT_FILE" "$LIB/prompt.md"
+# le jour du rapport de stratégie, les consignes le disent (jour déclaré dans agent.json, 1 = lundi)
+WEEKLY=$(python3 -c 'import json; print(json.load(open("declarations/agent.json"))["weeklyReportDay"])')
+if [ "$(date +%u)" = "$WEEKLY" ]; then
+  printf '\nAujourd hui est le jour du rapport de stratégie : ajoute le bilan de la semaine à ton compte rendu.\n' >> "$LIB/prompt.md"
+fi
 
 read -r MODEL BUDGET TIMEOUT < <(python3 -c 'import json; c=json.load(open("declarations/agent.json")); print(c["model"], c["monthlyBudgetUsd"], c["timeoutMinutes"])')
 SPENT=$(python3 - "$SPEND" <<'PY'
@@ -63,7 +68,9 @@ PY
 echo "$started modèle $MODEL, code $rc, $COST" >> "$LOG"
 
 report=$(cat "$WORK/last.md" 2>/dev/null || echo "(aucun compte rendu : voir $WORK/run.err)")
-alert_send "[winnza] L'IA du site : compte rendu du $(date +%d/%m)" "$report
+SUBJECT="[winnza] L'IA du site : compte rendu du $(date +%d/%m)"
+[ "$(date +%u)" = "$WEEKLY" ] && SUBJECT="[winnza] L'IA du site : bilan de la semaine et propositions ($(date +%d/%m))"
+alert_send "$SUBJECT" "$report
 
 Passage : modèle $MODEL, code de sortie $rc, $COST.
 Dépense du mois avant ce passage : $SPENT \$ sur $BUDGET \$.

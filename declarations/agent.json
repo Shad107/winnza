@@ -5,16 +5,55 @@
   "monthlyBudgetUsd": 10,
   "timeoutMinutes": 45,
   "promptFile": "scripts/agent-prompt.md",
+  "weeklyReportDay": 7,
+  "$comment_weeklyReportDay": "Jour du rapport de stratégie (1 = lundi, 7 = dimanche) : ce jour-là, l'agent fait aussi le bilan de la semaine et ses propositions de cap.",
   "engines": {
-    "codex": { "binary": ".local/codex/bin/codex", "path": [".local/codex/bin", ".local/codex/codex-path", ".local/node/bin"] },
-    "claude": { "binary": ".local/node/bin/claude", "path": [".local/node/bin"] }
+    "codex": {
+      "binary": ".local/codex/bin/codex",
+      "path": [
+        ".local/codex/bin",
+        ".local/codex/codex-path",
+        ".local/node/bin"
+      ]
+    },
+    "claude": {
+      "binary": ".local/node/bin/claude",
+      "path": [
+        ".local/node/bin"
+      ]
+    }
   },
   "pricing": {
     "$comment": "Dollars par million de jetons (contexte court), relevés le 2026-11-14.",
-    "gpt-6.1-sol": { "input": 2.0, "cachedInput": 0.1, "output": 10.0, "source": "https://developers.openai.com/api/docs/pricing" },
-    "gpt-6.1-terra": { "input": 1.0, "cachedInput": 0.05, "output": 5.0, "source": "https://developers.openai.com/api/docs/pricing" },
-    "gpt-6-astra": { "input": 10.0, "cachedInput": 1.0, "output": 50.0, "source": "https://developers.openai.com/api/docs/pricing" },
-    "claude-sonnet-5-5": { "input": 2.0, "cachedInput": 0.1, "output": 10.0, "source": "https://platform.claude.com/docs/en/about-claude/pricing" },
-    "claude-opus-5-5": { "input": 4.0, "cachedInput": 0.2, "output": 20.0, "source": "https://platform.claude.com/docs/en/about-claude/pricing" }
+    "gpt-6.1-sol": {
+      "input": 2.0,
+      "cachedInput": 0.1,
+      "output": 10.0,
+      "source": "https://developers.openai.com/api/docs/pricing"
+    },
+    "gpt-6.1-terra": {
+      "input": 1.0,
+      "cachedInput": 0.05,
+      "output": 5.0,
+      "source": "https://developers.openai.com/api/docs/pricing"
+    },
+    "gpt-6-astra": {
+      "input": 10.0,
+      "cachedInput": 1.0,
+      "output": 50.0,
+      "source": "https://developers.openai.com/api/docs/pricing"
+    },
+    "claude-sonnet-5-5": {
+      "input": 2.0,
+      "cachedInput": 0.1,
+      "output": 10.0,
+      "source": "https://platform.claude.com/docs/en/about-claude/pricing"
+    },
+    "claude-opus-5-5": {
+      "input": 4.0,
+      "cachedInput": 0.2,
+      "output": 20.0,
+      "source": "https://platform.claude.com/docs/en/about-claude/pricing"
+    }
   }
 }

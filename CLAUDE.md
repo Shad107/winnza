@@ -46,6 +46,21 @@ secrets (gitleaks). **Un commit sur `main` dont l'intégration continue est vert
 serveur vient le chercher toutes les 5 minutes, le construit, vérifie que le site répond, et remet la version
 précédente sinon. Il n'y a pas d'autre chemin de déploiement.
 
+## Les analyses (« le point de la semaine »)
+
+`content/analyses/AAAA-MM-JJ-sujet.md` : un en-tête entre deux lignes `---` (title, description, date),
+puis du Markdown sans HTML. **Aucun chiffre tapé à la main** : un chiffre s'écrit par un jeton de données,
+remplacé à l'affichage par la valeur de la base à la date indiquée :
+
+- `{{<série>@<date>|<format>}}` : la valeur en vigueur à cette date ; formats `eur2`, `eur3`, `eur4`, `usd0` ;
+- `{{<série>@<date1>..<date2>|<format>}}` : l'écart entre deux dates ; formats `ct` (centimes), `pct` (%).
+
+Les identifiants de séries sont construits dans `server/src/plugins/*/series-ids.ts` et
+`server/src/plugins/stations/index.ts` (par exemple `station.FR.gazole.avg`, `oil.brent.usd_per_barrel`,
+`elec.wholesale.FR`, `elec.trv.base.6kva.kwh.ttc`). Les années (« en 2022 ») restent permises.
+Les règles sont vérifiées par `server/src/pages/articles.test.ts` : un article qui les enfreint bloque
+l'intégration continue. Au plus une analyse par semaine, et seulement quand quelque chose a vraiment bougé.
+
 ## L'état du site
 
 https://www.winnza.eu/etat.json : les dernières collectes (réussite, erreurs, sources d'appoint absentes),
