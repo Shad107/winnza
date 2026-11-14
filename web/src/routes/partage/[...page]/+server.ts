@@ -2,6 +2,7 @@
 // l'IA rédactrice (ou le titre de la rubrique), et le chiffre du jour tiré de la base. /partage/accueil.png
 // pour l'accueil, /partage/<chemin>.png pour les autres pages.
 import { error } from '@sveltejs/kit';
+import { readdirSync } from 'node:fs';
 import { Resvg } from '@resvg/resvg-js';
 import { shareFigure, SHARE_UNIT, type ShareFigure, type ShareUnit } from '@winnza/core/pages/share.js';
 import { CITY_PATH } from '@winnza/core/pages/cities.js';
@@ -45,6 +46,12 @@ function svg(kicker: string, headline: string, figure: ShareFigure | null): stri
   </svg>`;
 }
 
+// Le dossier de la police est donné explicitement : l'image Docker allégée n'a pas fontconfig, et sans lui
+// la recherche « système » ne trouve rien et rend une image SANS TEXTE (constaté le 2026-11-14). Sans police,
+// on refuse plutôt que de servir une image vide.
+const FONT_DIR = process.env.WINNZA_FONT_DIR ?? '/usr/share/fonts/opentype/inter';
+const fontFiles = (() => { try { return readdirSync(FONT_DIR).filter((f) => /\.(otf|ttf)$/.test(f)).map((f) => `${FONT_DIR}/${f}`); } catch { return []; } })();
+
 const cache = new Map<string, Uint8Array<ArrayBuffer>>();
 const MAX_CACHED = 300;
 
@@ -68,9 +75,10 @@ export const GET = ({ params }) => {
     figure = withReadStore((s) => shareFigure(page, s));
   }
   const key = `${page}|${headline}|${figure?.date ?? ''}|${figure?.value ?? ''}`;
+  if (!fontFiles.length) error(500, `Images de partage : aucune police dans ${FONT_DIR}`);
   let png = cache.get(key);
   if (!png) {
-    png = new Uint8Array(new Resvg(svg(kicker, headline, figure), { font: { loadSystemFonts: true, defaultFontFamily: 'Inter' } }).render().asPng());
+    png = new Uint8Array(new Resvg(svg(kicker, headline, figure), { font: { fontFiles, loadSystemFonts: false, defaultFontFamily: 'Inter' } }).render().asPng());
     if (cache.size >= MAX_CACHED) cache.clear();
     cache.set(key, png);
   }

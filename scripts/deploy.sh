@@ -11,8 +11,8 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 SITE="${WINNZA_SITE:-https://www.winnza.eu}"
 # pages vérifiées après chaque déploiement : une par grande famille (l'accueil, une page du socle carburants,
-# une page plugin, une page de ville engendrée)
-CHECK_PATHS=(/ /taxes /electricite /cout-aux-100-km /prix-carburant/rennes-35 /sitemap.xml)
+# une page plugin, une page de ville engendrée, une image de partage : sans police, elle répond 500)
+CHECK_PATHS=(/ /taxes /electricite /cout-aux-100-km /prix-carburant/rennes-35 /sitemap.xml /partage/accueil.png)
 LOG=/var/log/winnza-deploy.log
 log() { echo "$(date -u +%FT%TZ) $*" | sudo tee -a "$LOG" >&2; }
 
