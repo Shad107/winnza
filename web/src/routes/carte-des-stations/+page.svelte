@@ -11,6 +11,8 @@
   import { MAP_MODE, type MapMode } from '#lib/map-mode.ts';
   import { PAGES } from '#lib/site-nav.ts';
   import type { StationsMap as StationsData } from '@winnza/core/pages/stations-map.js';
+  import { nearby } from '@winnza/core/pages/nearby.js';
+  import { eur2, eur0 } from '#lib/format.ts';
 
   let { data } = $props();
   const fuels = $derived(data.page.stations?.fuels ?? []);
@@ -24,13 +26,24 @@
   let zoomTo = $state<[number, number, number, number] | null>(null);
   const hasChange = $derived(loaded?.compareDate != null);
 
+  // « Autour de vous » : position acceptée par le visiteur ou code postal ; calculé ici, rien n'est envoyé
+  let here = $state<{ lon: number; lat: number; label: string } | null>(null);
+  let locating = $state(false);
+  const FILL_LITRES = 50;
+  const around = $derived(loaded && here ? nearby(loaded.features, fuelId, here.lon, here.lat) : null);
+  const fuelLabel = $derived(fuels.find((f) => f.id === fuelId)?.label.toLowerCase() ?? '');
+  const franceAvg = $derived(fuels.find((f) => f.id === fuelId)?.avg ?? null);
+  const km = (v: number) => (v < 1 ? `${Math.round(v * 1000 / 50) * 50} m` : `${v.toLocaleString('fr-FR', { maximumFractionDigits: 1 })} km`);
+  function locateMe() { locating = true; cpMessage = ''; if (!mapRef?.locate()) { locating = false; cpMessage = "La localisation n'est pas disponible sur cet appareil : utilisez votre code postal."; } }
+  function showStation(lon: number, lat: number) { zoomTo = [lon - 0.004, lat - 0.003, lon + 0.004, lat + 0.003]; }
+
   function search(e: SubmitEvent) {
     e.preventDefault();
     const code = cp.trim();
     if (!/^\d{5}$/.test(code)) { cpMessage = 'Un code postal a cinq chiffres.'; return; }
     const b = mapRef?.boundsOfPostcode(code) ?? null;
     cpMessage = b ? '' : `Aucune station au code postal ${code}.`;
-    if (b) zoomTo = b;
+    if (b) { zoomTo = b; here = { lon: (b[0] + b[2]) / 2, lat: (b[1] + b[3]) / 2, label: `autour du ${code}` }; }
   }
 
   const faq = [
@@ -57,12 +70,36 @@
       <label for="cp">Code postal</label>
       <input id="cp" inputmode="numeric" autocomplete="postal-code" maxlength="5" placeholder="35000" bind:value={cp} />
       <button type="submit">Voir</button>
+      <span class="or">ou</span>
+      <button type="button" class="ghost" onclick={locateMe} disabled={locating}>{locating ? 'Localisation…' : 'Autour de moi'}</button>
       {#if cpMessage}<span class="msg" role="status">{cpMessage}</span>{/if}
     </form>
   </section>
 
   <section class="section" aria-label="Carte" style="padding-top: 20px">
-    <StationsMap bind:this={mapRef} {fuelId} {mode} {zoomTo} onloaded={(m) => (loaded = m)} onlegend={(l) => (legend = l)} />
+    {#if around}
+      <div class="card pad near" aria-live="polite">
+        <h2 class="h3">Le {fuelLabel} {here?.label}</h2>
+        <p class="sum">
+          <strong>{eur2(around.average)}</strong> le litre en moyenne dans {around.count} station{around.count > 1 ? 's' : ''} à moins de {around.radiusKm} km{#if franceAvg !== null}, {around.average < franceAvg ? 'moins' : 'plus'} cher que la moyenne nationale ({eur2(franceAvg)}){/if}.
+          {#if around.dearest - around.cheapest[0]!.price >= 0.01}La moins chère vous fait gagner <strong>{eur0((around.dearest - around.cheapest[0]!.price) * FILL_LITRES)}</strong> sur un plein de {FILL_LITRES} litres par rapport à la plus chère du coin.{/if}
+        </p>
+        <ol class="near-list">
+          {#each around.cheapest as st (st.key)}
+            <li><button type="button" onclick={() => showStation(st.lon, st.lat)}>
+              <span class="where"><span class="addr">{st.address || 'Adresse non renseignée'}</span><span class="city">{st.city} · {km(st.km)}</span></span>
+              <strong>{eur2(st.price)}</strong>
+            </button></li>
+          {/each}
+        </ol>
+        <p class="caption">Votre position reste dans votre navigateur : elle n'est ni envoyée ni enregistrée.</p>
+      </div>
+    {:else if here && loaded}
+      <div class="card pad near"><p class="sum">Aucune station à jour à moins de 10 km {here.label} pour ce carburant.</p></div>
+    {/if}
+    <StationsMap bind:this={mapRef} {fuelId} {mode} {zoomTo} onloaded={(m) => (loaded = m)} onlegend={(l) => (legend = l)}
+      onlocated={(lon, lat) => { here = { lon, lat, label: 'autour de vous' }; locating = false; }}
+      onlocateerror={() => { locating = false; cpMessage = 'Position non disponible (refusée ou introuvable) : utilisez votre code postal.'; }} />
     {#if legend.length}
       <div class="legend" aria-label="Légende">
         {#each legend as l (l.text)}<span class="key"><span class="sw" style:background={l.color}></span>{l.text}</span>{/each}
@@ -85,6 +122,18 @@
   .cp input { width: 110px; min-height: 44px; border: 1px solid var(--line); border-radius: 12px; padding: 0 12px; font: 16px 'Inter Variable', system-ui, sans-serif; background: var(--card); color: var(--ink); }
   .cp button { min-height: 44px; border: 0; border-radius: 12px; padding: 0 18px; font: 700 15px 'Inter Variable', system-ui, sans-serif; background: #2a78d6; color: #ffffff; cursor: pointer; }
   .msg { font-size: 14px; color: var(--ink2); }
+  .or { color: var(--muted); font-size: 14px; }
+  .cp .ghost { background: var(--card); color: var(--ink); box-shadow: var(--shadow); border: 1px solid var(--line); }
+  .near { margin-bottom: 16px; }
+  .h3 { margin: 0; font-size: 20px; letter-spacing: -0.3px; }
+  .sum { margin: 8px 0 0; font-size: 15px; line-height: 1.55; color: var(--ink2); }
+  .near-list { list-style: none; margin: 12px 0 0; padding: 0; }
+  .near-list li { border-top: 1px solid var(--line); }
+  .near-list button { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 52px; padding: 8px 0;
+    border: 0; background: none; color: var(--ink); font: 15px 'Inter Variable', system-ui, sans-serif; text-align: left; cursor: pointer; }
+  .where { display: flex; flex-direction: column; min-width: 0; }
+  .addr { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .city { font-size: 13px; color: var(--muted); }
   .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 14px; font-size: 13px; color: var(--ink2); }
   .key { display: inline-flex; align-items: center; gap: 6px; }
   .sw { width: 12px; height: 12px; border-radius: 50%; }

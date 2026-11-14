@@ -8,10 +8,14 @@
   import { MAP_MODE, type MapMode } from '#lib/map-mode.ts';
   import { eur2, longDate } from '#lib/format.ts';
 
-  let { fuelId, mode, onloaded, onlegend, zoomTo }: {
+  let { fuelId, mode, onloaded, onlegend, onlocated, onlocateerror, zoomTo }: {
     fuelId: string;
     mode: MapMode;
     onloaded: (m: NonNullable<StationsMap>) => void;
+    /** position du visiteur, s'il a accepté d'être localisé (elle ne quitte pas son navigateur) */
+    onlocated: (lon: number, lat: number) => void;
+    /** position refusée par le visiteur ou introuvable */
+    onlocateerror: () => void;
     onlegend: (l: { color: string; text: string }[]) => void;
     /** demande de recentrage (code postal), ou null */
     zoomTo: [number, number, number, number] | null;
@@ -21,6 +25,7 @@
   let map: MapLibreMap | null = null;
   let data: NonNullable<StationsMap> | null = null;
   let ready = $state(false);
+  let geolocate: { trigger: () => boolean } | null = null;
   let failed = $state(false);
 
   /** Rampe bleue validée (clair) et la même en sombre ; divergente bleu (baisse) / rouge (hausse), gris neutre. */
@@ -129,7 +134,11 @@
         });
         map = m;
         m.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
-        m.addControl(new maplibregl.GeolocateControl({ positionOptions: { enableHighAccuracy: false }, fitBoundsOptions: { maxZoom: 13 } }), 'top-right');
+        const geo = new maplibregl.GeolocateControl({ positionOptions: { enableHighAccuracy: false }, fitBoundsOptions: { maxZoom: 13 } });
+        geo.on('geolocate', (e) => onlocated(e.coords.longitude, e.coords.latitude));
+        geo.on('error', () => onlocateerror());
+        m.addControl(geo, 'top-right');
+        geolocate = geo;
         const res = await fetch('/carte-des-stations/stations.json');
         if (!res.ok) throw new Error(`stations : ${res.status}`);
         data = (await res.json()) as NonNullable<StationsMap>;
@@ -163,6 +172,9 @@
     })();
     return () => { cancelled = true; map?.remove(); };
   });
+
+  /** « Autour de moi » : demande la position au navigateur (qui demande l'accord du visiteur) */
+  export function locate(): boolean { return geolocate?.trigger() ?? false; }
 
   /** pour la recherche par code postal : l'emprise des stations d'un code */
   export function boundsOfPostcode(cp: string): [number, number, number, number] | null {
