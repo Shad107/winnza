@@ -65,7 +65,7 @@ dans le code.
    officiel : gazole, SP95, E10, SP98, E85, GPL).
 3. **Plugin électricité** (fait le 14/11, sauf ENTSO-E) : même barre de décomposition pour le kWh (énergie, réseau, taxes, TVA),
    tarifs réglementés CRE depuis 2012, Tempo, prix de gros ENTSO-E (l'équivalent du baril).
-4. **Coût aux 100 km** : toutes les motorisations côte à côte. Essence, gazole, E85, GPL, GNV,
+4. **Coût aux 100 km** (fait le 14/11, sauf GNV, hydrogène, hybride, solaire) : toutes les motorisations côte à côte. Essence, gazole, E85, GPL, GNV,
    hydrogène, hybride, électrique à la maison (Base, heures creuses, Tempo), sur borne, avec ses
    propres panneaux solaires (PVGIS). GNV et hydrogène n'ont pas de flux de prix public : prix de
    référence déclarés avec leur source et leur date, affichés comme tels.
@@ -100,7 +100,13 @@ taux votés : 21 €/MWh en 2024, 33,70 €/MWh en 2025, deux ancres) ; le vrai 
 composantes Eurostat (énergie, réseau, taxes, TVA) et prix de 27 pays. Piège Eurostat : la rubrique
 TAX_FEE_LEV_CHRG CONTIENT la TVA, vérifié sur 41 pays et contrôlé à chaque collecte. Couleur Tempo du jour
 et jours rouges et blancs restants. Relevée à 6 h 30 : la couleur du lendemain (publiée vers 11 h) n'y est
-pas encore ; une seconde collecte vers 11 h 30 l'ajouterait.
+pas encore. Ajouté le 14/11 : seconde collecte à 11 h 30 UTC (le serveur est en UTC : la collecte du matin
+tourne à 6 h 30 UTC, soit 7 h 30 à Paris en hiver).
+
+**14/11, midi** : page **/cout-aux-100-km** (plugin `running-cost`) : 10 motorisations côte à côte au prix du
+jour (stations, tarif réglementé, recharge rapide déclarée avec source et date), consommations moyennes
+sourcées que le visiteur remplace par les siennes. GNV et hydrogène absents faute de prix public daté et TTC.
+Une page optionnelle en erreur est désormais retirée seule (journalisée) au lieu de faire tomber le site.
 
 ## Moteur de plugins partagé avec OpenCloudApp (décision du 2026-11-13)
 

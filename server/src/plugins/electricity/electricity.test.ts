@@ -49,6 +49,8 @@ test("déclaration : couleur Tempo inconnue ou pays de référence absent refus�
   assert.throws(() => parseElecCatalog({ ...DECL, tempo }), /couleur inconnue « bleu »/);
   const eurostat = { ...(DECL.eurostat as object), reference: "XX" };
   assert.throws(() => parseElecCatalog({ ...DECL, eurostat }), /référence XX/);
+  const page = { consumption: { default: 3700, min: 1000, max: 15000, step: 250 } };
+  assert.throws(() => parseElecCatalog({ ...DECL, page }), /pas du curseur/);
 });
 
 // --- collecte complète sur de petites réponses fabriquées ---

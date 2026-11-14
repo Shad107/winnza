@@ -116,6 +116,9 @@ export function parseElecCatalog(json: unknown): ElecCatalog {
   const c = obj(obj(root.page, "page").consumption, "page.consumption");
   const consumption = { default: num(c, "default", "page.consumption"), min: num(c, "min", "page.consumption"), max: num(c, "max", "page.consumption"), step: num(c, "step", "page.consumption") };
   if (!(consumption.min < consumption.max && consumption.default >= consumption.min && consumption.default <= consumption.max)) fail("page.consumption", "il faut min < max et la valeur par défaut entre les deux");
+  // hors de la grille du curseur, le navigateur arrondit en silence et affiche une autre consommation
+  const steps = (consumption.default - consumption.min) / consumption.step;
+  if (Math.abs(steps - Math.round(steps)) > 1e-9) fail("page.consumption", "la valeur par défaut doit tomber sur un pas du curseur (min + n × step)");
 
   return {
     trv: {

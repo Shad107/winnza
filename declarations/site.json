@@ -46,6 +46,11 @@
       "priority": 0.8
     },
     {
+      "path": "/cout-aux-100-km",
+      "changefreq": "daily",
+      "priority": 0.9
+    },
+    {
       "path": "/electricite",
       "changefreq": "daily",
       "priority": 0.9

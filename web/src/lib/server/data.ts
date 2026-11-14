@@ -7,12 +7,19 @@ import { buildFuelPage, type FuelPage } from '@winnza/core/pages/fuel-page.js';
 import { buildDepartmentsPage, type DepartmentsPage } from '@winnza/core/pages/departments-page.js';
 import { buildStationsMap } from '@winnza/core/pages/stations-map.js';
 import { buildElectricityPage, type ElectricityPage } from '@winnza/core/pages/electricity-page.js';
+import { buildRunningCostPage, type RunningCostPage } from '@winnza/core/pages/running-cost-page.js';
 import { parseSiteDecl, SITE_SETTING, type SiteDecl } from '@winnza/core/plugins/site/index.js';
 import { ANALYTICS_SETTING, parseMatomoSettings, type MatomoSettings } from '@winnza/core/plugins/matomo/index.js';
 
 const DB = process.env.WINNZA_DB ?? join(process.cwd(), '..', 'data', 'energy.db');
 
-let cache: { mtime: number; page: FuelPage; departments: DepartmentsPage; stationsJson: string | null; electricity: ElectricityPage | null; site: SiteDecl; analytics: MatomoSettings | null } | null = null;
+let cache: { mtime: number; page: FuelPage; departments: DepartmentsPage | null; stationsJson: string | null; electricity: ElectricityPage | null; runningCost: RunningCostPage | null; site: SiteDecl; analytics: MatomoSettings | null } | null = null;
+
+/** Page optionnelle (son plugin peut être éteint ou mal réglé) : une erreur la retire, journalisée, au
+ *  lieu de faire tomber tout le site. Les pages carburant, elles, restent obligatoires. */
+function optional<T>(name: string, build: () => T | null): T | null {
+  try { return build(); } catch (e) { console.error(`page ${name} retirée : ${e instanceof Error ? e.message : String(e)}`); return null; }
+}
 
 function load() {
   const mtime = statSync(DB).mtimeMs;
@@ -20,8 +27,8 @@ function load() {
   const store = new Store(DB, { readonly: true });
   try {
     const a = store.settingOrNull(ANALYTICS_SETTING);
-    const stations = buildStationsMap(store);
-    cache = { mtime, page: buildFuelPage(store), departments: buildDepartmentsPage(store), stationsJson: stations && JSON.stringify(stations), electricity: buildElectricityPage(store), site: parseSiteDecl(store.setting(SITE_SETTING.site)), analytics: a === null ? null : parseMatomoSettings(a) };
+    const stations = optional('carte des stations', () => buildStationsMap(store));
+    cache = { mtime, page: buildFuelPage(store), departments: optional('départements', () => buildDepartmentsPage(store)), stationsJson: stations && JSON.stringify(stations), electricity: optional('électricité', () => buildElectricityPage(store)), runningCost: optional('coût aux 100 km', () => buildRunningCostPage(store)), site: parseSiteDecl(store.setting(SITE_SETTING.site)), analytics: a === null ? null : parseMatomoSettings(a) };
     return cache;
   } finally {
     store.close();
@@ -36,12 +43,15 @@ export function withWritableStore<T>(fn: (store: Store) => T): T {
 
 export const fuelPage = (): FuelPage => load().page;
 /** Carte et prix par département : chargés par leur seule page (les contours pèsent quelques dizaines de Ko). */
-export const departmentsPage = (): DepartmentsPage => load().departments;
+export const departmentsPage = (): DepartmentsPage | null => load().departments;
 /** Carte des stations, déjà sérialisée (environ 9 500 points : on ne la recalcule qu'à chaque collecte). */
 export const stationsMapJson = (): string | null => load().stationsJson;
 
 /** Page électricité, ou null si le plugin n'a jamais tourné ou est éteint. */
 export const electricityPage = (): ElectricityPage | null => load().electricity;
+
+/** Page coût aux 100 km, ou null si le plugin n'a jamais tourné ou est éteint. */
+export const runningCostPage = (): RunningCostPage | null => load().runningCost;
 
 /** Réglages de mesure d'audience (plugin matomo), ou null si le plugin n'a jamais tourné ou est éteint. */
 export const analytics = (): MatomoSettings | null => load().analytics;

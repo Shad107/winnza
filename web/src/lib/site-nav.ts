@@ -11,6 +11,7 @@ export const SECTIONS: readonly Section[] = [
   { href: '/prix-par-departement', label: 'Départements', title: 'Le prix dans votre département', text: 'La carte de France du prix du jour, les départements les moins chers et les plus chers.' },
   { href: '/prevision', label: 'Prévision', title: 'Le carburant va-t-il baisser ?', text: 'Hausse ou baisse la semaine qui vient, d\'après le marché de gros, avec le bilan réel de la méthode.' },
   { href: '/europe', label: 'Europe', title: 'Moins cher chez nos voisins ?', text: 'Le même plein en Espagne, au Luxembourg, en Belgique, en Allemagne...' },
+  { href: '/cout-aux-100-km', label: '100 km', title: 'Combien coûtent 100 km ?', text: 'Diesel, essence, E85, GPL, électrique à la maison ou sur borne : le coût de 100 km au prix du jour.' },
   { href: '/electricite', label: 'Électricité', title: 'Le vrai prix du kWh', text: 'Le kWh découpé en énergie, réseau, taxes et TVA, le tarif réglementé depuis 2012, Tempo et nos voisins européens.' },
 ];
 

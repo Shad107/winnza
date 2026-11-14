@@ -4,6 +4,7 @@
   import Toggle from '#lib/components/Toggle.svelte';
   import Icon from '#lib/components/Icon.svelte';
   import StackedBar from '#lib/components/StackedBar.svelte';
+  import RankBars from '#lib/components/RankBars.svelte';
   import ColumnsChart from '#lib/components/ColumnsChart.svelte';
   import LineChart from '#lib/components/LineChart.svelte';
   import Faq from '#lib/components/Faq.svelte';
@@ -49,7 +50,6 @@
   const refTotal = $derived(refParts ? KWH_PARTS.reduce((s, k) => s + refParts[k], 0) : 0);
   const shares = $derived(refParts ? Object.fromEntries(KWH_PARTS.map((k) => [k, refParts[k] / refTotal > 0.09 ? percent(refParts[k], refTotal) : ''])) : {});
   const ranked = $derived(el.europe.countries.filter((c) => c.price !== null).sort((a, b) => a.price! - b.price!));
-  const maxPrice = $derived(Math.max(...ranked.map((c) => c.price!)));
   const refRank = $derived(ranked.findIndex((c) => c.code === el.europe.reference) + 1);
   const semesterLabel = (iso: string) => `${iso.slice(5, 7) === '01' ? '1er' : '2e'} semestre ${iso.slice(0, 4)}`;
 
@@ -202,15 +202,8 @@
       <h2 class="h2" id="europe">Et chez nos voisins ?</h2>
       <p class="lead">Prix moyen du kWh payé par les ménages au {semesterLabel(el.europe.semester)}, abonnement et taxes compris.{#if refRank}{' '}La France est {refRank === 1 ? 'la moins chère' : `${refRank}e sur ${ranked.length}`}, du moins cher au plus cher.{/if}</p>
       <div class="card pad">
-        <ol class="ranking">
-          {#each ranked as c (c.code)}
-            <li class:home={c.code === el.europe.reference}>
-              <span class="r-name">{#if FLAG[c.code]}<span class="flag" style:background={FLAG[c.code]} aria-hidden="true"></span>{/if}{c.label}</span>
-              <span class="r-bar"><span style:width="{((c.price! / maxPrice) * 100).toFixed(1)}%"></span></span>
-              <span class="r-value">{eur4(c.price!)}</span>
-            </li>
-          {/each}
-        </ol>
+        <RankBars label="Prix moyen du kWh par pays, du moins cher au plus cher"
+          items={ranked.map((c) => ({ key: c.code, label: c.label, value: c.price!, text: eur4(c.price!), highlight: c.code === el.europe.reference, flag: FLAG[c.code] }))} />
       </div>
     </section>
   {/if}
@@ -261,13 +254,4 @@
   .quota li { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 15px; }
   .quota li:first-child { border-top: 0; }
   .q-label { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
-  .ranking { list-style: none; margin: 0; padding: 0; }
-  .ranking li { display: grid; grid-template-columns: minmax(120px, 170px) 1fr auto; align-items: center; gap: 12px; padding: 7px 0; font-size: 14px; }
-  .ranking li.home { font-weight: 800; }
-  .r-name { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
-  .flag { width: 22px; height: 15px; border-radius: 3px; box-shadow: 0 0 0 1px var(--line); flex: 0 0 auto; }
-  .r-bar { height: 10px; background: var(--soft); border-radius: 999px; overflow: hidden; }
-  .r-bar span { display: block; height: 100%; background: var(--q3); border-radius: 999px; }
-  .ranking li.home .r-bar span { background: var(--s2); }
-  .r-value { font-variant-numeric: tabular-nums; }
 </style>

@@ -22,6 +22,7 @@ import { matomoPlugin } from "./plugins/matomo/index.js";
 import { forecastPlugin } from "./plugins/forecast/index.js";
 import { mapPlugin, outlinesFromGeoJson, parseMapDecl } from "./plugins/map/index.js";
 import { electricityPlugin } from "./plugins/electricity/index.js";
+import { runningCostPlugin } from "./plugins/running-cost/index.js";
 import { stationNamesPlugin } from "./plugins/station-names/index.js";
 import { buildRegistry, runCollect } from "./runner.js";
 import { Store } from "./store.js";
@@ -40,6 +41,7 @@ const SEEDS: Record<string, () => unknown> = {
   [mapPlugin.id]: () => declaration("map.json"),
   [stationNamesPlugin.id]: () => declaration("station-names.json"),
   [electricityPlugin.id]: () => declaration("electricity.json"),
+  [runningCostPlugin.id]: () => declaration("running-cost.json"),
 };
 
 function settingsOf(store: Store, id: string): unknown {
