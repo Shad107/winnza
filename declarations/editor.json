@@ -1,27 +1,31 @@
 {
-  "$comment": "Plugin « rédaction par IA » : chaque semaine, Claude relit chaque page du site telle qu'elle est en ligne et les recherches réelles qui la concernent (plugin mots-clés), et réécrit le titre et la description pour les moteurs. publish = auto : une proposition qui passe TOUS les contrôles est publiée sans intervention (décision d'Olivier du 2026-11-14 : site géré par une IA) ; review : rien sans validation dans /admin/ia. Une page bloquée dans /admin/ia garde son titre d'origine. La clé d'API n'est jamais ici : seulement le NOM de la variable du serveur qui la porte (collect.env). Le budget est un plafond dur.",
+  "$comment": "Plugin « rédaction par IA » : chaque semaine, une IA (OpenAI ou Anthropic, selon api.provider) relit chaque page du site telle qu'elle est en ligne et les recherches réelles qui la concernent (plugin mots-clés), et réécrit le titre et la description pour les moteurs. publish = auto : une proposition qui passe TOUS les contrôles est publiée sans intervention (décision d'Olivier du 2026-11-14 : site géré par une IA) ; review : rien sans validation dans /admin/ia. Une page bloquée dans /admin/ia garde son titre d'origine. La clé d'API n'est jamais ici : seulement le NOM de la variable du serveur qui la porte (collect.env). Le budget est un plafond dur.",
   "source": {
-    "id": "anthropic-claude",
-    "name": "Claude, IA d'Anthropic",
-    "publisher": "Anthropic",
-    "url": "https://www.anthropic.com/claude",
+    "id": "openai",
+    "name": "IA d'OpenAI (gpt-6.1-sol)",
+    "publisher": "OpenAI",
+    "url": "https://openai.com",
     "licence": "Titres et descriptions rédigés par l'IA, publiés après contrôles automatiques"
   },
   "publish": "auto",
   "api": {
-    "keySecret": "ANTHROPIC_API_KEY",
-    "model": "claude-opus-5-5",
+    "$comment": "Revenir à Claude : provider anthropic, keySecret ANTHROPIC_API_KEY, model claude-opus-5-5, url retiré, et les tarifs.",
+    "provider": "openai",
+    "url": "https://api.openai.com/v1/responses",
+    "keySecret": "OPENAI_API_KEY",
+    "model": "gpt-6.1-sol",
     "effort": "low",
     "maxTokens": 16000
   },
   "pricing": {
     "$comment": "Tarif du modèle, en dollars par million de jetons, pour compter la dépense de chaque appel.",
-    "inputUsdPerMTok": 4,
-    "outputUsdPerMTok": 20,
-    "asOf": "2026-11-03",
+    "inputUsdPerMTok": 2,
+    "cachedInputUsdPerMTok": 0.1,
+    "outputUsdPerMTok": 10,
+    "asOf": "2026-11-14",
     "source": {
-      "name": "Anthropic, tarifs de l'API",
-      "url": "https://platform.claude.com/docs/en/about-claude/pricing"
+      "name": "OpenAI, tarifs de l'API",
+      "url": "https://developers.openai.com/api/docs/pricing"
     }
   },
   "budget": {

@@ -8,11 +8,16 @@ export const PUBLISH = { auto: "auto", review: "review" } as const;
 export type Publish = (typeof PUBLISH)[keyof typeof PUBLISH];
 const PUBLISH_MODES: readonly Publish[] = Object.values(PUBLISH);
 
+/** Le fournisseur de l'IA rédactrice : changer d'IA ne demande que la déclaration. */
+export const PROVIDER = { openai: "openai", anthropic: "anthropic" } as const;
+export type Provider = (typeof PROVIDER)[keyof typeof PROVIDER];
+const PROVIDERS: readonly Provider[] = Object.values(PROVIDER);
+
 export type EditorDecl = {
   source: SourceDecl;
   publish: Publish;
-  api: { keySecret: string; model: string; effort: "low" | "medium" | "high"; maxTokens: number };
-  pricing: { inputUsdPerMTok: number; outputUsdPerMTok: number; asOf: string; source: { name: string; url: string } };
+  api: { provider: Provider; url: string | null; keySecret: string; model: string; effort: "low" | "medium" | "high"; maxTokens: number };
+  pricing: { inputUsdPerMTok: number; cachedInputUsdPerMTok: number; outputUsdPerMTok: number; asOf: string; source: { name: string; url: string } };
   budget: { monthlyUsd: number; everyDays: number };
   site: string; brand: string;
   limits: { title: number; description: number; share: number };
@@ -32,7 +37,7 @@ export type Proposal = {
   runId: string;
 };
 /** Une exécution : ce qu'elle a coûté, pour tenir le budget. */
-export type EditorRun = { runId: string; date: string; model: string; inputTokens: number; outputTokens: number; costUsd: number };
+export type EditorRun = { runId: string; date: string; model: string; inputTokens: number; cachedInputTokens?: number; outputTokens: number; costUsd: number };
 
 export const EDITOR_SNAPSHOT = "editor.proposals";
 /** Titres et descriptions validés par un humain : { chemin : { title, description, approvedOn } }. */
@@ -59,6 +64,9 @@ export function parseEditorDecl(json: unknown): EditorDecl {
   const keySecret = str(a, "keySecret", "api");
   if (!SECRET_NAME.test(keySecret)) fail("api", "keySecret doit être un NOM de variable (majuscules), jamais la clé");
   const effort = EFFORTS.find((e) => e === a.effort) ?? fail("api", `effort inconnu « ${String(a.effort)} »`);
+  const provider = PROVIDERS.find((p) => p === a.provider) ?? fail("api", `provider : ${PROVIDERS.join(" ou ")}, pas « ${String(a.provider)} »`);
+  // OpenAI : l'adresse de l'API se déclare ; Anthropic : le SDK la connaît
+  const url = provider === PROVIDER.openai ? str(a, "url", "api") : null;
   const site = str(root, "site", "racine");
   if (!/^https:\/\/[^/]+$/.test(site)) fail("racine", "site : une adresse https sans chemin ni / final");
   const ps = obj(p.source, "pricing.source");
@@ -66,8 +74,8 @@ export function parseEditorDecl(json: unknown): EditorDecl {
   return {
     publish,
     source: { id: str(s, "id", "source"), name: str(s, "name", "source"), publisher: str(s, "publisher", "source"), url: str(s, "url", "source"), licence: str(s, "licence", "source") },
-    api: { keySecret, model: str(a, "model", "api"), effort, maxTokens: pos(a, "maxTokens", "api") },
-    pricing: { inputUsdPerMTok: pos(p, "inputUsdPerMTok", "pricing"), outputUsdPerMTok: pos(p, "outputUsdPerMTok", "pricing"), asOf: str(p, "asOf", "pricing"),
+    api: { provider, url, keySecret, model: str(a, "model", "api"), effort, maxTokens: pos(a, "maxTokens", "api") },
+    pricing: { inputUsdPerMTok: pos(p, "inputUsdPerMTok", "pricing"), cachedInputUsdPerMTok: pos(p, "cachedInputUsdPerMTok", "pricing"), outputUsdPerMTok: pos(p, "outputUsdPerMTok", "pricing"), asOf: str(p, "asOf", "pricing"),
       source: { name: str(ps, "name", "pricing.source"), url: str(ps, "url", "pricing.source") } },
     budget: { monthlyUsd: pos(b, "monthlyUsd", "budget"), everyDays: pos(b, "everyDays", "budget") },
     site, brand: str(root, "brand", "racine"),

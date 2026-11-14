@@ -45,7 +45,12 @@ function seeded(): Store {
   store.putSnapshot(KEYWORDS_SNAPSHOT, { date: parisDate(), items: [{ key: "cout|prix recharge voiture electrique", value: { group: "cout", text: "prix recharge voiture electrique", volume: 4400, competition: "LOW", seed: false, months: [] } }] }, 30);
   return store;
 }
-const MESSAGE = (proposal: object) => JSON.stringify({ id: "msg_1", type: "message", role: "assistant", model: "claude-opus-5-5", stop_reason: "end_turn", stop_sequence: null,
+/** réponse de l'API Responses d'OpenAI (forme relevée sur un vrai appel le 2026-11-14) */
+const MESSAGE = (proposal: object) => JSON.stringify({ id: "resp_1", status: "completed", model: "gpt-6.1-sol",
+  output: [{ type: "message", content: [{ type: "output_text", text: JSON.stringify({ proposals: [proposal] }) }] }],
+  usage: { input_tokens: 10_000, input_tokens_details: { cached_tokens: 4_000 }, output_tokens: 2_000 } });
+/** réponse de l'API Messages d'Anthropic, pour le chemin de repli */
+const ANTHROPIC_MESSAGE = (proposal: object) => JSON.stringify({ id: "msg_1", type: "message", role: "assistant", model: "claude-opus-5-5", stop_reason: "end_turn", stop_sequence: null,
   content: [{ type: "text", text: JSON.stringify({ proposals: [proposal] }) }], usage: { input_tokens: 10_000, output_tokens: 2_000 } });
 function fake(opts: { key?: boolean; proposal?: object } = {}) {
   const posts: string[] = [];
@@ -67,7 +72,9 @@ test("collecte : une requête, la proposition contrôlée, la dépense comptée 
   assert.deepEqual(r.warnings, []);
   assert.equal(f.posts.length, 1);
   const run = latest(store).find((i) => i.key === RUN_KEY)!.value as EditorRun;
-  assert.ok(Math.abs(run.costUsd - (10_000 * 4 + 2_000 * 20) / 1e6) < 1e-12);
+  // 6 000 jetons hors cache à 2 $, 4 000 depuis le cache à 0,10 $, 2 000 écrits à 10 $ (tarifs déclarés)
+  assert.ok(Math.abs(run.costUsd - (6_000 * 2 + 4_000 * 0.1 + 2_000 * 10) / 1e6) < 1e-12);
+  assert.equal(f.posts[0], decl.api.url);
   const p = latest(store).find((i) => i.key === "/cout-aux-100-km")!.value as Proposal;
   assert.deepEqual(p.problems, []);
   assert.equal(p.current.title, "Coût aux 100 km : diesel, essence | Winnza");
@@ -102,7 +109,7 @@ test("clé absente : aucun appel, la variable est nommée", async () => {
   const f = fake({ key: false });
   const r = await collect(seeded(), f.ctx);
   assert.equal(f.posts.length, 0);
-  assert.match(r.warnings.join(), /ANTHROPIC_API_KEY absente/);
+  assert.match(r.warnings.join(), new RegExp(`${decl.api.keySecret} absente`));
 });
 
 test("proposition avec un chiffre inventé : gardée, mais marquée, donc non publiable", async () => {
@@ -110,4 +117,23 @@ test("proposition avec un chiffre inventé : gardée, mais marquée, donc non pu
   await collect(store, fake({ proposal: { path: "/cout-aux-100-km", title: "100 km dès 2,67 €", description: "Le coût aux 100 km de chaque motorisation, au prix du jour, du diesel à l'électrique.", shareText: "Le vrai coût de vos 100 km", keywords: [], reason: "" } }).ctx);
   const p = latest(store).find((i) => i.key === "/cout-aux-100-km")!.value as Proposal;
   assert.match(p.problems.join(), /2,67/);
+});
+
+// Le retour à Claude ne demande que la déclaration : ce chemin reste éprouvé.
+test("fournisseur anthropic : même collecte, réponse du SDK d'Anthropic", async () => {
+  const store = seeded();
+  const anthropicDecl = { ...DECL, api: { provider: "anthropic", keySecret: "ANTHROPIC_API_KEY", model: "claude-opus-5-5", effort: "low", maxTokens: 16000 } };
+  const posts: string[] = [];
+  const ctx: CollectContext = { ...fake().ctx, secret: (n) => (n === "ANTHROPIC_API_KEY" ? "cle" : null),
+    postText: async (url) => { posts.push(url); return ANTHROPIC_MESSAGE({ path: "/cout-aux-100-km", title: "Prix de la recharge et coût aux 100 km", description: "Diesel, essence, E85, GPL, électrique à la maison ou sur borne : ce que coûtent vraiment 100 km aujourd'hui.", shareText: "Qui roule le moins cher ?", keywords: [], reason: "" }); } };
+  const r = await runCollect(store, await buildRegistry({ editor: editorPlugin }, ["editor"], () => anthropicDecl), ctx, []);
+  assert.deepEqual(r.warnings, []);
+  assert.ok(posts[0]!.includes("api.anthropic.com"));
+  assert.equal((latest(store).find((i) => i.key === RUN_KEY)!.value as EditorRun).model, "claude-opus-5-5");
+});
+
+test("déclaration : fournisseur inconnu refusé, adresse exigée pour OpenAI", () => {
+  assert.throws(() => parseEditorDecl({ ...DECL, api: { ...(DECL.api as object), provider: "mistral" } }), /provider/);
+  const { url: _u, ...noUrl } = DECL.api as Record<string, unknown>;
+  assert.throws(() => parseEditorDecl({ ...DECL, api: noUrl }), /« url » manquant/);
 });
