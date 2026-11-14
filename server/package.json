@@ -21,5 +21,8 @@
   },
   "exports": {
     "./*": "./dist/*"
+  },
+  "allowScripts": {
+    "better-sqlite3@13.1.1": true
   }
 }

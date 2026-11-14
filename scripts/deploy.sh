@@ -44,8 +44,24 @@ fi
 sudo docker compose up -d web >/dev/null 2>&1
 
 # le site met quelques secondes à recharger la base : on lui laisse jusqu'à une minute
+# Les déclarations font foi : celles que ce commit modifie sont ressemées en base (le plugin les applique à la
+# collecte suivante). Fichier -> plugin : <plugin>.json, sauf site.json et fuel-page.json (plugin site) ;
+# anchors.json est relu à chaque collecte, agent.json ne concerne que l'IA du site.
+reseed() {
+  local plugins
+  plugins=$(git diff --name-only "$before" "$after" -- declarations/ | sed -n 's#^declarations/\(.*\)\.json$#\1#p' \
+    | sed 's#^fuel-page$#site#' | grep -vx -e anchors -e agent | sort -u || true)   # aucune déclaration touchée : rien à faire, pas une erreur
+  for p in $plugins; do
+    if sudo docker compose run --rm -T collect node server/dist/cli.js seed "$p" /data/energy.db >/dev/null 2>&1; then
+      log "réglages ressemés : $p"
+    else
+      log "réglages NON ressemés : $p (déclaration refusée par le plugin ?)"
+    fi
+  done
+}
+
 for _ in $(seq 1 12); do
-  if healthy; then log "en ligne : ${after:0:7}"; exit 0; fi
+  if healthy; then log "en ligne : ${after:0:7}"; reseed; exit 0; fi
   sleep 5
 done
 

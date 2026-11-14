@@ -23,6 +23,9 @@ Dans le code, un test qui en a besoin l'écrit en séquence d'échappement (`\u2
   sources, séries, instantanés et réglages, et ses collecteurs. Contrat : `server/src/contract.ts`.
 - `declarations/<plugin>.json` : la configuration de chaque plugin (adresses des sources, colonnes, pays,
   limites). **Une valeur qui décrit une source ou le produit se déclare là, jamais dans le code.**
+  Un commit qui modifie une déclaration la fait ressemer en base au déploiement (le dépôt fait foi : un
+  réglage changé à la main dans /admin est écrasé à la prochaine modification de sa déclaration), et le
+  plugin l'applique à la collecte suivante.
 - `declarations/anchors.json` : des valeurs publiées par des tiers que nos calculs doivent retrouver. Une
   ancre violée arrête la collecte. Toute nouvelle série calculée mérite son ancre.
 - `server/src/pages/*.ts` : les données de chaque page, calculées depuis la base seulement, testées.
