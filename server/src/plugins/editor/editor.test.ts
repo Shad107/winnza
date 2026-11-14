@@ -25,7 +25,7 @@ test("contrôles : longueur, tiret cadratin, marque, chiffre inventé ; une bonn
   const good = { title: "Coût aux 100 km : électrique ou essence, au prix du jour", description: "Diesel, essence, E85, GPL, électrique à la maison ou sur borne : combien coûtent vraiment 100 km aujourd'hui." };
   assert.deepEqual(checkProposal(good, now, decl), []);
   assert.match(checkProposal({ ...good, title: good.title + " et bien plus encore pour tout le monde" }, now, decl).join(), /caractères/);
-  assert.match(checkProposal({ ...good, title: "Coût aux 100 km — au prix du jour" }, now, decl).join(), /tiret/);
+  assert.match(checkProposal({ ...good, title: "Coût aux 100 km \u2014 au prix du jour" }, now, decl).join(), /tiret/);
   assert.match(checkProposal({ ...good, title: "Coût aux 100 km | Winnza" }, now, decl).join(), /Winnza/);
   assert.match(checkProposal({ ...good, description: good.description + " Dès 2,67 € les 100 km." }, now, decl).join(), /chiffre « 2,67 »/);
   assert.match(checkProposal({ ...good, title: "Coût aux 200 km" }, now, decl).join(), /chiffre « 200 »/, "un nombre absent, même rond");

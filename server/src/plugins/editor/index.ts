@@ -89,7 +89,7 @@ export function checkProposal(p: { title: string; description: string }, now: Pa
   if (p.title.length > decl.limits.title) problems.push(`titre de ${p.title.length} caractères (au plus ${decl.limits.title})`);
   if (p.description.length > decl.limits.description) problems.push(`description de ${p.description.length} caractères (au plus ${decl.limits.description})`);
   if (p.description.length < 50) problems.push("description trop courte");
-  if (/[–—]/.test(p.title + p.description)) problems.push("tiret cadratin ou demi-cadratin");
+  if (/[\u2013\u2014]/.test(p.title + p.description)) problems.push("tiret cadratin ou demi-cadratin");
   if (p.title.toLowerCase().includes(decl.brand.toLowerCase())) problems.push(`le nom ${decl.brand} est ajouté par le site, pas dans le titre`);
   // un nombre que la page ne porte pas est inventé (les prix changent chaque jour : la page les écrit elle-même).
   // Les chiffres collés à des lettres sont des noms (SP95, E10, E85), pas des nombres.
