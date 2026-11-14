@@ -9,12 +9,13 @@ import { buildStationsMap } from '@winnza/core/pages/stations-map.js';
 import { buildElectricityPage, type ElectricityPage } from '@winnza/core/pages/electricity-page.js';
 import { buildRunningCostPage, type RunningCostPage } from '@winnza/core/pages/running-cost-page.js';
 import { buildCities, type Cities, type City } from '@winnza/core/pages/cities.js';
+import { EDITOR_OVERRIDES_SETTING, parseOverrides, type Override } from '@winnza/core/plugins/editor/index.js';
 import { parseSiteDecl, SITE_SETTING, type SiteDecl } from '@winnza/core/plugins/site/index.js';
 import { ANALYTICS_SETTING, parseMatomoSettings, type MatomoSettings } from '@winnza/core/plugins/matomo/index.js';
 
 const DB = process.env.WINNZA_DB ?? join(process.cwd(), '..', 'data', 'energy.db');
 
-let cache: { mtime: number; page: FuelPage; departments: DepartmentsPage | null; stationsJson: string | null; electricity: ElectricityPage | null; runningCost: RunningCostPage | null; cities: Cities; site: SiteDecl; analytics: MatomoSettings | null } | null = null;
+let cache: { mtime: number; page: FuelPage; departments: DepartmentsPage | null; stationsJson: string | null; electricity: ElectricityPage | null; runningCost: RunningCostPage | null; cities: Cities; seo: Record<string, Override>; site: SiteDecl; analytics: MatomoSettings | null } | null = null;
 
 /** Page optionnelle (son plugin peut être éteint ou mal réglé) : une erreur la retire, journalisée, au
  *  lieu de faire tomber tout le site. Les pages carburant, elles, restent obligatoires. */
@@ -29,7 +30,7 @@ function load() {
   try {
     const a = store.settingOrNull(ANALYTICS_SETTING);
     const stations = optional('carte des stations', () => buildStationsMap(store));
-    cache = { mtime, page: buildFuelPage(store), departments: optional('départements', () => buildDepartmentsPage(store)), stationsJson: stations && JSON.stringify(stations), electricity: optional('électricité', () => buildElectricityPage(store)), runningCost: optional('coût aux 100 km', () => buildRunningCostPage(store)), cities: optional('villes', () => buildCities(store)), site: parseSiteDecl(store.setting(SITE_SETTING.site)), analytics: a === null ? null : parseMatomoSettings(a) };
+    cache = { mtime, page: buildFuelPage(store), departments: optional('départements', () => buildDepartmentsPage(store)), stationsJson: stations && JSON.stringify(stations), electricity: optional('électricité', () => buildElectricityPage(store)), runningCost: optional('coût aux 100 km', () => buildRunningCostPage(store)), cities: optional('villes', () => buildCities(store)), seo: optional('titres validés', () => parseOverrides(store.settingOrNull(EDITOR_OVERRIDES_SETTING))) ?? {}, site: parseSiteDecl(store.setting(SITE_SETTING.site)), analytics: a === null ? null : parseMatomoSettings(a) };
     return cache;
   } finally {
     store.close();
@@ -79,6 +80,9 @@ export const citiesSearchJson = (): string | null => {
   if (searchCache?.mtime !== c.mtime) searchCache = { mtime: c.mtime, json: JSON.stringify(c.cities.list.map((x) => [x.name, x.dep, x.slug])) };
   return searchCache.json;
 };
+
+/** Titres et descriptions validés dans l'administration de l'IA, par chemin de page. */
+export const seoOverrides = (): Record<string, Override> => load().seo;
 
 /** Réglages de mesure d'audience (plugin matomo), ou null si le plugin n'a jamais tourné ou est éteint. */
 export const analytics = (): MatomoSettings | null => load().analytics;

@@ -24,6 +24,7 @@ import { mapPlugin, outlinesFromGeoJson, parseMapDecl } from "./plugins/map/inde
 import { electricityPlugin } from "./plugins/electricity/index.js";
 import { runningCostPlugin } from "./plugins/running-cost/index.js";
 import { keywordsPlugin } from "./plugins/keywords/index.js";
+import { editorPlugin } from "./plugins/editor/index.js";
 import { stationNamesPlugin } from "./plugins/station-names/index.js";
 import { buildRegistry, runCollect } from "./runner.js";
 import { Store } from "./store.js";
@@ -44,6 +45,7 @@ const SEEDS: Record<string, () => unknown> = {
   [electricityPlugin.id]: () => declaration("electricity.json"),
   [runningCostPlugin.id]: () => declaration("running-cost.json"),
   [keywordsPlugin.id]: () => declaration("keywords.json"),
+  [editorPlugin.id]: () => declaration("editor.json"),
 };
 
 function settingsOf(store: Store, id: string): unknown {

@@ -70,7 +70,7 @@ dans le code.
    propres panneaux solaires (PVGIS). GNV et hydrogène n'ont pas de flux de prix public : prix de
    référence déclarés avec leur source et leur date, affichés comme tels.
 5. **Prévision « plein maintenant ou j'attends ? »**, seulement si elle passe un test sur l'historique.
-6. **Plugin de gestion autonome par IA.**
+6. **Plugin de gestion autonome par IA** (commencé le 14/11 : propositions de titres, validées à la main).
 7. **Plugin Keyword Planner** : les phrases que les gens tapent vraiment (volume, tendance) pilotent
    les titres, les questions fréquentes et les pages à créer. Le contenu parle leurs mots.
 
@@ -120,6 +120,13 @@ isno-512816 est en mode Test : à passer en Production (console Google Cloud, pa
 (275,88 €/MWh) ; recharge solaire au coût de revente du surplus (1,1 c€/kWh, arrêté du 1er juin 2026).
 Les collecteurs de séries peuvent être des sources d'appoint (ils nomment les séries qu'ils produisent).
 Reste de l'étape 4 : production solaire selon le lieu (PVGIS, testé, sans clé).
+
+**14/11, 14 h** : **plugin IA rédactrice** (`editor`, Claude Opus 5.5 par l'API, clé `ANTHROPIC_API_KEY` dans
+collect.env) : une fois par semaine, relit chaque page en ligne et ses mots-clés, PROPOSE titre et description ;
+contrôles (longueurs, aucun chiffre absent de la page, pas de tiret cadratin, pas la marque) ; budget plafonné
+à 20 $ par mois, compté sur la dépense réelle (environ 0,08 $ par passage). Validation par Olivier dans
+/admin/ia ; un titre validé remplace celui de la page (composant Seo). Search Console : winnza.eu ajouté par
+Olivier, plan du site déclaré le 14/11.
 
 ## Moteur de plugins partagé avec OpenCloudApp (décision du 2026-11-13)
 

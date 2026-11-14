@@ -94,13 +94,17 @@ export type Snapshot = { date: string; items: SnapshotItem[] };
 export type SnapshotCollector = {
   id: string;
   snapshot: string;
-  run: (ctx: CollectContext) => Promise<Snapshot>;
+  /** `read` : la base telle qu'elle était AVANT cette collecte (les relevés du jour n'y sont pas encore) */
+  run: (ctx: CollectContext, read: CollectReader) => Promise<Snapshot>;
 };
 export type SnapshotReader = {
   /** jours disponibles, du plus ancien au plus récent */
   snapshotDates: (id: string) => string[];
   snapshot: (id: string, date: string) => SnapshotItem[];
 };
+
+/** Ce qu'un collecteur d'instantané peut lire de la base (relevés des collectes précédentes). */
+export type CollectReader = SeriesReader & SnapshotReader & { settingOrNull: (key: string) => unknown };
 
 /** Lecture des séries déjà en base, pour les dérivations. */
 export type SeriesReader = {

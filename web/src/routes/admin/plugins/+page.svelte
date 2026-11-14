@@ -7,7 +7,7 @@
   <h1>Plugins</h1>
   <form method="POST" action="?/logout"><button type="submit" class="ghost">Se déconnecter</button></form>
 </div>
-<p class="lead">Tout ce que Winnza affiche entre en base par ces plugins. Un changement prend effet à la prochaine collecte. Voir aussi : <a href="/admin/mots-cles">les mots-clés</a>.</p>
+<p class="lead">Tout ce que Winnza affiche entre en base par ces plugins. Un changement prend effet à la prochaine collecte. Voir aussi : <a href="/admin/mots-cles">les mots-clés</a>, <a href="/admin/ia">les propositions de l'IA</a>.</p>
 {#if form?.error}<p class="err" role="alert">{form.error}</p>{/if}
 
 <ul class="list">

@@ -1,7 +1,11 @@
 <script lang="ts">
   // Balises de tête d'une page, toutes rendues par le serveur (visibles des moteurs sans JavaScript).
+  import { page as appPage } from '$app/state';
   import { jsonLd, type PageSeo, type SiteDecl } from './index';
-  let { site, page }: { site: SiteDecl; page: PageSeo } = $props();
+  let { site, page: declared }: { site: SiteDecl; page: PageSeo } = $props();
+  // un titre validé dans l'administration de l'IA remplace celui écrit dans la page (le nom du site s'ajoute ici)
+  const override = $derived(appPage.data.seoOverrides?.[declared.path]);
+  const page = $derived(override ? { ...declared, title: `${override.title} | ${site.name}`, description: override.description } : declared);
   const canonical = $derived(site.url + page.path);
   const ld = $derived(`<script type="application/ld+json">${jsonLd(site, page)}</` + `script>`);
 </script>

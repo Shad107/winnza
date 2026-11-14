@@ -137,7 +137,7 @@ export async function runCollect(store: Store, reg: Registry, rawCtx: CollectCon
   const snaps: { c: SnapshotCollector; snap: Snapshot }[] = [];
   for (const c of reg.snapshotCollectors) {
     try {
-      const snap = await c.run(ctx);
+      const snap = await c.run(ctx, store);
       assertSnapshot(reg, c, snap);
       snaps.push({ c, snap });
     } catch (e) {
