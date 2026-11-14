@@ -1,7 +1,7 @@
 // Données de la page d'administration de l'IA : les dernières propositions, ce qui est déjà validé, et la
 // dépense du mois. Calculées depuis la base seulement.
 import type { CollectReader } from "../contract.js";
-import { EDITOR_OVERRIDES_SETTING, EDITOR_SNAPSHOT, parseOverrides, RUN_KEY, spentThisMonth, type EditorRun, type Override, type Proposal } from "../plugins/editor/index.js";
+import { EDITOR_OVERRIDES_SETTING, EDITOR_SNAPSHOT, parseOverrides, RUN_KEY, spentThisMonth, type EditorRun, type Override, type Proposal } from "../plugins/editor/model.js";
 
 export type EditorPage = { date: string | null; run: EditorRun | null; spentThisMonth: number; proposals: Proposal[]; overrides: Record<string, Override> };
 

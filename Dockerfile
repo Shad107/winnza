@@ -16,6 +16,9 @@ COPY web/package.json web/package-lock.json web/
 RUN cd web && npm ci
 COPY web/ web/
 RUN cd web && npm run check && npm run build
+# le site public n'embarque jamais le code du SDK de l'IA (réservé à la collecte) : s'il revient, la construction
+# échoue. On cherche l'adresse de l'API, qui n'existe que dans le code du SDK.
+RUN if grep -rlq "api.anthropic.com" web/build; then echo "le SDK d'Anthropic est entré dans le site public" >&2; exit 1; fi
 # seules les dépendances d'exécution partent dans l'image finale
 RUN cd server && npm prune --omit=dev && cd ../web && npm prune --omit=dev
 

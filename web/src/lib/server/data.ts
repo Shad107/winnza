@@ -9,7 +9,7 @@ import { buildStationsMap } from '@winnza/core/pages/stations-map.js';
 import { buildElectricityPage, type ElectricityPage } from '@winnza/core/pages/electricity-page.js';
 import { buildRunningCostPage, type RunningCostPage } from '@winnza/core/pages/running-cost-page.js';
 import { buildCities, type Cities, type City } from '@winnza/core/pages/cities.js';
-import { EDITOR_OVERRIDES_SETTING, parseOverrides, type Override } from '@winnza/core/plugins/editor/index.js';
+import { EDITOR_OVERRIDES_SETTING, parseOverrides, type Override } from '@winnza/core/plugins/editor/model.js';
 import { parseSiteDecl, SITE_SETTING, type SiteDecl } from '@winnza/core/plugins/site/index.js';
 import { ANALYTICS_SETTING, parseMatomoSettings, type MatomoSettings } from '@winnza/core/plugins/matomo/index.js';
 

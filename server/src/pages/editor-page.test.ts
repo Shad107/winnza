@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { Store } from "../store.js";
-import { EDITOR_OVERRIDES_SETTING, EDITOR_SNAPSHOT, parseOverrides, RUN_KEY, type Proposal } from "../plugins/editor/index.js";
+import { EDITOR_OVERRIDES_SETTING, EDITOR_SNAPSHOT, parseOverrides, RUN_KEY, type Proposal } from "../plugins/editor/model.js";
 import { approve, buildEditorPage } from "./editor-page.js";
 
 const prop = (path: string, problems: string[] = []): Proposal => ({ path, label: path, current: { title: "a", description: "b" },

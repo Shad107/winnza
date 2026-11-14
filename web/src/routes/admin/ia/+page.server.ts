@@ -1,6 +1,6 @@
 import { fail } from '@sveltejs/kit';
 import { approve, buildEditorPage } from '@winnza/core/pages/editor-page.js';
-import { EDITOR_OVERRIDES_SETTING, EDITOR_PLUGIN_ID } from '@winnza/core/plugins/editor/index.js';
+import { EDITOR_OVERRIDES_SETTING, EDITOR_PLUGIN_ID } from '@winnza/core/plugins/editor/model.js';
 import { parisDate } from '@winnza/core/units.js';
 import { withReadStore, withWritableStore } from '#lib/server/data.ts';
 
