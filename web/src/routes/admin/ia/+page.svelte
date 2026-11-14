@@ -1,6 +1,6 @@
 <script lang="ts">
-  // Les propositions de l'IA : le titre et la description actuels, la proposition, les recherches visées,
-  // et ce que les contrôles y ont trouvé. Rien n'est publié sans un clic ici.
+  // Ce que l'IA a écrit pour chaque page, ce qui est en ligne, et ce que les contrôles ont refusé. En mode
+  // automatique, une proposition contrôlée est publiée seule ; bloquer une page lui rend son titre d'origine.
   import { longDate } from '#lib/format.ts';
   let { data, form } = $props();
   const ed = $derived(data.editor);
@@ -12,11 +12,13 @@
 {#if !ed.date}
   <p class="lead">Aucune proposition : l'IA n'a pas encore tourné (clé absente, ou pas encore de mots-clés relevés).</p>
 {:else}
-  <p class="lead">Propositions du {longDate(ed.run?.date ?? ed.date)}{#if ed.run}, modèle {ed.run.model}, {usd(ed.run.costUsd)}{/if}. Dépensé ce mois-ci : {usd(ed.spentThisMonth)}. Rien n'est publié sans validation.</p>
+  <p class="lead">Propositions du {longDate(ed.run?.date ?? ed.date)}{#if ed.run}, modèle {ed.run.model}, {usd(ed.run.costUsd)}{/if}. Dépensé ce mois-ci : {usd(ed.spentThisMonth)}.
+    {ed.auto ? "Publication automatique : chaque proposition qui passe tous les contrôles est en ligne." : 'Rien n\'est publié sans validation.'}</p>
   {#each ed.proposals as p (p.path)}
-    {@const live = ed.overrides[p.path]}
+    {@const live = ed.live[p.path]}
+    {@const blocked = ed.blocked.includes(p.path)}
     <section class="card prop">
-      <div class="head"><strong>{p.label}</strong> <a href={p.path}>{p.path}</a>{#if live}<span class="tag on">Validé le {longDate(live.approvedOn)}</span>{/if}</div>
+      <div class="head"><strong>{p.label}</strong> <a href={p.path}>{p.path}</a>{#if blocked}<span class="tag">Bloquée : titre d'origine</span>{:else if live}<span class="tag on">En ligne depuis le {longDate(live.approvedOn)}</span>{/if}</div>
       <div class="cols">
         <div><div class="k">Aujourd'hui</div><div class="t">{p.current.title}</div><div class="d">{p.current.description}</div></div>
         <div><div class="k">Proposé</div><div class="t">{p.proposed.title} <span class="brand">| {data.site.name}</span></div><div class="d">{p.proposed.description}</div></div>
@@ -25,10 +27,12 @@
       {#if p.reason}<p class="kw">Pourquoi : {p.reason}</p>{/if}
       {#if p.problems.length}<p class="err">Refusée par les contrôles : {p.problems.join(' ; ')}</p>{/if}
       <div class="actions">
-        {#if !p.problems.length && !(live && live.title === p.proposed.title && live.description === p.proposed.description)}
+        {#if !ed.auto && !p.problems.length && !(live && live.title === p.proposed.title && live.description === p.proposed.description)}
           <form method="POST" action="?/approve"><input type="hidden" name="path" value={p.path} /><button type="submit">Valider et publier</button></form>
         {/if}
-        {#if live}<form method="POST" action="?/revert"><input type="hidden" name="path" value={p.path} /><button type="submit" class="ghost">Revenir au titre d'origine</button></form>{/if}
+        {#if ed.overrides[p.path]}<form method="POST" action="?/revert"><input type="hidden" name="path" value={p.path} /><button type="submit" class="ghost">Retirer la validation à la main</button></form>{/if}
+        <form method="POST" action="?/block"><input type="hidden" name="path" value={p.path} /><input type="hidden" name="on" value={blocked ? '0' : '1'} />
+          <button type="submit" class="ghost">{blocked ? "Débloquer : laisser l'IA écrire" : "Bloquer : garder le titre d'origine"}</button></form>
       </div>
     </section>
   {/each}

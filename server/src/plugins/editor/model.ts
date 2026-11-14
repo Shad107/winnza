@@ -3,8 +3,14 @@
 // plugin (index.ts, lancé par la collecte) charge le SDK d'Anthropic.
 import type { CollectReader, SourceDecl } from "../../contract.js";
 
+/** Ce que devient une proposition qui passe les contrôles : publiée seule, ou en attente de validation. */
+export const PUBLISH = { auto: "auto", review: "review" } as const;
+export type Publish = (typeof PUBLISH)[keyof typeof PUBLISH];
+const PUBLISH_MODES: readonly Publish[] = Object.values(PUBLISH);
+
 export type EditorDecl = {
   source: SourceDecl;
+  publish: Publish;
   api: { keySecret: string; model: string; effort: "low" | "medium" | "high"; maxTokens: number };
   pricing: { inputUsdPerMTok: number; outputUsdPerMTok: number; asOf: string; source: { name: string; url: string } };
   budget: { monthlyUsd: number; everyDays: number };
@@ -33,6 +39,10 @@ export const EDITOR_OVERRIDES_SETTING = "editor.overrides";
 /** Clé de l'élément d'instantané qui décrit l'exécution (les autres sont des chemins de page). */
 export const RUN_KEY = "_run";
 export const EDITOR_PLUGIN_ID = "editor";
+/** Réglage écrit par le plugin : le mode de publication, lu par le site. */
+export const EDITOR_PUBLISH_SETTING = "editor.publish";
+/** Pages bloquées dans l'administration : elles gardent leur titre d'origine, quoi que propose l'IA. */
+export const EDITOR_BLOCKED_SETTING = "editor.blocked";
 
 const EFFORTS = ["low", "medium", "high"] as const;
 type Obj = Record<string, unknown>;
@@ -51,7 +61,9 @@ export function parseEditorDecl(json: unknown): EditorDecl {
   const site = str(root, "site", "racine");
   if (!/^https:\/\/[^/]+$/.test(site)) fail("racine", "site : une adresse https sans chemin ni / final");
   const ps = obj(p.source, "pricing.source");
+  const publish = PUBLISH_MODES.find((m) => m === root.publish) ?? fail("racine", `publish : « auto » ou « review », pas « ${String(root.publish)} »`);
   return {
+    publish,
     source: { id: str(s, "id", "source"), name: str(s, "name", "source"), publisher: str(s, "publisher", "source"), url: str(s, "url", "source"), licence: str(s, "licence", "source") },
     api: { keySecret, model: str(a, "model", "api"), effort, maxTokens: pos(a, "maxTokens", "api") },
     pricing: { inputUsdPerMTok: pos(p, "inputUsdPerMTok", "pricing"), outputUsdPerMTok: pos(p, "outputUsdPerMTok", "pricing"), asOf: str(p, "asOf", "pricing"),
@@ -111,5 +123,33 @@ export function parseOverrides(json: unknown): Record<string, Override> {
     const o = obj(v, `editor.overrides[${path}]`);
     out[path] = { title: str(o, "title", path), description: str(o, "description", path), approvedOn: str(o, "approvedOn", path) };
   }
+  return out;
+}
+
+/** Pages bloquées, lues en base. */
+export function parseBlocked(json: unknown): string[] {
+  if (json === null || json === undefined) return [];
+  if (!Array.isArray(json)) throw new Error("editor.blocked : liste de chemins attendue");
+  return json.map((p) => (typeof p === "string" && p.startsWith("/") ? p : (() => { throw new Error(`editor.blocked : chemin invalide « ${String(p)} »`); })()));
+}
+
+/** Les titres réellement en ligne : ceux validés à la main, puis, en mode automatique, chaque proposition du
+ *  dernier passage qui a passé tous les contrôles. Une page bloquée garde son titre d'origine. */
+export function liveOverrides(read: CollectReader): Record<string, Override> {
+  const blocked = new Set(parseBlocked(read.settingOrNull(EDITOR_BLOCKED_SETTING)));
+  const manual = parseOverrides(read.settingOrNull(EDITOR_OVERRIDES_SETTING));
+  const out: Record<string, Override> = {};
+  if (read.settingOrNull(EDITOR_PUBLISH_SETTING) === PUBLISH.auto) {
+    const date = read.snapshotDates(EDITOR_SNAPSHOT).at(-1);
+    const items = date ? read.snapshot(EDITOR_SNAPSHOT, date) : [];
+    const run = items.find((i) => i.key === RUN_KEY)?.value as EditorRun | undefined;
+    for (const i of items) {
+      if (i.key === RUN_KEY) continue;
+      const p = i.value as Proposal;
+      if (!p.problems.length && run) out[p.path] = { title: p.proposed.title, description: p.proposed.description, approvedOn: run.date };
+    }
+  }
+  for (const [path, o] of Object.entries(manual)) out[path] = o;
+  for (const path of blocked) delete out[path];
   return out;
 }

@@ -9,7 +9,7 @@ import { buildStationsMap } from '@winnza/core/pages/stations-map.js';
 import { buildElectricityPage, type ElectricityPage } from '@winnza/core/pages/electricity-page.js';
 import { buildRunningCostPage, type RunningCostPage } from '@winnza/core/pages/running-cost-page.js';
 import { buildCities, type Cities, type City } from '@winnza/core/pages/cities.js';
-import { EDITOR_OVERRIDES_SETTING, parseOverrides, type Override } from '@winnza/core/plugins/editor/model.js';
+import { liveOverrides, type Override } from '@winnza/core/plugins/editor/model.js';
 import { parseSiteDecl, SITE_SETTING, type SiteDecl } from '@winnza/core/plugins/site/index.js';
 import { ANALYTICS_SETTING, parseMatomoSettings, type MatomoSettings } from '@winnza/core/plugins/matomo/index.js';
 
@@ -30,7 +30,7 @@ function load() {
   try {
     const a = store.settingOrNull(ANALYTICS_SETTING);
     const stations = optional('carte des stations', () => buildStationsMap(store));
-    cache = { mtime, page: buildFuelPage(store), departments: optional('départements', () => buildDepartmentsPage(store)), stationsJson: stations && JSON.stringify(stations), electricity: optional('électricité', () => buildElectricityPage(store)), runningCost: optional('coût aux 100 km', () => buildRunningCostPage(store)), cities: optional('villes', () => buildCities(store)), seo: optional('titres validés', () => parseOverrides(store.settingOrNull(EDITOR_OVERRIDES_SETTING))) ?? {}, site: parseSiteDecl(store.setting(SITE_SETTING.site)), analytics: a === null ? null : parseMatomoSettings(a) };
+    cache = { mtime, page: buildFuelPage(store), departments: optional('départements', () => buildDepartmentsPage(store)), stationsJson: stations && JSON.stringify(stations), electricity: optional('électricité', () => buildElectricityPage(store)), runningCost: optional('coût aux 100 km', () => buildRunningCostPage(store)), cities: optional('villes', () => buildCities(store)), seo: optional('titres de l\'IA', () => liveOverrides(store)) ?? {}, site: parseSiteDecl(store.setting(SITE_SETTING.site)), analytics: a === null ? null : parseMatomoSettings(a) };
     return cache;
   } finally {
     store.close();
@@ -81,7 +81,7 @@ export const citiesSearchJson = (): string | null => {
   return searchCache.json;
 };
 
-/** Titres et descriptions validés dans l'administration de l'IA, par chemin de page. */
+/** Titres et descriptions de l'IA réellement en ligne (publiés seuls ou validés), par chemin de page. */
 export const seoOverrides = (): Record<string, Override> => load().seo;
 
 /** Réglages de mesure d'audience (plugin matomo), ou null si le plugin n'a jamais tourné ou est éteint. */

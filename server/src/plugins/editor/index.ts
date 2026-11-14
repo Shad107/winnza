@@ -12,7 +12,7 @@ import { PLUGIN_CATEGORY, type CollectContext, type Plugin, type SnapshotItem } 
 import { jsonSettings } from "../json-settings.js";
 import { addDays, parisDate } from "../../units.js";
 import { KEYWORDS_SETTING, KEYWORDS_SNAPSHOT, type KeywordGroup, type KeywordIdea } from "../keywords/index.js";
-import { checkProposal, EDITOR_PLUGIN_ID, EDITOR_SNAPSHOT, parseEditorDecl, readPage, RUN_KEY, spentThisMonth, type EditorDecl, type EditorRun, type Proposal } from "./model.js";
+import { checkProposal, EDITOR_PLUGIN_ID, EDITOR_PUBLISH_SETTING, EDITOR_SNAPSHOT, parseEditorDecl, readPage, RUN_KEY, spentThisMonth, type EditorDecl, type EditorRun, type Proposal } from "./model.js";
 
 export * from "./model.js";
 
@@ -60,6 +60,7 @@ export const editorPlugin: Plugin = {
   register(api) {
     const decl = parseEditorDecl(api.settings());
     api.declareSource(decl.source);
+    api.declareSetting({ key: EDITOR_PUBLISH_SETTING, value: decl.publish });
     api.declareSnapshot({ id: EDITOR_SNAPSHOT, label: "Propositions de titres et descriptions par l'IA", sourceId: decl.source.id, keepDays: decl.keepDays, optional: true });
     api.registerSnapshotCollector({ id: "editor.proposals", snapshot: EDITOR_SNAPSHOT, run: async (ctx, read) => {
       const today = parisDate();
