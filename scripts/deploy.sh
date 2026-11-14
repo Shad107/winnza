@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
-# Déploiement de Winnza sur le serveur, appelé par GitHub Actions APRÈS les tests et la construction (job
-# « deploy » de .github/workflows/ci.yml), par une clé SSH qui ne peut lancer QUE ce script (command= dans
-# authorized_keys). Aussi lançable à la main : ./scripts/deploy.sh
+# Déploiement de Winnza sur le serveur. Lancé par scripts/deploy-when-green.sh quand l'intégration continue
+# de GitHub a validé un commit de main, ou à la main : ./scripts/deploy.sh [commit]
 #
-#   1. récupère main (avance rapide seulement : jamais d'écrasement silencieux)
+#   1. avance jusqu'au commit demandé, ou à main (avance rapide seulement : jamais d'écrasement silencieux)
 #   2. garde l'image en service sous le nom winnza:previous
 #   3. construit la nouvelle image (les tests du serveur tournent dans la construction)
 #   4. redémarre le site et vérifie qu'il répond sur les pages qui comptent
-#   5. sinon : remet l'image précédente, et sort en erreur (la CI passe au rouge, Olivier est prévenu)
+#   5. sinon : remet l'image précédente, et sort en erreur (deploy-when-green.sh prévient Olivier)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 SITE="${WINNZA_SITE:-https://www.winnza.eu}"
@@ -27,7 +26,7 @@ healthy() {
 
 before=$(git rev-parse HEAD)
 git fetch -q origin main
-git merge -q --ff-only origin/main
+git merge -q --ff-only "${1:-origin/main}"
 after=$(git rev-parse HEAD)
 log "déploiement ${before:0:7} -> ${after:0:7}"
 
