@@ -35,8 +35,11 @@ export function jsonLd(site: SiteDecl, page: PageSeo): string {
 
 const xml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-export function sitemap(site: SiteDecl, lastmod: string): string {
-  const urls = site.pages.map((p) => `  <url><loc>${xml(site.url + p.path)}</loc><lastmod>${lastmod}</lastmod><changefreq>${p.changefreq}</changefreq><priority>${p.priority.toFixed(1)}</priority></url>`);
+/** Pages engendrées depuis les données (une par ville...), en plus des pages déclarées du site. */
+export type ExtraPage = { path: string; changefreq: string; priority: number };
+
+export function sitemap(site: SiteDecl, lastmod: string, extra: readonly ExtraPage[] = []): string {
+  const urls = [...site.pages, ...extra].map((p) => `  <url><loc>${xml(site.url + p.path)}</loc><lastmod>${lastmod}</lastmod><changefreq>${p.changefreq}</changefreq><priority>${p.priority.toFixed(1)}</priority></url>`);
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`;
 }
 

@@ -8,6 +8,9 @@ export const eur2 = (v: number): string => cents.format(v);
 const kwh = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', minimumFractionDigits: 4, maximumFractionDigits: 4 });
 /** 0,2001 € : le prix du kWh se publie au dix-millième d'euro */
 export const eur4 = (v: number): string => kwh.format(v);
+const milli = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', minimumFractionDigits: 3, maximumFractionDigits: 3 });
+/** 1,999 € : les stations affichent leur prix au millième ; l'arrondir au centime le fausserait */
+export const eur3 = (v: number): string => milli.format(v);
 /** 109 € */
 export const eur0 = (v: number): string => whole.format(v);
 /** au centime pour un litre, à l'euro pour un plein */

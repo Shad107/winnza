@@ -108,6 +108,13 @@ jour (stations, tarif réglementé, recharge rapide déclarée avec source et da
 sourcées que le visiteur remplace par les siennes. GNV et hydrogène absents faute de prix public daté et TTC.
 Une page optionnelle en erreur est désormais retirée seule (journalisée) au lieu de faire tomber le site.
 
+**14/11, après-midi** : **pages par ville** (/prix-carburant, 5 493 villes, une page par département qui les
+liste, toutes dans le plan du site) : prix moyen du jour par carburant (prix à jour seulement), la moins
+chère, écart au département et à la France, chaque station, 8 villes voisines ; variation sur 7 jours dès
+le 21/11. **Plugin mots-clés** (Keyword Planner, /admin/mots-cles) : 100 idées par groupe de pages, source
+d'appoint. ⚠️ Le jeton Google expire tous les 7 jours tant que l'écran de consentement OAuth du projet
+isno-512816 est en mode Test : à passer en Production (console Google Cloud, par Olivier).
+
 ## Moteur de plugins partagé avec OpenCloudApp (décision du 2026-11-13)
 
 Winnza n'a aujourd'hui que le principe d'OpenCloudApp (`register(api)`) : ses plugins sont branchés en

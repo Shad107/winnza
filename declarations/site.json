@@ -16,6 +16,11 @@
       "priority": 0.9
     },
     {
+      "path": "/prix-carburant",
+      "changefreq": "daily",
+      "priority": 0.9
+    },
+    {
       "path": "/prix-par-departement",
       "changefreq": "daily",
       "priority": 0.9
