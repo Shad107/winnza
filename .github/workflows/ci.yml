@@ -40,3 +40,21 @@ jobs:
         working-directory: server
       - run: npm ci && npm run check && npm run build
         working-directory: web
+
+  deploy:
+    # en production SEULEMENT si les trois contrôles sont verts, et seulement depuis main. La clé ne peut lancer
+    # que scripts/deploy.sh sur le serveur (command= dans authorized_keys) : construire, vérifier, sinon revenir.
+    needs: [secrets, test, web]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency: { group: deploy, cancel-in-progress: false }
+    steps:
+      - name: déployer
+        env:
+          KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/deploy && chmod 600 ~/.ssh/deploy
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy -o BatchMode=yes ubuntu@146.59.45.179 deploy
