@@ -32,6 +32,10 @@
     return [1, 2, 3, 4].map((i) => v[Math.min(v.length - 1, Math.floor((v.length * i) / 5))] ?? 0);
   }
 
+  /** « 2,15 € » : prix affiché sous la pastille au zoom de la rue */
+  const priceText = (prop: string): ExpressionSpecification =>
+    ['concat', ['number-format', ['get', prop], { locale: 'fr-FR', 'min-fraction-digits': 2, 'max-fraction-digits': 2 }], ' €'];
+
   function paint() {
     if (!map || !data || !map.getLayer('stations')) return;
     const price = STATION_PROP.price + fuelId, change = STATION_PROP.change + fuelId, stale = STATION_PROP.stale + fuelId;
@@ -44,6 +48,8 @@
         ['step', ['get', price], ramp[0]!, b[0]!, ramp[1]!, b[1]!, ramp[2]!, b[2]!, ramp[3]!, b[3]!, ramp[4]!]];
       map.setFilter('stations', ['has', price]);
       map.setPaintProperty('stations', 'circle-color', color);
+      map.setFilter('stations-label', ['has', price]);
+      map.setLayoutProperty('stations-label', 'text-field', priceText(price));
       const lo = Math.min(...fresh), hi = Math.max(...fresh);
       const edges = [lo, ...b, hi];
       onlegend([...ramp.map((c, i) => ({ color: c, text: `${eur2(edges[i]!)} à ${eur2(edges[i + 1]!)}` })),
@@ -51,6 +57,9 @@
     } else {
       const down = css('--down-strong'), downSoft = css('--down'), up = css('--up'), upStrong = css('--up-strong');
       map.setFilter('stations', ['has', change]);
+      map.setFilter('stations-label', ['has', change]);
+      map.setLayoutProperty('stations-label', 'text-field', ['concat', ['case', ['>', ['get', change], 0], '+', ''],
+        ['number-format', ['*', ['get', change], 100], { locale: 'fr-FR', 'max-fraction-digits': 0 }], ' ct']);
       map.setPaintProperty('stations', 'circle-color',
         ['step', ['get', change], down, CHANGE_STEPS[0], downSoft, CHANGE_STEPS[1], neutral, CHANGE_STEPS[2], up, CHANGE_STEPS[3], upStrong]);
       onlegend([{ color: down, text: 'baisse de plus de 2 ct' }, { color: downSoft, text: 'baisse' }, { color: neutral, text: 'stable (moins d\'un demi-centime)' },
@@ -133,6 +142,10 @@
             'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 2, 8, 3.5, 11, 6, 14, 9],
             'circle-stroke-color': css('--card'), 'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 4, 0.3, 10, 1.2],
           } });
+          // le prix écrit sous chaque pastille, quand on est assez près pour lire la rue
+          map.addLayer({ id: 'stations-label', type: 'symbol', source: 'stations', minzoom: 11, layout: {
+            'text-font': ['Noto Sans Medium'], 'text-size': 13, 'text-offset': [0, 1.1], 'text-anchor': 'top', 'text-allow-overlap': false,
+          }, paint: { 'text-color': css('--ink'), 'text-halo-color': css('--card'), 'text-halo-width': 1.6 } });
           map.on('click', 'stations', (e) => {
             const f = e.features?.[0];
             if (!f || f.geometry.type !== 'Point') return;
