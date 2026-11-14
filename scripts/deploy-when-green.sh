@@ -17,7 +17,8 @@ sudo mkdir -p "$STATE_DIR"
 api() { curl -fsS --max-time 30 -H "Accept: application/vnd.github+json" "https://api.github.com/repos/$REPO/$1"; }
 
 sha=$(api commits/main | python3 -c 'import sys, json; print(json.load(sys.stdin)["sha"])') || exit 0
-[ "$sha" = "$(git rev-parse HEAD)" ] && exit 0
+# déjà tenté (déployé, refusé ou en échec) : rien à faire. On compare à ce qui a été DÉPLOYÉ, pas au code
+# présent sur le disque (un git pull à la main ne reconstruit pas l'image)
 [ "$(sudo cat "$STATE" 2>/dev/null | cut -d" " -f1)" = "$sha" ] && exit 0
 
 # vert : tous les contrôles requis terminés et réussis ; en attente : l'un n'est pas fini ; rouge sinon
