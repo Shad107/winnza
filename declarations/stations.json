@@ -1,5 +1,5 @@
 {
-  "$comment": "Plugin stations : prix moyen du jour de chaque carburant, en France et par département, depuis le flux officiel des stations (sans clé). Seuls les prix mis à jour depuis maxAgeDays jours comptent (une station fermée garde son dernier prix affiché). Une moyenne hors des bornes plausibles fait échouer la collecte au lieu d'être publiée. La liste des départements vient de la source elle-même. keepDays : jours gardés des relevés station par station (carte des stations, variation sur 7 jours).",
+  "$comment": "Plugin stations : prix moyen du jour de chaque carburant, en France et par département, depuis le flux officiel des stations (sans clé). Nos moyennes (France, régions, départements) sont calculées sur le prix de chaque station, gardé historyDays jours. Seuls les prix mis à jour depuis maxAgeDays jours comptent (une station fermée garde son dernier prix affiché). Une moyenne hors des bornes plausibles fait échouer la collecte au lieu d'être publiée. La liste des départements vient de la source elle-même. keepDays : jours gardés des relevés station par station (carte des stations, variation sur 7 jours).",
   "source": {
     "id": "prix-carburants-flux",
     "name": "Prix des carburants en France, flux instantané (version 2)",
@@ -430,5 +430,60 @@
       "label": "Val-d'Oise"
     }
   ],
-  "keepDays": 35
+  "keepDays": 35,
+  "regions": [
+    {
+      "code": "11",
+      "label": "Île-de-France"
+    },
+    {
+      "code": "24",
+      "label": "Centre-Val de Loire"
+    },
+    {
+      "code": "27",
+      "label": "Bourgogne-Franche-Comté"
+    },
+    {
+      "code": "28",
+      "label": "Normandie"
+    },
+    {
+      "code": "32",
+      "label": "Hauts-de-France"
+    },
+    {
+      "code": "44",
+      "label": "Grand Est"
+    },
+    {
+      "code": "52",
+      "label": "Pays de la Loire"
+    },
+    {
+      "code": "53",
+      "label": "Bretagne"
+    },
+    {
+      "code": "75",
+      "label": "Nouvelle-Aquitaine"
+    },
+    {
+      "code": "76",
+      "label": "Occitanie"
+    },
+    {
+      "code": "84",
+      "label": "Auvergne-Rhône-Alpes"
+    },
+    {
+      "code": "93",
+      "label": "Provence-Alpes-Côte d'Azur"
+    },
+    {
+      "code": "94",
+      "label": "Corse"
+    }
+  ],
+  "historyDays": 3650
 }

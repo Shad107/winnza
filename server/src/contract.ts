@@ -107,7 +107,8 @@ export type SiteReader = SeriesReader & SnapshotReader & {
  *  après tous les collecteurs, dans l'ordre de déclaration. */
 export type Derivation = {
   id: string;
-  run: (read: SeriesReader) => Observation[];
+  /** lit les séries et les instantanés déjà en base (ceux du jour compris) */
+  run: (read: SeriesReader & SnapshotReader) => Observation[];
 };
 
 /** Ce que Winnza donne à un plugin. Le moteur (OpenPluginHost) ne connaît cette api que par son type :

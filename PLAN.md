@@ -88,6 +88,12 @@ seul : l'ÉTENDRE, jamais le remplacer). Base dans le volume `winnza-data`. Coll
 matomo.winnza.eu, IP anonymisées, IP d'Olivier exclues ; MATOMO_TOKEN dans `~/winnza/.env`) ; alerte mail
 au changement d'état de la collecte (`scripts/collect-and-alert.sh`, identifiants de la sonde externe).
 
+**14/11, nuit** : prévision (/prevision), carte des départements, carte zoomable des stations avec noms
+(OpenStreetMap) et « Autour de moi ». **Historique des prix station par station** gardé chaque jour
+(instantané `stations.prices`, 10 ans, environ 330 Mo par an) : nos propres moyennes France, 13 régions et
+96 départements en sont calculées (identiques à 4 décimales près à celles de la source le 14/11). La
+moyenne par ville se calculera du même historique, pour une page par ville.
+
 ## Moteur de plugins partagé avec OpenCloudApp (décision du 2026-11-13)
 
 Winnza n'a aujourd'hui que le principe d'OpenCloudApp (`register(api)`) : ses plugins sont branchés en

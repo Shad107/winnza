@@ -97,7 +97,20 @@ function assertSnapshot(reg: Registry, c: SnapshotCollector, snap: Snapshot): vo
 /** `skipped` : ancres sur une série dont le plugin n'est pas chargé (non vérifiées, et signalées). */
 export type RunReport = { observations: number; anchors: AnchorResult[]; skipped: Anchor[]; warnings: string[] };
 
-export async function runCollect(store: Store, reg: Registry, ctx: CollectContext, anchors: readonly Anchor[]): Promise<RunReport> {
+/** Une même adresse n'est téléchargée qu'une fois par collecte (ex. l'export des stations, lu par deux
+ *  instantanés). */
+function memoized(ctx: CollectContext): CollectContext {
+  const text = new Map<string, Promise<string>>(), bytes = new Map<string, Promise<Uint8Array>>();
+  const once = <T>(m: Map<string, Promise<T>>, url: string, f: (u: string) => Promise<T>) => {
+    let p = m.get(url);
+    if (!p) { p = f(url); m.set(url, p); p.catch(() => m.delete(url)); }
+    return p;
+  };
+  return { fetchText: (u) => once(text, u, ctx.fetchText), fetchBytes: (u) => once(bytes, u, ctx.fetchBytes) };
+}
+
+export async function runCollect(store: Store, reg: Registry, rawCtx: CollectContext, anchors: readonly Anchor[]): Promise<RunReport> {
+  const ctx = memoized(rawCtx);
   const batches: Observation[][] = [];
   for (const c of reg.collectors) {
     const obs = await c.run(ctx);
