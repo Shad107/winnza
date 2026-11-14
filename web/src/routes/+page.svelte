@@ -37,7 +37,7 @@
   ];
 </script>
 
-<Seo site={data.site} page={{ path: '/', title: `Prix du carburant : où passe l'argent de votre plein ? | Winnza`,
+<Seo site={data.site} page={{ path: '/', title: `Prix des carburants aujourd'hui : où passe l'argent de votre plein ? | Winnza`,
   description: `Sur ${eur2(fuel.products[0]!.litre)} de ${fuel.products[0]!.label.toLowerCase()}, combien pour le pétrole, la raffinerie, la TICPE et la TVA ? Le prix du jour de chaque carburant, chaque semaine le vrai découpage. Chiffres officiels.`,
   faq, modified: fuel.asOf }} />
 

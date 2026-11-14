@@ -65,7 +65,7 @@
 
   const faq = $derived([
     ...(baseKwh && basePower ? [
-      { q: 'Quel est le prix du kWh en ce moment ?', a: `Au tarif réglementé (tarif Bleu), option Base, ${kva} kVA : ${eur4(baseKwh.ttc)} le kWh toutes taxes comprises depuis le ${longDate(basePower.since)}, plus un abonnement de ${eur2(basePower.subscriptionTtc)} par an.` },
+      { q: 'Quel est le prix du kWh EDF en ce moment ?', a: `Au tarif réglementé (tarif Bleu d'EDF), option Base, ${kva} kVA : ${eur4(baseKwh.ttc)} le kWh toutes taxes comprises depuis le ${longDate(basePower.since)}, plus un abonnement de ${eur2(basePower.subscriptionTtc)} par an.` },
       { q: 'Pourquoi le vrai prix du kWh est-il plus élevé que le tarif affiché ?', a: `Parce que l'abonnement se paie en plus, quelle que soit votre consommation. Pour ${kwhYear.toLocaleString('fr-FR')} kWh par an, il ajoute ${eur4(basePower.subscriptionTtc / kwhYear)} à chaque kWh : le vrai prix monte à ${eur4(truePrice ?? 0)}. Moins vous consommez, plus l'abonnement pèse.` },
       { q: "Combien de taxes sur l'électricité ?", a: `Sur un kWh à ${eur4(baseKwh.ttc)} : ${eur4(baseKwh.excise)} d'accise sur l'électricité (l'ancienne CSPE) et ${eur4(baseKwh.vat)} de TVA, soit ${percent(baseKwh.excise + baseKwh.vat, baseKwh.ttc)} du prix. La TVA de ${Math.round(el.kwhVat.rate * 100)} % s'applique aussi à l'accise.` },
     ] : []),
@@ -73,14 +73,14 @@
   ]);
 </script>
 
-<Seo site={data.site} page={{ path: '/electricite', title: "Prix du kWh d'électricité : le vrai prix, taxes et abonnement compris | Winnza",
+<Seo site={data.site} page={{ path: '/electricite', title: "Prix du kWh EDF (tarif Bleu) aujourd'hui, et couleur Tempo du jour | Winnza",
   description: `Le prix du kWh au tarif réglementé (Base, heures creuses, Tempo), ce qu'il coûte vraiment une fois l'abonnement compté, la part des taxes, la couleur Tempo du jour et le prix chez nos voisins. Chiffres de la CRE et d'Eurostat.`,
   faq, modified: el.asOf }} />
 
 <main class="wrap">
   <section class="page-head" aria-labelledby="titre">
     <p class="chip"><Icon name={ICON.chart} size={16} />Tarifs officiels de la CRE et d'Eurostat</p>
-    <h1 class="h1" id="titre">Le vrai prix du kWh</h1>
+    <h1 class="h1" id="titre">Le prix du kWh, le vrai</h1>
     <p class="intro">Le prix affiché sur la facture n'est pas ce que vous payez vraiment : l'abonnement s'ajoute{#if baseKwh}, et {percent(baseKwh.excise + baseKwh.vat, baseKwh.ttc)} du kWh part en taxes{/if}. Voici le kWh découpé, comme le litre.</p>
     <div class="controls">
       <Toggle label="Option" bind:value={optionId} options={el.options.map((o) => ({ id: o.id, label: o.label }))} />
@@ -172,7 +172,7 @@
   {#if el.tempo}
     {@const t = el.tempo}
     <section class="section" aria-labelledby="tempo">
-      <h2 class="h2" id="tempo">Tempo : aujourd'hui, jour {TEMPO_LABEL[t.color]}</h2>
+      <h2 class="h2" id="tempo">Couleur Tempo du jour : jour {TEMPO_LABEL[t.color]}</h2>
       <div class="grid-cards two">
         <div class="card pad today" data-tempo={t.color}>
           <div class="t-date">{longDate(t.date)}</div>

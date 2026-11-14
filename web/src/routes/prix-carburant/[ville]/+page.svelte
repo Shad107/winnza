@@ -27,7 +27,7 @@
   }));
 </script>
 
-<Seo site={data.site} page={{ path: `${CITY_PATH}/${c.slug}`, title: `Prix du carburant à ${c.name} (${c.dep}) aujourd'hui | Winnza`,
+<Seo site={data.site} page={{ path: `${CITY_PATH}/${c.slug}`, title: `Prix essence et gazole à ${c.name} (${c.dep}) aujourd'hui | Winnza`,
   description: `${first ? `${first.label} à ${eur3(first.avg)} en moyenne à ${c.name} aujourd'hui. ` : ''}Le prix du jour de chaque carburant dans ${plural(c.stations.length, 'station')} de ${c.name} (${c.depLabel}), et la moins chère. Prix officiels.`,
   faq, modified: data.date }} />
 

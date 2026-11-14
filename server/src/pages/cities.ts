@@ -39,7 +39,8 @@ export type City = {
 export type CitySummary = { slug: string; name: string; dep: string; stations: number };
 export type Cities = {
   date: string; compareDate: string | null; maxAgeDays: number;
-  departments: { code: string; label: string }[];
+  /** chaque département qui a des villes, avec la moyenne du jour de chaque carburant */
+  departments: { code: string; label: string; fuels: { id: string; label: string; avg: number }[] }[];
   /** par département puis par nom */
   list: CitySummary[];
   bySlug: Map<string, City>;
@@ -131,6 +132,7 @@ export function buildCities(read: SiteReader): Cities {
   }
   const list = [...bySlug.values()].map((c) => ({ slug: c.slug, name: c.name, dep: c.dep, stations: c.stations.length }))
     .sort((a, b) => cmpFr(a.dep, b.dep) || cmpFr(a.name, b.name));
-  const departments = [...new Set(list.map((c) => c.dep))].map((code) => ({ code, label: depLabel.get(code) ?? code }));
+  const departments = [...new Set(list.map((c) => c.dep))].map((code) => ({ code, label: depLabel.get(code) ?? code,
+    fuels: fuels.flatMap((f) => { const avg = lastAt(areaOfDepartment(code), f.id); return avg === null ? [] : [{ id: f.id, label: f.label, avg }]; }) }));
   return { date, compareDate, maxAgeDays, departments, list, bySlug };
 }

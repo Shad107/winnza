@@ -57,20 +57,20 @@
   }
 
   const faq = [
-    { q: 'Comment trouver la station la moins chère près de chez moi ?', a: "Choisissez votre carburant, puis tapez votre code postal ou touchez le bouton de localisation. Les pastilles les plus claires sont les stations les moins chères ; touchez-en une pour voir tous ses prix." },
+    { q: "Où trouver l'essence la moins chère autour de moi ?", a: "Choisissez votre carburant, puis tapez votre code postal ou touchez le bouton de localisation. Les pastilles les plus claires sont les stations les moins chères ; touchez-en une pour voir tous ses prix." },
     { q: 'Les prix sont-ils à jour ?', a: "Ils viennent du flux officiel où chaque station déclare ses prix, relevé chaque matin. Une station qui n'a pas mis son prix à jour depuis plus d'une semaine apparaît en gris : son prix réel peut être différent." },
     { q: 'Le prix a-t-il monté ou baissé dans ma station ?', a: "Le mode « Variation sur 7 jours » colore chaque station selon l'évolution de son prix sur une semaine : bleu quand il baisse, rouge quand il monte, gris quand il ne bouge pas." },
   ];
 </script>
 
-<Seo site={data.site} page={{ path: '/carte-des-stations', title: 'Carte des stations-service : le prix du carburant près de chez vous | Winnza',
+<Seo site={data.site} page={{ path: '/carte-des-stations', title: 'Essence la moins chère autour de moi : carburant à proximité, prix du jour | Winnza',
   description: "Chaque station-service de France sur une carte, avec le prix du jour du gazole, du SP95, de l'E10, du SP98, de l'E85 et du GPL, et l'évolution sur 7 jours. Prix officiels, sans compte.",
   faq, modified: data.page.asOf }} />
 
 <main class="wrap">
   <section class="page-head" aria-labelledby="titre">
     <p class="chip"><Icon name={ICON.chart} size={16} />Chaque station de France, prix officiels du jour</p>
-    <h1 class="h1" id="titre">Le prix du carburant près de chez vous</h1>
+    <h1 class="h1" id="titre">Le carburant le moins cher autour de vous</h1>
     <p class="intro">Zoomez jusqu'à votre rue : chaque pastille est une station, colorée selon son prix. Touchez-la pour voir tous ses prix.</p>
     <div class="controls">
       <Toggle label="Carburant" bind:value={fuelId} options={fuels.map((f) => ({ id: f.id, label: f.label }))} />

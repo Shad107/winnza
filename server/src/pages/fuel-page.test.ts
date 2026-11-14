@@ -55,7 +55,8 @@ test("page carburants : tout vient de la base (séries, réglages, sources)", ()
   assert.deepEqual(p.neighbours, [{ code: "ES", label: "Espagne", litre: 1.9 }]);
   assert.deepEqual(p.annual.map((a) => a.year), [2008, 2026]);
   assert.deepEqual(p.quarterly.map((q) => [q.year, q.quarter]), [[2008, 3], [2026, 4]]);
-  assert.deepEqual(page.market, { brentUsd: { reference: 144, now: 97 }, usdPerEur: { reference: 1.57, now: 1.10 } });
+  assert.deepEqual(page.market, { brentUsd: { reference: 144, now: 97 }, usdPerEur: { reference: 1.57, now: 1.10 },
+    brentLatest: { value: 97, date: "2026-11-06" } });
   assert.ok(Math.abs(LITRE_PARTS.reduce((s, k) => s + p.now[k], 0) - p.litre) < 1e-9);   // les parts refont le prix
   assert.equal(page.stations, null, "plugin stations absent : pas de bloc, pas d'erreur");
   assert.equal(page.forecast, null, "plugin prévision absent : pas de bloc");

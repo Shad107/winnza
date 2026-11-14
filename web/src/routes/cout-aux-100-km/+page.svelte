@@ -36,11 +36,12 @@
   const faq = $derived([
     ...(thermal && evHome ? [{ q: 'Électrique ou thermique : qu\'est-ce qui coûte le moins cher au kilomètre ?', a: `Au prix du jour, le thermique le moins cher est « ${thermal.label.toLowerCase()} » : ${eur2(thermal.per100)} les 100 km (${fmtNumber(thermal.consumption)} L). En électrique rechargée à la maison au ${evHome.priceLabel}, c'est ${eur2(evHome.per100)} (${fmtNumber(evHome.consumption)} kWh). Sur ${km.toLocaleString('fr-FR')} km par an, l'écart est de ${eur0(Math.abs(thermal.per100 - evHome.per100) * km / 100)} en faveur ${thermal.per100 > evHome.per100 ? "de l'électrique" : 'du thermique'}.` }] : []),
     ...(evFast && evHome ? [{ q: 'Et en rechargeant sur borne rapide ?', a: `Sur borne rapide sans abonnement (${eur4(evFast.price)} le kWh, ${evFast.priceSource?.name ?? 'relevé'} du ${longDate(evFast.priceDate)}), 100 km coûtent ${eur2(evFast.per100)}, soit ${Math.round(evFast.per100 / evHome.per100 * 10) / 10} fois plus qu'à la maison.` }] : []),
+    ...(evHome ? [{ q: 'Combien coûte la recharge d\'une voiture électrique ?', a: `À la maison, au ${evHome.priceLabel}, le kWh coûte ${eur4(evHome.price)} : 100 km reviennent à ${eur2(evHome.per100)} pour ${fmtNumber(evHome.consumption)} kWh.${evFast ? ` Sur borne rapide sans abonnement, ${eur4(evFast.price)} le kWh, soit ${eur2(evFast.per100)} les 100 km.` : ''}` }] : []),
     { q: 'Ce coût comprend-il tout ?', a: "Non : seulement l'énergie. L'achat de la voiture, l'entretien, l'assurance et, pour l'électrique, l'abonnement d'électricité (que vous payez déjà pour votre logement) n'y sont pas." },
   ]);
 </script>
 
-<Seo site={data.site} page={{ path: '/cout-aux-100-km', title: 'Coût aux 100 km : diesel, essence, E85, GPL ou électrique, au prix du jour | Winnza',
+<Seo site={data.site} page={{ path: '/cout-aux-100-km', title: "Prix de la recharge d'une voiture électrique et coût aux 100 km face à l'essence | Winnza",
   description: "Combien coûtent 100 km en diesel, essence, E85, GPL ou voiture électrique rechargée à la maison ou sur borne ? Au prix du jour, avec la consommation de votre voiture. Chiffres officiels et sources.",
   faq, modified: cost.rows.map((r) => r.priceDate).sort().at(-1) }} />
 

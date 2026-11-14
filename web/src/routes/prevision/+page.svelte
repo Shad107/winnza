@@ -17,13 +17,13 @@
   const rate = (h: number, n: number) => (n ? `${Math.round((h / n) * 100)}${NBSP_PERCENT}` : '');
 
   const faq = $derived(best ? [
-    { q: 'Le carburant va-t-il baisser ?', a: `Pour la semaine qui vient, d'après le marché de gros : ${answer} Ce n'est pas une certitude : depuis ${best.track.since.slice(0, 4)}, quand le signal était net, le sens annoncé était juste ${rate(best.track.strongHits, best.track.strongWeeks)} du temps pour le ${best.label.toLowerCase()}.` },
+    { q: 'Le prix du carburant va-t-il baisser la semaine prochaine ?', a: `Pour la semaine qui vient, d'après le marché de gros : ${answer} Ce n'est pas une certitude : depuis ${best.track.since.slice(0, 4)}, quand le signal était net, le sens annoncé était juste ${rate(best.track.strongHits, best.track.strongWeeks)} du temps pour le ${best.label.toLowerCase()}.` },
     { q: 'Faut-il faire le plein maintenant ou attendre ?', a: "Si une baisse est probable et que votre réservoir n'est pas presque vide, attendre quelques jours peut faire gagner quelques euros. Si une hausse est probable, autant faire le plein tôt. Sans tendance nette, rien ne sert d'attendre." },
     { q: 'Comment Winnza fait-il sa prévision ?', a: "Les prix à la pompe suivent ceux du gazole et de l'essence sur les marchés de gros, avec environ une semaine de retard. Winnza compare leur moyenne des cinq derniers jours à celle de la semaine précédente. La méthode a été testée sur les prix réels depuis 2006 avant d'être publiée." },
   ] : []);
 </script>
 
-<Seo site={data.site} page={{ path: '/prevision', title: 'Le carburant va-t-il baisser ? Prévision de la semaine | Winnza',
+<Seo site={data.site} page={{ path: '/prevision', title: 'Baisse des prix du carburant : va-t-il baisser la semaine prochaine ? | Winnza',
   description: `Prix du gazole et de l'essence la semaine prochaine : hausse, baisse ou stabilité, d'après le marché de gros. ${answer} Avec le bilan réel de la méthode.`,
   faq, modified: data.page.asOf }} />
 

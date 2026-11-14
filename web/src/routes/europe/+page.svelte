@@ -24,12 +24,13 @@
   const cheapest = $derived([...p.neighbours].sort((a, b) => a.litre - b.litre)[0]);
 
   const faq = $derived(cheapest ? [
+    { q: `Combien coûte le ${name} chez nos voisins cette semaine ?`, a: `${p.neighbours.map((n) => `${n.label} : ${eur2(n.litre)}`).join(' ; ')}, contre ${eur2(p.litre)} en France, le litre.` },
     { q: 'Où le carburant est-il le moins cher autour de la France ?', a: `Cette semaine, pour le ${name}, c'est ${cheapest.label} : ${eur2(cheapest.litre)} le litre contre ${eur2(p.litre)} en France, soit ${money((p.litre - cheapest.litre) * 50, false)} d'écart sur un plein de 50 litres.` },
     { q: "Pourquoi l'essence est-elle moins chère au Luxembourg ?", a: "Principalement parce que les taxes y sont plus basses : l'accise et la TVA sur les carburants sont parmi les plus faibles de l'Union européenne. Le pétrole, lui, coûte le même prix partout." },
   ] : []);
 </script>
 
-<Seo site={data.site} page={{ path: '/europe', title: 'Prix du carburant en Europe : Espagne, Luxembourg, Belgique | Winnza',
+<Seo site={data.site} page={{ path: '/europe', title: "Prix du carburant au Luxembourg, en Espagne, en Belgique : moins cher qu'en France ? | Winnza",
   description: `Le prix du gazole et du sans plomb chez nos voisins cette semaine, et l'écart sur votre plein : Espagne, Luxembourg, Belgique, Allemagne, Italie, Pays-Bas. Chiffres de la Commission européenne.`,
   faq, modified: fuel.asOf }} />
 

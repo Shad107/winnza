@@ -37,7 +37,11 @@ export type ProductPage = {
 };
 
 /** Cours du marché : moyenne sur la période de référence, et dernière valeur connue à la date des prix. */
-export type Market = { brentUsd: { reference: number; now: number }; usdPerEur: { reference: number; now: number } };
+export type Market = {
+  brentUsd: { reference: number; now: number }; usdPerEur: { reference: number; now: number };
+  /** dernier cours connu du Brent, avec sa date (il peut être plus récent que le relevé des prix à la pompe) */
+  brentLatest: { value: number; date: string };
+};
 
 /** Prix du jour en station (plugin stations) ; null si le plugin n'a jamais tourné ou est éteint. */
 export type StationsToday = { date: string; fuels: { id: string; label: string; avg: number; stations: number }[] } | null;
@@ -202,7 +206,8 @@ export function buildFuelPage(read: SiteReader): FuelPage {
   const { from, to } = decl.reference;
   return {
     asOf, referenceLabel: decl.reference.label, products, hiddenCharges: hiddenCharges(read),
-    market: { brentUsd: marketPair(read, OIL_SERIES.brentUsd, from, to, asOf), usdPerEur: marketPair(read, OIL_SERIES.eurusd, from, to, asOf) },
+    market: { brentUsd: marketPair(read, OIL_SERIES.brentUsd, from, to, asOf), usdPerEur: marketPair(read, OIL_SERIES.eurusd, from, to, asOf),
+      brentLatest: (() => { const o = read.get(OIL_SERIES.brentUsd).at(-1); if (!o) throw new Error("page carburants : aucun cours du Brent"); return { value: o.value, date: o.date }; })() },
     stations: stationsToday(read),
     forecast: forecast(read),
   };
