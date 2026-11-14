@@ -35,6 +35,12 @@ function load() {
   }
 }
 
+/** Base en lecture, à la demande : pour l'administration (pas de cache, pages rares). */
+export function withReadStore<T>(fn: (store: Store) => T): T {
+  const store = new Store(DB, { readonly: true });
+  try { return fn(store); } finally { store.close(); }
+}
+
 /** Base en écriture, pour l'administration seulement (réglages des plugins). Fermée après usage. */
 export function withWritableStore<T>(fn: (store: Store) => T): T {
   const store = new Store(DB);

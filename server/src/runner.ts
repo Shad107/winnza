@@ -106,7 +106,7 @@ function memoized(ctx: CollectContext): CollectContext {
     if (!p) { p = f(url); m.set(url, p); p.catch(() => m.delete(url)); }
     return p;
   };
-  return { fetchText: (u) => once(text, u, ctx.fetchText), fetchBytes: (u) => once(bytes, u, ctx.fetchBytes) };
+  return { fetchText: (u) => once(text, u, ctx.fetchText), fetchBytes: (u) => once(bytes, u, ctx.fetchBytes), postText: ctx.postText, secret: ctx.secret };
 }
 
 export async function runCollect(store: Store, reg: Registry, rawCtx: CollectContext, anchors: readonly Anchor[]): Promise<RunReport> {

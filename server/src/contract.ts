@@ -63,6 +63,11 @@ export type Observation = { seriesId: string; date: string; value: number };
 export type CollectContext = {
   fetchBytes: (url: string) => Promise<Uint8Array>;
   fetchText: (url: string) => Promise<string>;
+  /** requête POST (API qui demandent un corps, ex. Google Ads) ; jamais mise en cache */
+  postText: (url: string, body: string, headers: Record<string, string>) => Promise<string>;
+  /** un secret du serveur (variable d'environnement), ou null s'il n'est pas défini. Jamais en base, jamais
+   *  dans le dépôt ; le plugin déclare le NOM de la variable dans ses réglages, pas sa valeur. */
+  secret: (name: string) => string | null;
 };
 
 export type Collector = {

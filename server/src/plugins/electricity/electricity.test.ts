@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { buildRegistry, runCollect } from "../../runner.js";
 import { Store } from "../../store.js";
+import { NO_POST_NO_SECRET } from "../../test-net.js";
 import { electricityPlugin } from "./index.js";
 import { buildElectricityPage } from "../../pages/electricity-page.js";
 import { parseElecCatalog, parseElecDecl } from "./decl.js";
@@ -88,6 +89,7 @@ function fakeNet(opts: { swapHtTtc?: boolean; vatInsideTaxes?: boolean } = {}) {
   const tempoUrls: string[] = [];
   return {
     tempoUrls,
+    ...NO_POST_NO_SECRET,
     fetchBytes: async () => new Uint8Array(),
     fetchText: async (url: string) => {
       if (url.includes("nrg_pc_204_c")) return comp;

@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { buildRegistry, runCollect } from "../../runner.js";
 import { Store } from "../../store.js";
+import { NO_POST_NO_SECRET } from "../../test-net.js";
 import { parisDate, parseStationExport, stationExportUrl, parseStationsDecl, stationSeriesId, stationsPlugin, stationPrices, AREA_FRANCE, areaOfDepartment, areaOfRegion, STATION_PRICES_SNAPSHOT } from "./index.js";
 
 const decl = {
@@ -27,7 +28,7 @@ const row = (id: number, dep: string, region: string, price: number, maj: string
 
 function fakeNet(rows: unknown[]) {
   let calls = 0;
-  return { calls: () => calls, ctx: { fetchBytes: async () => new Uint8Array(), fetchText: async () => { calls++; return JSON.stringify(rows); } } };
+  return { calls: () => calls, ctx: { ...NO_POST_NO_SECRET, fetchBytes: async () => new Uint8Array(), fetchText: async () => { calls++; return JSON.stringify(rows); } } };
 }
 
 test("collecte : nos moyennes France, région, département, sur les prix à jour ; un seul téléchargement", async () => {

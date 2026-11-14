@@ -4,8 +4,9 @@ import { AGGREGATE, parseAnchors, type Anchor } from "./anchors.js";
 import { FREQUENCY, PLUGIN_CATEGORY, UNIT, type CollectContext, type Plugin } from "./contract.js";
 import { buildRegistry, runCollect } from "./runner.js";
 import { Store } from "./store.js";
+import { NO_POST_NO_SECRET } from "./test-net.js";
 
-const noNet: CollectContext = { fetchBytes: async () => new Uint8Array(), fetchText: async () => "" };
+const noNet: CollectContext = { ...NO_POST_NO_SECRET, fetchBytes: async () => new Uint8Array(), fetchText: async () => "" };
 
 /** Un plugin d'essai : sa série vaut ce que dit son réglage en base. */
 const plugin: Plugin = {

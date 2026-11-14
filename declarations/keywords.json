@@ -1,0 +1,37 @@
+{
+  "$comment": "Plugin mots-clés : ce que les gens tapent vraiment dans Google (Keyword Planner, API Google Ads), par page du site. Les identifiants ne sont JAMAIS ici : seulement les NOMS des variables d'environnement du serveur qui les portent (fichier .env du serveur, recopié du coffre « Google Ads API (Keyword Planner) »). Accès de niveau Basic du projet Cloud isno-512816 : pas de developer token.",
+  "source": {
+    "id": "google-keyword-planner",
+    "name": "Planificateur de mots-clés (API Google Ads)",
+    "publisher": "Google",
+    "url": "https://ads.google.com/home/tools/keyword-planner/",
+    "licence": "Données consultées par l'API Google Ads, usage éditorial interne (non publiées telles quelles)"
+  },
+  "api": {
+    "tokenUrl": "https://oauth2.googleapis.com/token",
+    "ideasUrl": "https://googleads.googleapis.com/v26/customers/{customer}:generateKeywordIdeas",
+    "geo": "geoTargetConstants/2250",
+    "language": "languageConstants/1002",
+    "network": "GOOGLE_SEARCH",
+    "secrets": {
+      "customerId": "GOOGLE_ADS_CUSTOMER_ID",
+      "clientId": "GOOGLE_ADS_CLIENT_ID",
+      "clientSecret": "GOOGLE_ADS_CLIENT_SECRET",
+      "refreshToken": "GOOGLE_ADS_REFRESH_TOKEN"
+    }
+  },
+  "keepDays": 30,
+  "perGroup": 100,
+  "groups": [
+    { "id": "plein", "page": "/", "label": "Prix du carburant, le plein", "seeds": ["prix essence", "prix carburant", "prix du gazole", "prix du litre d'essence"] },
+    { "id": "carte", "page": "/carte-des-stations", "label": "Station la moins chère", "seeds": ["station essence moins chère", "prix carburant autour de moi", "carte prix carburant"] },
+    { "id": "departements", "page": "/prix-par-departement", "label": "Prix par département", "seeds": ["prix carburant par département", "département essence moins chère"] },
+    { "id": "ville", "page": "/prix-carburant", "label": "Prix dans une ville", "seeds": ["prix gazole rennes", "prix essence paris", "prix carburant lyon", "prix gasoil marseille"] },
+    { "id": "prevision", "page": "/prevision", "label": "Le carburant va-t-il baisser", "seeds": ["le carburant va-t-il baisser", "prix carburant semaine prochaine", "baisse prix essence"] },
+    { "id": "taxes", "page": "/taxes", "label": "Taxes sur le carburant", "seeds": ["taxes carburant", "ticpe", "taxe sur l'essence"] },
+    { "id": "baril", "page": "/prix-du-baril", "label": "Prix du baril", "seeds": ["prix du baril", "prix du baril de pétrole", "cours du brent"] },
+    { "id": "europe", "page": "/europe", "label": "Carburant en Europe", "seeds": ["prix essence luxembourg", "prix gasoil espagne", "prix carburant belgique", "prix essence allemagne"] },
+    { "id": "electricite", "page": "/electricite", "label": "Prix de l'électricité", "seeds": ["prix du kwh", "tarif bleu edf", "couleur tempo", "tempo demain", "prix kwh électricité"] },
+    { "id": "cout-100-km", "page": "/cout-aux-100-km", "label": "Coût aux 100 km", "seeds": ["cout 100 km voiture electrique", "voiture electrique ou essence", "prix recharge voiture electrique"] }
+  ]
+}

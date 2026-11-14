@@ -8,3 +8,4 @@ data/
 .env.*
 build/
 .svelte-kit/
+collect.env

@@ -3,8 +3,10 @@
 #   docker compose run --rm collect                 une collecte (lancée chaque jour par cron)
 #
 # Le site rejoint le réseau du reverse-proxy existant (Caddy, réseau « coolify ») : pas de port public.
-# .env (jamais commité) : WINNZA_ADMIN_TOKEN (coffre « Winnza (www.winnza.eu) ») et MATOMO_TOKEN
-# (coffre « matomo.winnza.eu », champ token).
+# .env (jamais commité) : WINNZA_ADMIN_TOKEN (coffre « Winnza (www.winnza.eu) »), MATOMO_TOKEN
+# (coffre « matomo.winnza.eu », champ token). collect.env (jamais commité, collecte seulement) :
+# GOOGLE_ADS_CUSTOMER_ID, GOOGLE_ADS_CLIENT_ID, GOOGLE_ADS_CLIENT_SECRET, GOOGLE_ADS_REFRESH_TOKEN
+# (coffre « Google Ads API (Keyword Planner) »).
 services:
   web:
     build: .
@@ -28,6 +30,8 @@ services:
   collect:
     image: winnza:latest
     profiles: [collect]
+    # identifiants Google Ads du plugin mots-clés (GOOGLE_ADS_*) : un fichier à part, que le site ne lit pas
+    env_file: [collect.env]
     command: ["node", "server/dist/cli.js", "collect", "/data/energy.db"]
     volumes:
       - data:/data
