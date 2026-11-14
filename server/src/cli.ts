@@ -28,6 +28,8 @@ import { editorPlugin } from "./plugins/editor/index.js";
 import { stationNamesPlugin } from "./plugins/station-names/index.js";
 import { buildRegistry, runCollect } from "./runner.js";
 import { Store } from "./store.js";
+import { buildTrends } from "./pages/trends.js";
+import { parisDate } from "./units.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const declaration = (name: string): unknown => JSON.parse(readFileSync(join(ROOT, "declarations", name), "utf8"));
@@ -59,6 +61,12 @@ function settingsOf(store: Store, id: string): unknown {
 
 async function main(): Promise<void> {
   const [command, a, b] = process.argv.slice(2);
+  if (command === "trends") {
+    // tendances du jour pour l'IA qui gère le site (base en lecture seule), sur la sortie standard
+    const store = new Store(a ?? join(ROOT, "data", "energy.db"), { readonly: true });
+    try { console.log(JSON.stringify(buildTrends(store, parisDate()), null, 2)); } finally { store.close(); }
+    return;
+  }
   if (command === "outlines") {
     if (!a || !b) throw new Error("usage : node dist/cli.js outlines <departements.geojson> <declaration.json>");
     const current = JSON.parse(readFileSync(b, "utf8")) as Record<string, unknown>;

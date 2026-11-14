@@ -28,7 +28,8 @@ Dans le code, un test qui en a besoin l'écrit en séquence d'échappement (`\u2
 - `server/src/pages/*.ts` : les données de chaque page, calculées depuis la base seulement, testées.
 - `web/` : le site (SvelteKit, rendu serveur, Svelte 5, TypeScript). Il ne lit QUE la base.
 - `scripts/` : collecte quotidienne (`collect-and-alert.sh`), déploiement (`deploy.sh`,
-  `deploy-when-green.sh`).
+  `deploy-when-green.sh`), passage quotidien de l'IA qui gère le site (`agent-cron.sh`, `agent-run.sh`,
+  consignes dans `agent-prompt.md`, moteur et budget dans `declarations/agent.json`).
 
 ## Vérifier avant de pousser
 
