@@ -63,7 +63,7 @@ dans le code.
    structurées (FAQPage), `sitemap.xml`, `robots.txt`. Contenu prévu à l'origine : la barre « où va mon litre », 2008 contre aujourd'hui (baril en
    dollars, en euros, en euros constants), comparaison européenne, prix des stations (open data
    officiel : gazole, SP95, E10, SP98, E85, GPL).
-3. **Plugin électricité** : même barre de décomposition pour le kWh (énergie, réseau, taxes, TVA),
+3. **Plugin électricité** (fait le 14/11, sauf ENTSO-E) : même barre de décomposition pour le kWh (énergie, réseau, taxes, TVA),
    tarifs réglementés CRE depuis 2012, Tempo, prix de gros ENTSO-E (l'équivalent du baril).
 4. **Coût aux 100 km** : toutes les motorisations côte à côte. Essence, gazole, E85, GPL, GNV,
    hydrogène, hybride, électrique à la maison (Base, heures creuses, Tempo), sur borne, avec ses
@@ -93,6 +93,14 @@ au changement d'état de la collecte (`scripts/collect-and-alert.sh`, identifian
 (instantané `stations.prices`, 10 ans, environ 330 Mo par an) : nos propres moyennes France, 13 régions et
 96 départements en sont calculées (identiques à 4 décimales près à celles de la source le 14/11). La
 moyenne par ville se calculera du même historique, pour une page par ville.
+
+**14/11, matin** : page **/electricite** (plugin `electricity`). Tarifs réglementés de la CRE depuis 2012
+(Base, heures creuses, Tempo ; 6 et 9 kVA), accise et TVA calculées de chaque prix (le calcul retrouve les
+taux votés : 21 €/MWh en 2024, 33,70 €/MWh en 2025, deux ancres) ; le vrai prix du kWh abonnement compris ;
+composantes Eurostat (énergie, réseau, taxes, TVA) et prix de 27 pays. Piège Eurostat : la rubrique
+TAX_FEE_LEV_CHRG CONTIENT la TVA, vérifié sur 41 pays et contrôlé à chaque collecte. Couleur Tempo du jour
+et jours rouges et blancs restants. Relevée à 6 h 30 : la couleur du lendemain (publiée vers 11 h) n'y est
+pas encore ; une seconde collecte vers 11 h 30 l'ajouterait.
 
 ## Moteur de plugins partagé avec OpenCloudApp (décision du 2026-11-13)
 
