@@ -9,6 +9,8 @@ WORKDIR /app
 COPY server/package.json server/package-lock.json server/
 RUN cd server && npm ci
 COPY server/ server/
+# les tests lisent les vraies déclarations : ce qui part en production est ce qui est éprouvé
+COPY declarations/ declarations/
 RUN cd server && npm run build && npm test
 COPY web/package.json web/package-lock.json web/
 RUN cd web && npm ci
