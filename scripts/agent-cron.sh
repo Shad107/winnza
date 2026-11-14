@@ -68,10 +68,20 @@ PY
 echo "$started modèle $MODEL, code $rc, $COST" >> "$LOG"
 
 report=$(cat "$WORK/last.md" 2>/dev/null || echo "(aucun compte rendu : voir $WORK/run.err)")
+# la dépense en clair : ce passage, et le cumul du mois après lui
+SPEND_LINE=$(python3 - "$COST" "$SPENT" "$BUDGET" <<'PY'
+import json, sys
+c = json.loads(sys.argv[1]); t = c["tokens"]; spent = float(sys.argv[2]) + c["costUsd"]; budget = float(sys.argv[3])
+n = lambda x: f"{x:,}".replace(",", " ")
+d = lambda x: f"{x:.2f}".replace(".", ",")
+print(f"Coût de ce passage : {d(c['costUsd'])} $ ({n(t['input'])} jetons lus, dont {n(t['cachedInput'])} depuis le cache, et {n(t['output'])} écrits).")
+print(f"Dépense du mois : {d(spent)} $ sur {d(budget)} $ ({round(spent / budget * 100)} % du plafond).")
+PY
+)
 SUBJECT="[winnza] L'IA du site : compte rendu du $(date +%d/%m)"
 [ "$(date +%u)" = "$WEEKLY" ] && SUBJECT="[winnza] L'IA du site : bilan de la semaine et propositions ($(date +%d/%m))"
 alert_send "$SUBJECT" "$report
 
-Passage : modèle $MODEL, code de sortie $rc, $COST.
-Dépense du mois avant ce passage : $SPENT \$ sur $BUDGET \$.
+$SPEND_LINE
+Modèle : $MODEL, code de sortie $rc.
 Journal : $LOG ; sorties : $WORK"
