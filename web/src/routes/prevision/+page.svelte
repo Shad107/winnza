@@ -18,7 +18,8 @@
 
   const faq = $derived(best ? [
     { q: 'Le prix du carburant va-t-il baisser la semaine prochaine ?', a: `Pour la semaine qui vient, d'après le marché de gros : ${answer} Ce n'est pas une certitude : depuis ${best.track.since.slice(0, 4)}, quand le signal était net, le sens annoncé était juste ${rate(best.track.strongHits, best.track.strongWeeks)} du temps pour le ${best.label.toLowerCase()}.` },
-    { q: 'Faut-il faire le plein maintenant ou attendre ?', a: "Si une baisse est probable et que votre réservoir n'est pas presque vide, attendre quelques jours peut faire gagner quelques euros. Si une hausse est probable, autant faire le plein tôt. Sans tendance nette, rien ne sert d'attendre." },
+    { q: 'Faut-il faire le plein maintenant ou attendre ?', a: "La prévision indique une tendance nationale, sans garantir le prix de votre prochain plein ni la date d'un changement dans votre station. Pour décider, comparez les prix locaux à jour et tenez compte de vos trajets et du carburant qu'il vous reste." },
+    { q: 'Une baisse annoncée concerne-t-elle toutes les stations ?', a: "Chaque station fixe son prix et ne le modifie pas au même moment. Un signal de baisse sur le marché de gros peut donc coexister avec un prix stable ou en hausse près de chez vous. La carte des stations et les pages par ville permettent de consulter les derniers prix déclarés, avec leur date de relevé." },
     { q: 'Comment Winnza fait-il sa prévision ?', a: "Les prix à la pompe suivent ceux du gazole et de l'essence sur les marchés de gros, avec environ une semaine de retard. Winnza compare leur moyenne des cinq derniers jours à celle de la semaine précédente. La méthode a été testée sur les prix réels depuis 2006 avant d'être publiée." },
   ] : []);
 </script>
@@ -31,7 +32,7 @@
   <section class="page-head" aria-labelledby="titre">
     <p class="chip"><Icon name={ICON.chart} size={16} />Prévision recalculée chaque jour</p>
     <h1 class="h1" id="titre">Le carburant va-t-il baisser&#160;?</h1>
-    <p class="intro">Les prix à la pompe suivent le marché de gros avec environ une semaine de retard. Voici ce que ce marché annonce pour les jours qui viennent, et à quel point la méthode s'est trompée par le passé.</p>
+    <p class="intro">Une baisse de l'essence ou du gazole sur le marché de gros peut se transmettre à la pompe avec quelques jours de retard. Voici la tendance pour les jours qui viennent, avec le bilan des erreurs de la méthode. Elle ne garantit pas une baisse dans votre station.</p>
   </section>
 
   {#if fc}
@@ -44,6 +45,11 @@
   {:else}
     <section class="section"><p class="lead">La prévision n'est pas disponible pour le moment.</p></section>
   {/if}
+
+  <section class="section" aria-labelledby="baisse-locale">
+    <h2 class="h2" id="baisse-locale">Comment vérifier une baisse près de chez vous ?</h2>
+    <p class="lead">Consultez les <a href="/prix-carburant">prix du carburant dans votre ville</a> ou la <a href="/carte-des-stations">carte des stations</a>, puis vérifiez la date de chaque relevé. Comparez le même carburant : une moyenne nationale ou un prix de gros ne remplace pas le prix affiché dans la station où vous comptez faire le plein.</p>
+  </section>
 
   <section class="section" aria-labelledby="methode">
     <h2 class="h2" id="methode">Une méthode testée avant d'être publiée</h2>
