@@ -64,6 +64,7 @@
   const tempoPrices = $derived(el.options.find((o) => o.id === 'tempo')?.powers.find((p) => p.kva === kva) ?? null);
 
   const faq = $derived([
+    { q: "Si le prix de gros baisse, ma facture baisse-t-elle aussi ?", a: "Pas automatiquement. Le prix de gros affiché ici concerne l'électricité échangée la veille pour le lendemain. Le tarif réglementé suit son propre calendrier de révision ; une offre de marché dépend des conditions de votre contrat. Le réseau, les taxes et l'abonnement entrent aussi dans la facture. Une baisse du marché sur une journée ne suffit donc pas à annoncer une baisse de votre tarif." },
     ...(baseKwh && basePower ? [
       { q: 'Quel est le prix du kWh EDF en ce moment ?', a: `Au tarif réglementé (tarif Bleu d'EDF), option Base, ${kva} kVA : ${eur4(baseKwh.ttc)} le kWh toutes taxes comprises depuis le ${longDate(basePower.since)}, plus un abonnement de ${eur2(basePower.subscriptionTtc)} par an.` },
       { q: 'Pourquoi le vrai prix du kWh est-il plus élevé que le tarif affiché ?', a: `Parce que l'abonnement se paie en plus, quelle que soit votre consommation. Pour ${kwhYear.toLocaleString('fr-FR')} kWh par an, il ajoute ${eur4(basePower.subscriptionTtc / kwhYear)} à chaque kWh : le vrai prix monte à ${eur4(truePrice ?? 0)}. Moins vous consommez, plus l'abonnement pèse.` },
@@ -161,7 +162,7 @@
     {@const w = el.wholesale}
     <section class="section" aria-labelledby="gros">
       <h2 class="h2" id="gros">Le prix de gros : ce que vaut le kWh sur le marché</h2>
-      <p class="lead">L'équivalent du baril pour l'électricité : le prix auquel elle s'échange la veille pour le lendemain. Les fournisseurs l'achètent en partie à ce prix, puis s'ajoutent le réseau, les taxes et leur marge.</p>
+      <p class="lead">Le prix auquel l'électricité s'échange la veille pour le lendemain peut fortement varier d'un jour à l'autre. Les fournisseurs achètent aussi de l'électricité à l'avance : ce cours ne représente pas tout leur coût d'achat. Une baisse du marché ne modifie donc pas automatiquement votre tarif. Le réseau, les taxes et l'abonnement entrent aussi dans votre facture.</p>
       <div class="card pad">
         <div class="headline" style="margin-top: 0">
           <span class="mid">{eur4(w.latest.value)}</span>
