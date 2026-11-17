@@ -32,5 +32,7 @@ export const memeWeek = (m: Meme): number => isoWeek(m.date);
 /** L'adresse publique du mème et celle de son image à partager (légendes comprises). */
 export const memePath = (slug: string) => `/memes/${slug}`;
 export const memePngPath = (slug: string) => `/images/${slug}.png`;
+/** l'aperçu pour les réseaux sociaux (1200 × 630) */
+export const memeSharePath = (slug: string) => `/partage/${slug}.png`;
 /** l'image du dernier mème, à une adresse fixe (partage de l'accueil, vérification du déploiement) */
 export const LATEST = 'dernier';

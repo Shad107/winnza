@@ -7,7 +7,7 @@
   const m = $derived(data.meme);
 </script>
 
-<Seo site={data.site} page={{ path: m.href, title: `${m.title} | ${data.site.name}`, description: m.lead.length > 158 ? m.lead.slice(0, 157) + '…' : m.lead, modified: m.date }} image={m.png} />
+<Seo site={data.site} page={{ path: m.href, title: `${m.title} | ${data.site.name}`, description: m.lead.length > 158 ? m.lead.slice(0, 157) + '…' : m.lead, modified: m.date }} image={m.share} imageAlt="{m.alt} Légendes : {m.top} / {m.bottom}." article />
 
 <main class="wrap">
   <span class="badge">Semaine {m.week} · {longDate(m.date)}</span>

@@ -4,7 +4,7 @@
   let { data } = $props();
 </script>
 
-<Seo site={data.site} page={{ path: '/personnages', title: `Les personnages | ${data.site.name}`, description: "Les personnages inventés des mèmes de Winnza, qui reviennent d'une semaine à l'autre." }} image="/images/dernier.png" />
+<Seo site={data.site} page={{ path: '/personnages', title: `Les personnages | ${data.site.name}`, description: "Les personnages inventés des mèmes de Winnza, qui reviennent d'une semaine à l'autre." }} image="/partage/dernier.png" imageAlt="Le dernier mème de Winnza." />
 
 <main class="wrap">
   <h1>Les personnages</h1>

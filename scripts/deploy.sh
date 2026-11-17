@@ -12,7 +12,7 @@ cd "$(dirname "$0")/.."
 SITE="${WINNZA_SITE:-https://www.winnza.eu}"
 # adresses vérifiées après chaque déploiement : l'accueil, le plan du site, l'état public, et l'image du
 # dernier mème (sans police, elle répond 500)
-CHECK_PATHS=(/ /sitemap.xml /etat.json /images/dernier.png)
+CHECK_PATHS=(/ /sitemap.xml /etat.json /images/dernier.png /partage/dernier.png)
 LOG=/var/log/winnza-deploy.log
 log() { echo "$(date -u +%FT%TZ) $*" | sudo tee -a "$LOG" >&2; }
 
