@@ -4,11 +4,12 @@
   let { data } = $props();
 </script>
 
-<Seo site={data.site} page={{ path: '/personnages', title: `Les personnages | ${data.site.name}`, description: "Les personnages inventés des mèmes de Winnza, qui reviennent d'une semaine à l'autre." }} image="/partage/dernier.png" imageAlt="Le dernier mème de Winnza." />
+<Seo site={data.site} page={{ path: '/personnages', title: `Les personnages | ${data.site.name}`, description: "Les personnages inventés des mèmes de Winnza, qui reviennent d'une semaine à l'autre." }} image={data.hasMemes ? '/partage/dernier.png' : null} imageAlt="Le dernier mème de Winnza." />
 
 <main class="wrap">
   <h1>Les personnages</h1>
   <p class="lead">Tous inventés, tous de mauvaise foi. Ils reviennent d'une semaine à l'autre, au gré de l'actualité. Toute ressemblance avec une personne réelle serait une erreur de l'IA : signalez-la.</p>
+  {#if !data.cast.length}<p class="lead">La troupe se forme : les premiers personnages arrivent avec le premier mème.</p>{/if}
   {#each data.cast as c (c.id)}
     <section class="card who" id={c.id}>
       <h2>{c.name}</h2>

@@ -7,7 +7,7 @@
   let { data } = $props();
 </script>
 
-<Seo site={data.site} page={{ path: '/', title: `${data.site.name} : l'actualité de la semaine en un mème satirique`, description: data.site.description, modified: data.latest?.date }} image="/partage/dernier.png" imageAlt={data.latest ? `${data.latest.alt} Légendes : ${data.latest.top} / ${data.latest.bottom}.` : data.site.name} />
+<Seo site={data.site} page={{ path: '/', title: `${data.site.name} : l'actualité de la semaine en un mème satirique`, description: data.site.description, modified: data.latest?.date }} image={data.latest ? '/partage/dernier.png' : null} imageAlt={data.latest ? `${data.latest.alt} Légendes : ${data.latest.top} / ${data.latest.bottom}.` : data.site.name} />
 
 <main class="wrap">
   <section class="hero">
@@ -19,7 +19,7 @@
   {#if data.latest}
     <MemeCard meme={data.latest} siteUrl={data.site.url} />
   {:else}
-    <p class="lead">Le premier mème arrive cette semaine.</p>
+    <p class="lead">Le premier mème arrive très bientôt : l'IA lit l'actualité.</p>
   {/if}
 
   {#if data.previous.length}
