@@ -1,31 +1,14 @@
 // Les plugins livrés avec Winnza, et où sont rangés leur état et leurs réglages en base. Lu par la
 // collecte et par l'administration : une seule liste.
 import type { Plugin } from "../contract.js";
-import { fuelPlugin } from "./fuel/index.js";
-import { hiddenChargesPlugin } from "./hidden-charges/index.js";
 import { sitePlugin } from "./site/index.js";
-import { stationsPlugin } from "./stations/index.js";
 import { matomoPlugin } from "./matomo/index.js";
-import { forecastPlugin } from "./forecast/index.js";
-import { mapPlugin } from "./map/index.js";
-import { stationNamesPlugin } from "./station-names/index.js";
-import { electricityPlugin } from "./electricity/index.js";
-import { runningCostPlugin } from "./running-cost/index.js";
 import { keywordsPlugin } from "./keywords/index.js";
-import { editorPlugin } from "./editor/index.js";
 import { searchConsolePlugin } from "./search-console/index.js";
 
 export const BUILTIN_PLUGINS: Readonly<Record<string, Plugin>> = {
-  [fuelPlugin.id]: fuelPlugin, [hiddenChargesPlugin.id]: hiddenChargesPlugin, [sitePlugin.id]: sitePlugin,
-  [stationsPlugin.id]: stationsPlugin, [matomoPlugin.id]: matomoPlugin,
-  [forecastPlugin.id]: forecastPlugin,
-  [mapPlugin.id]: mapPlugin,
-  [stationNamesPlugin.id]: stationNamesPlugin,
-  [electricityPlugin.id]: electricityPlugin,
-  [runningCostPlugin.id]: runningCostPlugin,
-  [keywordsPlugin.id]: keywordsPlugin,
-  [editorPlugin.id]: editorPlugin,
-  [searchConsolePlugin.id]: searchConsolePlugin,
+  [sitePlugin.id]: sitePlugin, [matomoPlugin.id]: matomoPlugin,
+  [keywordsPlugin.id]: keywordsPlugin, [searchConsolePlugin.id]: searchConsolePlugin,
 };
 
 /** Règles des plugins actifs : tous actifs tant que rien n'est enregistré, aucun imposé d'office. */

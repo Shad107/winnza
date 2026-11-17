@@ -102,6 +102,15 @@ async function accessToken(ctx: CollectContext, decl: KeywordsDecl): Promise<{ t
   return { token: res.access_token, customer };
 }
 
+/** Les idées de Keyword Planner pour une liste de mots (volumes mensuels en France, concurrence, 12 mois),
+ *  `limit` au plus. Sert au plugin (groupes déclarés) et à l'IA du site, à la demande (cli.ts keyword-ideas). */
+export async function keywordIdeas(ctx: CollectContext, decl: KeywordsDecl, group: KeywordGroup, limit: number, auth?: { token: string; customer: string }): Promise<KeywordIdea[]> {
+  const { token, customer } = auth ?? await accessToken(ctx, decl);
+  const body = JSON.stringify({ keywordSeed: { keywords: group.seeds }, geoTargetConstants: [decl.api.geo], language: decl.api.language, keywordPlanNetwork: decl.api.network });
+  const text = await ctx.postText(decl.api.ideasUrl.replace("{customer}", customer), body, { authorization: `Bearer ${token}`, "content-type": "application/json" });
+  return parseIdeas(text, group, limit);
+}
+
 export const keywordsPlugin: Plugin = {
   id: "keywords",
   title: { fr: "Mots-clés", en: "Keywords" },
@@ -116,13 +125,11 @@ export const keywordsPlugin: Plugin = {
     api.declareSetting({ key: KEYWORDS_SETTING, value: decl.groups });
     api.declareSnapshot({ id: KEYWORDS_SNAPSHOT, label: "Idées de mots-clés par page, volumes et tendance", sourceId: decl.source.id, keepDays: decl.keepDays, optional: true });
     api.registerSnapshotCollector({ id: "keywords.ideas", snapshot: KEYWORDS_SNAPSHOT, run: async (ctx) => {
-      const { token, customer } = await accessToken(ctx, decl);
+      const auth = await accessToken(ctx, decl);
       const items: SnapshotItem[] = [];
       for (const g of decl.groups) {
-        const body = JSON.stringify({ keywordSeed: { keywords: g.seeds }, geoTargetConstants: [decl.api.geo], language: decl.api.language, keywordPlanNetwork: decl.api.network });
-        const text = await ctx.postText(decl.api.ideasUrl.replace("{customer}", customer), body, { authorization: `Bearer ${token}`, "content-type": "application/json" });
         // une même idée peut sortir dans deux groupes : la clé porte le groupe
-        for (const idea of parseIdeas(text, g, decl.perGroup)) items.push({ key: `${g.id}|${idea.text}`, value: idea });
+        for (const idea of await keywordIdeas(ctx, decl, g, decl.perGroup, auth)) items.push({ key: `${g.id}|${idea.text}`, value: idea });
       }
       return { date: parisDate(), items };
     } });

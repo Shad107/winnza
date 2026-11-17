@@ -7,48 +7,32 @@
 // La base est la seule vérité : un plugin lit ses réglages en base. Les fichiers de declarations/ ne
 // servent qu'à INITIALISER une base neuve (ou à recharger un plugin avec `seed`), en attendant l'écran
 // d'administration et le plugin IA.
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { enabledIn, type EnabledState } from "@isno-open/plugin-host";
 import { parseAnchors } from "./anchors.js";
 import { httpContext } from "./http.js";
 import { BUILTIN_PLUGINS as BUILTINS, ENABLED_RULES as RULES, PLUGINS_ENABLED_SETTING, pluginSettingKey as settingKey } from "./plugins/builtins.js";
-import { fuelPlugin } from "./plugins/fuel/index.js";
-import { hiddenChargesPlugin } from "./plugins/hidden-charges/index.js";
 import { sitePlugin } from "./plugins/site/index.js";
-import { stationsPlugin } from "./plugins/stations/index.js";
 import { matomoPlugin } from "./plugins/matomo/index.js";
-import { forecastPlugin } from "./plugins/forecast/index.js";
-import { mapPlugin, outlinesFromGeoJson, parseMapDecl } from "./plugins/map/index.js";
-import { electricityPlugin } from "./plugins/electricity/index.js";
-import { runningCostPlugin } from "./plugins/running-cost/index.js";
-import { keywordsPlugin } from "./plugins/keywords/index.js";
-import { editorPlugin } from "./plugins/editor/index.js";
+import { keywordIdeas, keywordsPlugin, parseKeywordsDecl } from "./plugins/keywords/index.js";
 import { searchConsolePlugin } from "./plugins/search-console/index.js";
-import { stationNamesPlugin } from "./plugins/station-names/index.js";
 import { buildRegistry, runCollect } from "./runner.js";
 import { Store } from "./store.js";
 import { buildTrends } from "./pages/trends.js";
 import { parisDate } from "./units.js";
 
+/** Keyword Planner à la demande : au plus 10 mots par appel (limite de l'API : 20), 40 idées, 4 derniers mois. */
+const KEYWORD_IDEAS = { maxWords: 10, limit: 40, months: 4 } as const;
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const declaration = (name: string): unknown => JSON.parse(readFileSync(join(ROOT, "declarations", name), "utf8"));
 
 /** Réglages initiaux de chaque plugin, lus dans declarations/. */
 const SEEDS: Record<string, () => unknown> = {
-  [fuelPlugin.id]: () => declaration("fuel.json"),
-  [hiddenChargesPlugin.id]: () => declaration("hidden-charges.json"),
-  [sitePlugin.id]: () => ({ site: declaration("site.json"), fuelPage: declaration("fuel-page.json") }),
-  [stationsPlugin.id]: () => declaration("stations.json"),
+  [sitePlugin.id]: () => ({ site: declaration("site.json") }),
   [matomoPlugin.id]: () => declaration("matomo.json"),
-  [forecastPlugin.id]: () => declaration("forecast.json"),
-  [mapPlugin.id]: () => declaration("map.json"),
-  [stationNamesPlugin.id]: () => declaration("station-names.json"),
-  [electricityPlugin.id]: () => declaration("electricity.json"),
-  [runningCostPlugin.id]: () => declaration("running-cost.json"),
   [keywordsPlugin.id]: () => declaration("keywords.json"),
-  [editorPlugin.id]: () => declaration("editor.json"),
   [searchConsolePlugin.id]: () => declaration("search-console.json"),
 };
 
@@ -69,13 +53,13 @@ async function main(): Promise<void> {
     try { console.log(JSON.stringify(buildTrends(store, parisDate()), null, 2)); } finally { store.close(); }
     return;
   }
-  if (command === "outlines") {
-    if (!a || !b) throw new Error("usage : node dist/cli.js outlines <departements.geojson> <declaration.json>");
-    const current = JSON.parse(readFileSync(b, "utf8")) as Record<string, unknown>;
-    const next = { ...current, ...outlinesFromGeoJson(JSON.parse(readFileSync(a, "utf8")), 600) };
-    parseMapDecl(next);   // on n'écrit qu'une déclaration que le plugin acceptera
-    writeFileSync(b, JSON.stringify(next) + "\n");
-    console.log(`${next.shapes.length} départements, ${JSON.stringify(next).length} octets`);
+  if (command === "keyword-ideas") {
+    // Keyword Planner à la demande, pour l'IA qui gère le site : node dist/cli.js keyword-ideas "mot 1" "mot 2"
+    // Les identifiants Google sont lus dans l'environnement (variables nommées dans declarations/keywords.json).
+    const words = process.argv.slice(3).map((w) => w.trim()).filter(Boolean);
+    if (!words.length || words.length > KEYWORD_IDEAS.maxWords) throw new Error(`usage : node dist/cli.js keyword-ideas "mot" ... (de 1 à ${KEYWORD_IDEAS.maxWords} mots)`);
+    const ideas = await keywordIdeas(httpContext, parseKeywordsDecl(declaration("keywords.json")), { id: "demande", page: "/", label: "à la demande", seeds: words }, KEYWORD_IDEAS.limit);
+    console.log(JSON.stringify(ideas.map((i) => ({ text: i.text, volume: i.volume, competition: i.competition, lastMonths: i.months.slice(-KEYWORD_IDEAS.months) })), null, 2));
     return;
   }
   const dbPath = (command === "seed" ? b : a) ?? join(ROOT, "data", "energy.db");
@@ -93,7 +77,7 @@ async function main(): Promise<void> {
       return;
     }
     if (command !== "collect") {
-      console.error("usage : node dist/cli.js collect|plugins [base] ; node dist/cli.js seed <plugin> [base]");
+      console.error("usage : node dist/cli.js collect|plugins [base] ; seed <plugin> [base] ; trends [base] ; keyword-ideas \"mot\" ...");
       process.exitCode = 2;
       return;
     }

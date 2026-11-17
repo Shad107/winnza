@@ -3,12 +3,8 @@
 // configuration du serveur.
 import type { SiteReader } from "../contract.js";
 import type { Store } from "../store.js";
-import { OIL_SERIES, FUEL_PART, fuelSeriesId } from "../plugins/fuel/series-ids.js";
-import { AREA_FRANCE, STATIONS_SNAPSHOT, stationSeriesId } from "../plugins/stations/index.js";
-import { STATION_NAMES_SNAPSHOT } from "../plugins/station-names/index.js";
-import { TEMPO_SERIES, wholesaleSeriesId } from "../plugins/electricity/series-ids.js";
 import { KEYWORDS_SNAPSHOT } from "../plugins/keywords/index.js";
-import { EDITOR_SNAPSHOT } from "../plugins/editor/model.js";
+import { SEARCH_CONSOLE_SNAPSHOT } from "../plugins/search-console/index.js";
 
 /** Masque ce qui pourrait ressembler à un secret dans un message d'erreur (paramètre de clé, jeton long). */
 export function redact(msg: string): string {
@@ -25,12 +21,9 @@ export type Status = {
   collects: { startedAt: string; finishedAt: string | null; ok: boolean; observations: number; message: string | null; warnings: string[] }[];
   deploy: { commit: string; result: string } | null;
   freshness: Freshness[];
-  /** pages optionnelles retirées faute de données valables (voir web/src/lib/server/data.ts) */
-  pageErrors: string[];
 };
 
-export function buildStatus(store: Store & SiteReader, deployState: string | null, pageErrors: readonly string[]): Status {
-  const series = (what: string, id: string): Freshness => ({ what, latest: store.get(id).at(-1)?.date ?? null });
+export function buildStatus(store: Store & SiteReader, deployState: string | null): Status {
   const snap = (what: string, id: string): Freshness => ({ what, latest: store.snapshotDates(id).at(-1) ?? null });
   const [commit, result] = (deployState ?? "").trim().split(/\s+/, 2);
   return {
@@ -38,16 +31,8 @@ export function buildStatus(store: Store & SiteReader, deployState: string | nul
     collects: store.recentRuns(10).map((r) => ({ ...r, message: r.message && redact(r.message), warnings: r.warnings.map(redact) })),
     deploy: commit ? { commit, result: result ?? "" } : null,
     freshness: [
-      series("prix à la pompe, bulletin européen (hebdomadaire)", fuelSeriesId("FR", "diesel", FUEL_PART.ttc)),
-      series("Brent", OIL_SERIES.brentUsd),
-      series("moyenne des stations, France", stationSeriesId(AREA_FRANCE, "gazole", "avg")),
-      snap("relevé des stations", STATIONS_SNAPSHOT),
-      snap("noms des stations (OpenStreetMap)", STATION_NAMES_SNAPSHOT),
-      series("prix de gros de l'électricité", wholesaleSeriesId("FR")),
-      series("couleur Tempo", TEMPO_SERIES),
       snap("mots-clés (Keyword Planner)", KEYWORDS_SNAPSHOT),
-      snap("propositions de l'IA rédactrice", EDITOR_SNAPSHOT),
+      snap("recherches Google (Search Console)", SEARCH_CONSOLE_SNAPSHOT),
     ],
-    pageErrors: [...pageErrors].map(redact),
   };
 }

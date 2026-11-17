@@ -9,7 +9,8 @@ import { KEYWORDS_SNAPSHOT, keywordsPlugin, parseIdeas, parseKeywordsDecl, type 
 
 const DECL = JSON.parse(readFileSync(join(import.meta.dirname, "../../../../declarations/keywords.json"), "utf8")) as Record<string, unknown>;
 const decl = parseKeywordsDecl(DECL);
-const group = decl.groups[0]!;
+/** un groupe fixe, indépendant de la déclaration du moment, dont « prix essence » est une graine */
+const group = { ...decl.groups[0]!, seeds: ["prix essence"] };
 
 const IDEAS = JSON.stringify({ results: [
   { text: "prix essence", keywordIdeaMetrics: { avgMonthlySearches: "90500", competition: "LOW", monthlySearchVolumes: [{ month: "OCTOBER", year: "2026", monthlySearches: "110000" }] } },

@@ -4,7 +4,7 @@ Winnza (https://www.winnza.eu) est un **site satirique** : chaque semaine, l'act
 troupe de personnages inventés qui reviennent d'une semaine à l'autre. Gratuit, sans compte, sans publicité.
 Le site est **géré par une IA** : ce fichier est écrit pour elle autant que pour un humain. (Jusqu'au
 2026-11-17, Winnza était un site sur le vrai prix de l'énergie : son dernier état est l'étiquette git
-`energie-2026-11`. La collecte de ces données tourne encore, pour l'instant, sans page qui l'affiche.)
+`energie-2026-11`.)
 
 ## Langue
 
@@ -27,8 +27,10 @@ Dans le code, un test qui en a besoin l'écrit en séquence d'échappement (`\u2
 - `web/` : le site (SvelteKit, rendu serveur, Svelte 5, TypeScript). Un seul dessin pour un mème
   (`web/src/lib/server/meme-svg.ts`) : SVG dans la page, PNG pour le partage (`/images/<sujet>.png`).
 - `server/` : le socle (TypeScript, SQLite) et ses plugins (`server/src/plugins/<id>/`, contrat
-  `server/src/contract.ts`), configurés par `declarations/<plugin>.json`. Le site y lit son identité (plugin
-  site) et sa mesure d'audience (plugin matomo). Une valeur qui décrit une source ou le produit se déclare
+  `server/src/contract.ts`), configurés par `declarations/<plugin>.json` : site (identité), matomo (audience),
+  keywords (Keyword Planner) et search-console. Le site y lit son identité et sa mesure d'audience ; l'IA y
+  lit les tendances de recherche, et interroge Keyword Planner à la demande
+  (`node server/dist/cli.js keyword-ideas "mot" ...`). Une valeur qui décrit une source ou le produit se déclare
   dans `declarations/`, jamais dans le code ; un commit qui modifie une déclaration la fait ressemer en base
   au déploiement (le dépôt fait foi).
 - `scripts/` : déploiement (`deploy.sh`, `deploy-when-green.sh`), passage quotidien de l'IA qui gère le site

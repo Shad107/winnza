@@ -10,6 +10,6 @@ const STATE_DIR = process.env.WINNZA_STATE_DIR;
 export const GET = () => {
   let deploy: string | null = null;
   try { deploy = STATE_DIR ? readFileSync(join(STATE_DIR, 'deploy.state'), 'utf8') : null; } catch { deploy = null; }
-  const status = withReadStore((s) => buildStatus(s, deploy, []));
+  const status = withReadStore((s) => buildStatus(s, deploy));
   return new Response(JSON.stringify(status, null, 2), { headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
 };
