@@ -1,5 +1,5 @@
 // Règles d'écriture valables pour tout le dépôt (CLAUDE.md) : aucun tiret cadratin ni demi-cadratin, dans
-// aucun fichier suivi par git. Un test qui en a besoin l'écrit en séquence d'échappement (—).
+// aucun fichier suivi par git. Un test qui en a besoin l'écrit en séquence d'échappement (\u2014).
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
@@ -10,7 +10,7 @@ const ROOT = join(process.cwd(), "..");
 /** hors d'un dépôt git (construction Docker, sans .git) la liste des fichiers suivis n'existe pas : ce test-là
  *  est alors sauté, et c'est l'intégration continue, qui a le dépôt complet, qui l'exécute */
 const IN_REPO = (() => { try { execFileSync("git", ["rev-parse", "--is-inside-work-tree"], { cwd: ROOT, stdio: "ignore" }); return true; } catch { return false; } })();
-const DASH = /[–—]/;
+const DASH = /[\u2013\u2014]/;
 /** les fichiers binaires ne contiennent pas de texte à relire */
 const BINARY = /\.(jpe?g|png|gif|webp|ico|woff2?|ttf|otf|pdf)$/i;
 
@@ -19,7 +19,7 @@ export const dashLines = (file: string, text: string): string[] =>
   text.split("\n").flatMap((l, i) => (DASH.test(l) ? [`${file}:${i + 1}`] : []));
 
 test("tirets : le contrôle sait échouer (témoin)", () => {
-  assert.deepEqual(dashLines("a.md", "ligne\nune incise — ici\nfin – ok"), ["a.md:2", "a.md:3"]);
+  assert.deepEqual(dashLines("a.md", "ligne\nune incise \u2014 ici\nfin \u2013 ok"), ["a.md:2", "a.md:3"]);
   assert.deepEqual(dashLines("a.md", "un tiret court - permis"), []);
 });
 

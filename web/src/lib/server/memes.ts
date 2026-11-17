@@ -24,6 +24,10 @@ export const findCharacter = (id: string): Character | null => cast.find((c) => 
 /** Les mèmes où joue un personnage, du plus récent au plus ancien. */
 export const appearances = (id: string): readonly Meme[] => memes.filter((m) => m.characters.includes(id));
 
+/** la vidéo gag, quand le mème en a une (fichier statique, empreinte dans le nom) */
+const videos = import.meta.glob('../../../../content/memes/*.mp4', { query: '?url', import: 'default', eager: true }) as Record<string, string>;
+export const memeVideoUrl = (slug: string): string | null => videos[`${DIR}${slug}.mp4`] ?? null;
+
 export const findMeme = (slug: string): Meme | null => memes.find((m) => m.slug === slug) ?? null;
 export const memeImageUrl = (slug: string): string | null => urls[`${DIR}${slug}.jpg`] ?? null;
 export const memeImageInline = (slug: string): string | null => inline[`${DIR}${slug}.jpg`] ?? null;

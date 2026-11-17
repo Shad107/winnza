@@ -39,6 +39,8 @@ const memeSchema = z.strictObject({
   previous: z.string().optional(),
   /** la consigne donnée à l'IA d'image, gardée pour qu'on sache d'où vient l'image */
   imagePrompt: z.string().min(1),
+  /** la mise en scène de la vidéo gag tirée de la photo (content/memes/<sujet>.mp4), quand il y en a une */
+  videoPrompt: z.string().min(1).optional(),
 });
 export type Meme = z.infer<typeof memeSchema> & { slug: string };
 
@@ -114,6 +116,30 @@ export function checkMemeImage(slug: string, bytes: Uint8Array | null): string[]
   if (!(bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff)) problems.push(`${slug} : l'image n'est pas un JPEG`);
   if (bytes.length > MEME_IMAGE_MAX_BYTES) problems.push(`${slug} : image de ${bytes.length} octets (au plus ${MEME_IMAGE_MAX_BYTES})`);
   return problems;
+}
+
+/** Poids maximal de la vidéo, en octets. */
+export const MEME_VIDEO_MAX_BYTES = 8_000_000;
+
+/** La vidéo gag, facultative : une vraie MP4 pas trop lourde, et une vidéo seulement avec sa mise en scène
+ *  écrite (videoPrompt), une mise en scène seulement avec sa vidéo. */
+export function checkMemeVideo(m: Meme, bytes: Uint8Array | null): string[] {
+  if (!bytes) return m.videoPrompt === undefined ? [] : [`${m.slug} : videoPrompt sans vidéo ${m.slug}.mp4 (retirer l'un ou ajouter l'autre)`];
+  const problems: string[] = [];
+  if (m.videoPrompt === undefined) problems.push(`${m.slug} : vidéo ${m.slug}.mp4 sans videoPrompt`);
+  // une MP4 commence par une boîte « ftyp » : 4 octets de taille, puis les lettres f t y p
+  if (String.fromCharCode(...bytes.slice(4, 8)) !== "ftyp") problems.push(`${m.slug} : la vidéo n'est pas une MP4`);
+  if (bytes.length > MEME_VIDEO_MAX_BYTES) problems.push(`${m.slug} : vidéo de ${bytes.length} octets (au plus ${MEME_VIDEO_MAX_BYTES})`);
+  return problems;
+}
+
+/** La vidéo ne se télécharge que depuis un domaine déclaré du fournisseur, en https : une adresse ailleurs
+ *  serait une erreur ou un piège. */
+export function allowedVideoUrl(url: string, hosts: readonly string[]): boolean {
+  try {
+    const u = new URL(url);
+    return u.protocol === "https:" && hosts.some((h) => u.hostname === h || u.hostname.endsWith(`.${h}`));
+  } catch { return false; }
 }
 
 /** Le numéro de semaine ISO d'une date AAAA-MM-JJ (« Semaine 47. »). */

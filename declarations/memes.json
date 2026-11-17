@@ -1,5 +1,5 @@
 {
-  "$comment": "Le mème satirique de la semaine (décision d'Olivier du 2026-11-17 : Winnza devient un site de mèmes d'actualité, ton satirique, design « Pop »). L'image de fond est engendrée par une IA d'image, SANS aucun texte : les légendes sont posées par le site. Commande : cd server && npm run meme:image -- <AAAA-MM-JJ-sujet>. La clé n'est jamais ici : la variable OPENAI_API_KEY, ou à défaut le champ keyField du fichier keyFile (chemin relatif au dossier personnel). news : les flux gratuits où l'IA cherche le sujet de la semaine.",
+  "$comment": "Le mème satirique de la semaine (décision d'Olivier du 2026-11-17 : Winnza devient un site de mèmes d'actualité, ton satirique, design « Pop »). L'image de fond est engendrée par une IA d'image, SANS aucun texte : les légendes sont posées par le site. Commande : cd server && npm run meme:image -- <AAAA-MM-JJ-sujet>. La clé n'est jamais ici : la variable OPENAI_API_KEY, ou à défaut le champ keyField du fichier keyFile (chemin relatif au dossier personnel). news : les flux gratuits où l'IA cherche le sujet de la semaine. video : la scène gag tirée de la photo du mème (image vers vidéo, fal.ai), commande cd server && npm run meme:video -- <AAAA-MM-JJ-sujet> ; la clé fal.ai vient de la variable FAL_KEY, ou à défaut du fichier keyFile (format VARIABLE=valeur, chemin relatif au dossier personnel).",
   "news": [
     {
       "name": "franceinfo",
@@ -35,9 +35,27 @@
     "rules": "Photorealistic, like a candid news agency photograph: natural light, real textures, believable people and places, shot on a 35mm lens, no illustration, no cartoon, no 3D render look. Every person shown is fictional and must not resemble any real person, celebrity or politician. Strictly no text, no letters, no numbers, no words, no signs, no logos, no brand names, no flags, no uniforms of real organisations. Never depict a real disaster, attack, accident or injury. Leave calm, uncluttered areas at the very top and the very bottom of the image, where captions will be added later."
   },
   "pricing": {
-    "$comment": "Dollars par million de jetons, relevés le 2026-11-17 ; une image moyenne en 1536x1024 fait environ 1 400 jetons d'image, soit 0,04 $.",
+    "$comment": "Dollars : par million de jetons pour l'image (relevé le 2026-11-17, environ 0,04 dollar l'image) ; par seconde de vidéo pour la vidéo (H3 Max en 768P, tarif normal à partir du 2026-11-16, page llms.txt du modèle sur fal.ai).",
     "textInput": 5,
     "imageOutput": 30,
-    "source": "https://developers.openai.com/api/docs/pricing"
+    "source": "https://developers.openai.com/api/docs/pricing",
+    "videoPerSecond": 0.08,
+    "videoSource": "https://fal.ai/models/minimax/h3-max/image-to-video/llms.txt"
+  },
+  "video": {
+    "endpoint": "minimax/h3-max/image-to-video",
+    "duration": 6,
+    "resolution": "768P",
+    "promptExpansion": "balanced",
+    "keyEnv": "FAL_KEY",
+    "keyFile": ".config/winnza/fal.env",
+    "allowedHosts": [
+      "fal.media",
+      "fal.run",
+      "fal.ai"
+    ],
+    "maxBytes": 8000000,
+    "timeoutSeconds": 600,
+    "rules": "Animate this exact photo into one continuous, realistic, candid comedy gag shot, like a hidden-camera clip. Keep every person's face, clothes and the setting exactly as in the photo, natural human motion and timing, deadpan acting, no cuts, no camera shake beyond handheld realism. Strictly no text, no subtitles, no logos, no new people, no real people."
   }
 }

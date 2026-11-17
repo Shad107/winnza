@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { checkCharacter, checkMeme, checkMemeImage, checkMemeSet, isoWeek, MEME_IMAGE_MAX_BYTES, parseCharacter, parseMeme, type Character, type Meme } from "./memes.js";
+import { allowedVideoUrl, checkCharacter, checkMeme, checkMemeImage, checkMemeSet, checkMemeVideo, isoWeek, MEME_IMAGE_MAX_BYTES, MEME_VIDEO_MAX_BYTES, parseCharacter, parseMeme, type Character, type Meme } from "./memes.js";
 
 const GOOD = {
   title: "Le baril prend l'ascenseur, le gazole prend l'escalier",
@@ -16,7 +16,7 @@ const GOOD = {
   characters: ["barry"],
   imagePrompt: "no text",
 };
-type Fields = Omit<typeof GOOD, "source"> & { source: { media: string; title: string; url: string }; previous?: string };
+type Fields = Omit<typeof GOOD, "source"> & { source: { media: string; title: string; url: string }; previous?: string; videoPrompt?: string };
 const meme = (over: Partial<Fields> = {}, slug = "2026-11-17-ascenseur"): Meme => parseMeme(slug, JSON.stringify({ ...GOOD, ...over }));
 const problems = (over: Partial<Fields>) => checkMeme(meme(over)).join(" | ");
 const src = (url: string) => ({ ...GOOD.source, url });
@@ -84,6 +84,27 @@ test("mème : image absente, pas un JPEG, ou trop lourde : refusée (témoins)",
   assert.match(checkMemeImage("a", big).join(), /octets/);
 });
 
+test("vidéo : facultative ; MP4 réelle, pas trop lourde, et toujours avec sa mise en scène (témoins)", () => {
+  const mp4 = new Uint8Array([0, 0, 0, 24, 0x66, 0x74, 0x79, 0x70, 0x69, 0x73, 0x6f, 0x6d]);
+  assert.deepEqual(checkMemeVideo(meme(), null), []);
+  assert.deepEqual(checkMemeVideo(meme({ videoPrompt: "he runs away" }), mp4), []);
+  assert.match(checkMemeVideo(meme(), mp4).join(), /sans videoPrompt/);
+  assert.match(checkMemeVideo(meme({ videoPrompt: "x" }), null).join(), /videoPrompt sans vidéo/);
+  assert.match(checkMemeVideo(meme({ videoPrompt: "x" }), new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3, 4])).join(), /pas une MP4/);
+  const big = new Uint8Array(MEME_VIDEO_MAX_BYTES + 1); big.set(mp4);
+  assert.match(checkMemeVideo(meme({ videoPrompt: "x" }), big).join(), /octets/);
+});
+
+test("vidéo : téléchargée seulement depuis un domaine déclaré, en https (témoins)", () => {
+  const hosts = ["fal.media"];
+  assert.equal(allowedVideoUrl("https://v3.fal.media/files/x.mp4", hosts), true);
+  assert.equal(allowedVideoUrl("https://fal.media/x.mp4", hosts), true);
+  assert.equal(allowedVideoUrl("http://v3.fal.media/x.mp4", hosts), false);
+  assert.equal(allowedVideoUrl("https://fal.media.pirate.example/x.mp4", hosts), false);
+  assert.equal(allowedVideoUrl("https://evilfal.media/x.mp4", hosts), false);
+  assert.equal(allowedVideoUrl("pas une adresse", hosts), false);
+});
+
 test("numéro de semaine ISO", () => {
   assert.equal(isoWeek("2026-11-17"), 47);
   assert.equal(isoWeek("2026-01-01"), 1);
@@ -102,10 +123,11 @@ test("mèmes et casting du dépôt : tous conformes, chaque mème avec son image
     ...memes.flatMap((m) => checkMeme(m).map((p) => `${m.slug} : ${p}`)),
     ...cast.flatMap(checkCharacter),
     ...memes.flatMap((m) => { const img = join(DIR, `${m.slug}.jpg`); return checkMemeImage(m.slug, existsSync(img) ? readFileSync(img) : null); }),
+    ...memes.flatMap((m) => { const vid = join(DIR, `${m.slug}.mp4`); return checkMemeVideo(m, existsSync(vid) ? readFileSync(vid) : null); }),
     ...checkMemeSet(memes, cast),
   ];
-  for (const f of existsSync(DIR) ? readdirSync(DIR).filter((f) => f.endsWith(".jpg")) : []) {
-    if (!files.includes(f.replace(/\.jpg$/, ".json"))) all.push(`${f} : image sans mème`);
+  for (const f of existsSync(DIR) ? readdirSync(DIR).filter((f) => /\.(jpg|mp4)$/.test(f)) : []) {
+    if (!files.includes(f.replace(/\.(jpg|mp4)$/, ".json"))) all.push(`${f} : fichier sans mème`);
   }
   assert.deepEqual(all, []);
 });

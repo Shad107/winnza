@@ -20,10 +20,11 @@ Dans le code, un test qui en a besoin l'écrit en séquence d'échappement (`\u2
 
 ## Architecture
 
-- `content/memes/AAAA-MM-JJ-sujet.json` et `.jpg` : un mème (texte, et image de fond SANS texte engendrée
-  par `cd server && npm run meme:image -- <sujet>`). `content/personnages/<id>.json` : le casting. Format et
+- `content/memes/AAAA-MM-JJ-sujet.json`, `.jpg` et `.mp4` : un mème (texte ; photo SANS texte engendrée par
+  `cd server && npm run meme:image -- <sujet>` ; vidéo gag facultative, la photo animée sur fal.ai par
+  `npm run meme:video -- <sujet>`). `content/personnages/<id>.json` : le casting. Format et
   règles : `server/src/pages/memes.ts`, vérifiés par `memes.test.ts` (un mème fautif bloque l'intégration
-  continue). Réglages de l'image et flux d'actualité : `declarations/memes.json`.
+  continue). Réglages de l'image, de la vidéo et flux d'actualité : `declarations/memes.json`.
 - `web/` : le site (SvelteKit, rendu serveur, Svelte 5, TypeScript). Un seul dessin pour un mème
   (`web/src/lib/server/meme-svg.ts`) : SVG dans la page, PNG pour le partage (`/images/<sujet>.png`).
 - `server/` : le socle (TypeScript, SQLite) et ses plugins (`server/src/plugins/<id>/`, contrat

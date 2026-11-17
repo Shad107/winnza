@@ -4,7 +4,7 @@
   /** image : chemin de l'aperçu pour les réseaux sociaux (1200 × 630), null tant qu'aucun mème n'existe, et sa
    *  description ; article : une
    *  page de mème (og:type article, date de publication) plutôt qu'une page du site */
-  let { site, page, image, imageAlt, article = false }: { site: SiteDecl; page: PageSeo; image: string | null; imageAlt: string; article?: boolean } = $props();
+  let { site, page, image, imageAlt, video = null, article = false }: { site: SiteDecl; page: PageSeo; image: string | null; imageAlt: string; video?: string | null; article?: boolean } = $props();
   const canonical = $derived(site.url + page.path);
   const shareImage = $derived(image && site.url + image);
   const ld = $derived(`<script type="application/ld+json">${jsonLd(site, page)}</` + `script>`);
@@ -29,6 +29,10 @@
     <meta name="twitter:card" content="summary_large_image" />
   {:else}
     <meta name="twitter:card" content="summary" />
+  {/if}
+  {#if video}
+    <meta property="og:video" content={site.url + video} />
+    <meta property="og:video:type" content="video/mp4" />
   {/if}
   {@html ld}
 </svelte:head>

@@ -13,6 +13,12 @@
     <h2 class="title"><a href={meme.href}>{meme.title}</a></h2>
     <p class="lead">{meme.lead}</p>
     {#each meme.body as para, i (i)}<p class="para">{para}</p>{/each}
+    {#if meme.video}
+      <figure class="video">
+        <video src={meme.video} poster={meme.image} controls playsinline preload="metadata" aria-label="La vidéo : {meme.alt}"><track kind="captions" srclang="fr" label="Français" src="/sous-titres/{meme.slug}.vtt" default /></video>
+        <figcaption>La scène en vidéo (satire, personnes inventées) · <a href={meme.video} download="winnza-{meme.slug}.mp4">Télécharger la vidéo</a></figcaption>
+      </figure>
+    {/if}
     <p class="meta">
       Avec {#each meme.characters as c, i (c.href)}{i ? (i === meme.characters.length - 1 ? ' et ' : ', ') : ''}<a href={c.href}>{c.name}</a>{/each}.
       {#if meme.previous}Épisode précédent : <a href={meme.previous.href}>semaine {meme.previous.week}, {meme.previous.title}</a>.{/if}
@@ -31,5 +37,8 @@
   .title a { color: var(--ink); text-decoration: none; }
   .lead { font-size: 17px; line-height: 1.6; font-weight: 600; color: var(--ink); }
   .para { margin: 0; font-size: 16px; line-height: 1.7; color: var(--ink2); }
+  .video { margin: 4px 0 0; }
+  .video video { display: block; width: 100%; height: auto; border-radius: 12px; background: #000; }
+  .video figcaption { margin-top: 8px; font-size: 13px; color: var(--muted); }
   .meta { margin: 0; font-size: 14px; line-height: 1.55; color: var(--muted); }
 </style>
