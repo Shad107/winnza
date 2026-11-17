@@ -10,14 +10,17 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 SITE="${WINNZA_SITE:-https://www.winnza.eu}"
-# adresses vérifiées après chaque déploiement : l'accueil, le plan du site, l'état public, et l'image du
-# dernier mème (sans police, elle répond 500)
-CHECK_PATHS=(/ /sitemap.xml /etat.json /images/dernier.png /partage/dernier.png)
+# adresses vérifiées après chaque déploiement : l'accueil, le plan du site, l'état public ; et, dès qu'un mème
+# existe (l'accueil renvoie vers /memes/), son image et son aperçu (sans police, ils répondent 500)
+CHECK_PATHS=(/ /sitemap.xml /etat.json)
+MEME_PATHS=(/images/dernier.png /partage/dernier.png)
 LOG=/var/log/winnza-deploy.log
 log() { echo "$(date -u +%FT%TZ) $*" | sudo tee -a "$LOG" >&2; }
 
 healthy() {
-  for p in "${CHECK_PATHS[@]}"; do
+  local paths=("${CHECK_PATHS[@]}")
+  if curl -s --max-time 20 "$SITE/" | grep -q 'href="/memes/'; then paths+=("${MEME_PATHS[@]}"); fi
+  for p in "${paths[@]}"; do
     local code
     code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$SITE$p" || echo 000)
     if [ "$code" != 200 ]; then log "vérification : $p répond $code"; return 1; fi
