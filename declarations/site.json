@@ -3,7 +3,7 @@
   "url": "https://www.winnza.eu",
   "name": "Winnza",
   "locale": "fr_FR",
-  "description": "Site satirique : chaque semaine, l'actualité en un mème. Dessin et blague par une IA, la vraie information citée sous chaque mème.",
+  "description": "Site satirique : chaque semaine, l'actualité en un mème avec des personnages inventés qui reviennent. Dessin et blague par une IA, la vraie information citée.",
   "pages": [
     {
       "path": "/",

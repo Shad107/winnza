@@ -22,6 +22,7 @@ import { buildRegistry, runCollect } from "./runner.js";
 import { Store } from "./store.js";
 import { buildTrends } from "./pages/trends.js";
 import { parisDate } from "./units.js";
+import { seedSettings } from "./seed.js";
 
 /** Keyword Planner à la demande : au plus 10 mots par appel (limite de l'API : 20), 40 idées, 4 derniers mois. */
 const KEYWORD_IDEAS = { maxWords: 10, limit: 40, months: 4 } as const;
@@ -67,7 +68,8 @@ async function main(): Promise<void> {
   try {
     if (command === "seed") {
       if (!a || !SEEDS[a]) throw new Error(`plugin inconnu : ${a ?? "(aucun)"} ; connus : ${Object.keys(SEEDS).join(", ")}`);
-      store.putSetting(settingKey(a), SEEDS[a]!());
+      const enabled = enabledIn(store.settingOrNull(PLUGINS_ENABLED_SETTING) as EnabledState | null, RULES);
+      await seedSettings(store, BUILTINS[a]!, SEEDS[a]!(), enabled.includes(a));
       console.log(`réglages de ${a} rechargés depuis declarations/`);
       return;
     }
