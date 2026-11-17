@@ -13,7 +13,7 @@
   <section class="hero">
     {#if data.latest}<span class="badge">Semaine {data.latest.week} · {longDate(data.latest.date)}</span>{/if}
     <h1>L'actualité de la semaine, en un mème.</h1>
-    <p class="lead">Un seul mème par semaine, sur ce dont tout le monde parle. Dessiné et écrit par une IA, avec ses personnages qui reviennent d'une semaine à l'autre. L'information qui l'a inspiré, elle, est vraie et citée.</p>
+    <p class="lead">Un seul mème par semaine, sur ce dont tout le monde parle. Imaginé, écrit et mis en images par une IA, avec ses personnages qui reviennent d'une semaine à l'autre. L'information qui l'a inspiré, elle, est vraie et citée.</p>
   </section>
 
   {#if data.latest}

@@ -12,6 +12,7 @@
   <div class="body">
     <h2 class="title"><a href={meme.href}>{meme.title}</a></h2>
     <p class="lead">{meme.lead}</p>
+    {#each meme.body as para, i (i)}<p class="para">{para}</p>{/each}
     <p class="meta">
       Avec {#each meme.characters as c, i (c.href)}{i ? (i === meme.characters.length - 1 ? ' et ' : ', ') : ''}<a href={c.href}>{c.name}</a>{/each}.
       {#if meme.previous}Épisode précédent : <a href={meme.previous.href}>semaine {meme.previous.week}, {meme.previous.title}</a>.{/if}
@@ -28,6 +29,7 @@
   .body { padding: 20px 22px 22px; display: flex; flex-direction: column; gap: 14px; }
   .title { margin: 0; font-size: 22px; line-height: 1.3; }
   .title a { color: var(--ink); text-decoration: none; }
-  .lead { font-size: 16px; line-height: 1.6; }
+  .lead { font-size: 17px; line-height: 1.6; font-weight: 600; color: var(--ink); }
+  .para { margin: 0; font-size: 16px; line-height: 1.7; color: var(--ink2); }
   .meta { margin: 0; font-size: 14px; line-height: 1.55; color: var(--muted); }
 </style>

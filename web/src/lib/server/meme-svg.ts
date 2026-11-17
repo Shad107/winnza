@@ -40,10 +40,15 @@ function memeBody(m: Meme, background: string): string {
   return `<rect width="${MEME_W}" height="${MEME_H}" fill="${INK}"/>
     <image href="${xml(background)}" x="0" y="0" width="${MEME_W}" height="${MEME_IMG_H}" preserveAspectRatio="xMidYMid slice"/>
     ${caption(m.top, 'top')}${caption(m.bottom, 'bottom')}
+    ${STAMP}
     <rect x="0" y="${MEME_IMG_H}" width="${MEME_W}" height="${MEME_BAND_H}" fill="${BAND}"/>
     <text x="24" y="${MEME_IMG_H + 33}" font-size="21" font-weight="700" fill="${WHITE}">winnza.eu · site satirique</text>
     <text x="24" y="${MEME_IMG_H + 62}" font-size="18" fill="${GREY}">${xml(band)}</text>`;
 }
+
+/** le tampon « SATIRE », posé sur l'image elle-même : une photo réaliste qui circulerait seule, recadrée sans
+ *  le bandeau du bas, reste marquée comme une blague (en haut à droite, sous la légende du haut) */
+const STAMP = `<g transform="translate(${MEME_W - 24} 200) rotate(-8)"><rect x="-150" y="-30" width="150" height="44" rx="6" fill="${ACCENT}" stroke="${INK}" stroke-width="3"/><text x="-75" y="1" text-anchor="middle" font-size="26" font-weight="900" fill="${INK}">SATIRE</text></g>`;
 
 const FONT = `font-family="Inter, 'Inter Variable', sans-serif"`;
 

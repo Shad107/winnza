@@ -32,7 +32,7 @@
     "keyFile": ".codex/auth.json",
     "keyField": "OPENAI_API_KEY",
     "timeoutSeconds": 300,
-    "rules": "Strictly no text, no letters, no numbers, no words, no logos, no brand names, no real people, no flags. Humorous cartoon illustration, clean flat style, readable at small size. Leave calm, uncluttered areas at the very top and the very bottom of the image, where captions will be added later."
+    "rules": "Photorealistic, like a candid news agency photograph: natural light, real textures, believable people and places, shot on a 35mm lens, no illustration, no cartoon, no 3D render look. Every person shown is fictional and must not resemble any real person, celebrity or politician. Strictly no text, no letters, no numbers, no words, no signs, no logos, no brand names, no flags, no uniforms of real organisations. Never depict a real disaster, attack, accident or injury. Leave calm, uncluttered areas at the very top and the very bottom of the image, where captions will be added later."
   },
   "pricing": {
     "$comment": "Dollars par million de jetons, relevés le 2026-11-17 ; une image moyenne en 1536x1024 fait environ 1 400 jetons d'image, soit 0,04 $.",

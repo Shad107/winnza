@@ -55,8 +55,11 @@ précédente sinon. Il n'y a pas d'autre chemin de déploiement.
   d'une personne réelle ni une déformation reconnaissable de son nom ; jamais une personne réelle dessinée.
   Une personnalité devient un personnage inventé qui joue son rôle. Rien sur la religion, l'origine, le
   handicap, la sexualité ; rien qui moque des victimes.
+- **Écrit comme une vraie dépêche** (le ton du Gorafi) : au premier degré, sans clin d'œil ; l'image est une
+  photo de presse réaliste de personnages inventés. Le site entier est déclaré satirique (pied de page, tampon
+  SATIRE sur l'image, bandeau), jamais une fausse information crédible sur un fait grave.
 - **La vraie information est citée** sous chaque mème (média, titre, adresse de l'article), et elle a été
-  lue et vérifiée dans un second média avant publication. Le chapeau dit en une phrase ce qui est vrai.
+  lue et vérifiée dans un second média avant publication.
 - **Le casting fait le fil** : des noms en jeux de mots, un caractère et une apparence qui ne changent pas
   d'un épisode à l'autre ; `previous` relie un mème à l'épisode qu'il continue.
 - Au plus un mème tous les 6 jours ; un mème publié ne se réécrit pas, une erreur se corrige par un nouveau

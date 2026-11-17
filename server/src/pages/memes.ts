@@ -9,7 +9,9 @@
 import { z } from "zod";
 
 /** Longueurs maximales, en caractères. */
-export const MEME_LIMITS = { title: 90, caption: 64, lead: 400, alt: 240, sourceTitle: 160 } as const;
+export const MEME_LIMITS = { title: 90, caption: 64, lead: 400, paragraph: 700, alt: 240, sourceTitle: 160 } as const;
+/** Le corps de l'article : de 1 à MEME_BODY_MAX paragraphes. */
+export const MEME_BODY_MAX = 5;
 /** Au plus un mème tous les MEME_EVERY_DAYS jours. */
 export const MEME_EVERY_DAYS = 6;
 /** Poids maximal de l'image de fond, en octets. */
@@ -23,8 +25,10 @@ const memeSchema = z.strictObject({
   /** la légende du haut et celle du bas, posées sur l'image */
   top: z.string().min(1),
   bottom: z.string().min(1),
-  /** le chapeau satirique : un présentateur qui garde son sérieux pendant que tout déraille */
+  /** le chapeau : écrit comme celui d'une vraie dépêche, au premier degré, sans clin d'œil */
   lead: z.string().min(1),
+  /** le corps de l'article, en paragraphes : le même ton de vraie dépêche (faits, citations, chiffres inventés) */
+  body: z.array(z.string().min(1)).min(1).max(MEME_BODY_MAX),
   /** la vraie information derrière la blague : l'article qui l'a inspirée */
   source: z.strictObject({ media: z.string().min(1), title: z.string().min(1), url: z.string() }),
   /** ce que montre l'image, pour qui ne la voit pas */
@@ -54,9 +58,13 @@ export function checkMeme(m: Meme): string[] {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(m.date) || !m.slug.startsWith(m.date)) problems.push("date : AAAA-MM-JJ, la même que le début du nom de fichier");
   const fields = { title: m.title, top: m.top, bottom: m.bottom, lead: m.lead, alt: m.alt, sourceTitle: m.source.title, media: m.source.media };
   const limit = { title: MEME_LIMITS.title, top: MEME_LIMITS.caption, bottom: MEME_LIMITS.caption, lead: MEME_LIMITS.lead, alt: MEME_LIMITS.alt, sourceTitle: MEME_LIMITS.sourceTitle, media: MEME_LIMITS.sourceTitle } satisfies Record<keyof typeof fields, number>;
-  for (const [field, text] of Object.entries(fields) as [keyof typeof fields, string][]) {
-    if (text.length > limit[field]) problems.push(`${field} : ${text.length} caractères (au plus ${limit[field]})`);
-    if (/[–—]/.test(text)) problems.push(`${field} : tiret cadratin ou demi-cadratin`);
+  const texts: [string, string, number][] = [
+    ...(Object.entries(fields) as [keyof typeof fields, string][]).map(([f, t]): [string, string, number] => [f, t, limit[f]]),
+    ...m.body.map((t, i): [string, string, number] => [`body[${i}]`, t, MEME_LIMITS.paragraph]),
+  ];
+  for (const [field, text, max] of texts) {
+    if (text.length > max) problems.push(`${field} : ${text.length} caractères (au plus ${max})`);
+    if (/[\u2013\u2014]/.test(text)) problems.push(`${field} : tiret cadratin ou demi-cadratin`);
     if (/<[a-z/!]/i.test(text)) problems.push(`${field} : HTML brut`);
   }
   // la source doit être un vrai lien vers un article en ligne, pas une page d'accueil

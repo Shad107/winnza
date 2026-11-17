@@ -10,6 +10,7 @@ const GOOD = {
   top: "Le baril : moins un tiers en cinq semaines",
   bottom: "La pompe : on arrive, on arrive",
   lead: "Les automobilistes sont priés de patienter : la baisse est en route, à pied.",
+  body: ["Selon nos informations, la baisse a été aperçue mardi dans l'escalier.", "Elle n'a pas souhaité s'exprimer."],
   source: { media: "Exemple Info", title: "Le pétrole recule", url: "https://exemple.fr/economie/petrole-recule" },
   alt: "Un baril dans un ascenseur, une pompe dans un escalier.",
   characters: ["barry"],
@@ -26,7 +27,9 @@ test("mème : un mème conforme passe", () => {
 
 test("mème : trop long, tiret cadratin, HTML, source absente ou page d'accueil, mauvais nom ou date : refusés (témoins)", () => {
   assert.match(problems({ top: "x".repeat(65) }), /top : 65 caractères/);
-  assert.match(problems({ lead: "Un recul — net." }), /lead : tiret/);
+  assert.match(problems({ lead: "Un recul \u2014 net." }), /lead : tiret/);
+  assert.match(problems({ body: ["ok", "x".repeat(701)] }), /body\[1\] : 701 caractères/);
+  assert.match(problems({ body: ["Un recul \u2014 net."] }), /body\[0\] : tiret/);
   assert.match(problems({ title: "<b>gras</b>" }), /title : HTML brut/);
   assert.match(problems({ source: src("http://exemple.fr/article") }), /https/);
   assert.match(problems({ source: src("pas une adresse") }), /https/);
@@ -39,6 +42,7 @@ test("mème : fichier illisible, champ manquant ou en trop : erreur qui nomme le
   assert.throws(() => parseMeme("x", "{"), /mème x : JSON illisible/);
   assert.throws(() => parseMeme("x", JSON.stringify({ ...GOOD, source: undefined })), /mème x : source/);
   assert.throws(() => parseMeme("x", JSON.stringify({ ...GOOD, extra: 1 })), /mème x/);
+  assert.throws(() => parseMeme("x", JSON.stringify({ ...GOOD, body: [] })), /mème x : body/);
 });
 
 test("mèmes : au plus un par semaine, jamais deux fois le même article (témoins)", () => {

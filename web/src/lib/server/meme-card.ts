@@ -10,7 +10,7 @@ export function memeCard(slug: string) {
   if (!m || !image) return null;
   const prev = m.previous ? findMeme(m.previous) : null;
   return {
-    slug, title: m.title, date: m.date, week: memeWeek(m), alt: m.alt, top: m.top, bottom: m.bottom, lead: m.lead, source: m.source,
+    slug, title: m.title, date: m.date, week: memeWeek(m), alt: m.alt, top: m.top, bottom: m.bottom, lead: m.lead, body: m.body, source: m.source,
     image, svg: memeSvg(m, image), png: memePngPath(slug), share: memeSharePath(slug), href: memePath(slug),
     characters: m.characters.map(findCharacter).filter((c) => c !== null).map((c) => ({ name: c.name, href: characterPath(c.id) })),
     previous: prev ? { title: prev.title, week: memeWeek(prev), href: memePath(prev.slug) } : null,
