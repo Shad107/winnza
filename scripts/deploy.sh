@@ -10,8 +10,9 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 SITE="${WINNZA_SITE:-https://www.winnza.eu}"
-# adresses vérifiées après chaque déploiement : l'accueil, le plan du site, l'état public
-CHECK_PATHS=(/ /sitemap.xml /etat.json)
+# adresses vérifiées après chaque déploiement : l'accueil, le plan du site, l'état public, et l'image du
+# dernier mème (sans police, elle répond 500)
+CHECK_PATHS=(/ /sitemap.xml /etat.json /images/dernier.png)
 LOG=/var/log/winnza-deploy.log
 log() { echo "$(date -u +%FT%TZ) $*" | sudo tee -a "$LOG" >&2; }
 
@@ -45,11 +46,11 @@ sudo docker compose up -d web >/dev/null 2>&1
 # le site met quelques secondes à recharger la base : on lui laisse jusqu'à une minute
 # Les déclarations font foi : celles que ce commit modifie sont ressemées en base (le plugin les applique à la
 # collecte suivante). Fichier -> plugin : <plugin>.json, sauf site.json et fuel-page.json (plugin site) ;
-# anchors.json est relu à chaque collecte, agent.json ne concerne que l'IA du site.
+# anchors.json est relu à chaque collecte, agent.json et memes.json ne concernent que l'IA du site.
 reseed() {
   local plugins
   plugins=$(git diff --name-only "$before" "$after" -- declarations/ | sed -n 's#^declarations/\(.*\)\.json$#\1#p' \
-    | sed 's#^fuel-page$#site#' | grep -vx -e anchors -e agent | sort -u || true)   # aucune déclaration touchée : rien à faire, pas une erreur
+    | sed 's#^fuel-page$#site#' | grep -vx -e anchors -e agent -e memes | sort -u || true)   # aucune déclaration touchée : rien à faire, pas une erreur
   for p in $plugins; do
     if sudo docker compose run --rm -T collect node server/dist/cli.js seed "$p" /data/energy.db >/dev/null 2>&1; then
       log "réglages ressemés : $p"

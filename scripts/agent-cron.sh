@@ -56,7 +56,7 @@ import json, sys
 try: u = json.load(open(sys.argv[1]))
 except (FileNotFoundError, ValueError): u = {"input": 0, "cachedInput": 0, "output": 0}
 p = json.load(open(sys.argv[2]))["pricing"][sys.argv[3]]
-cost = ((u["input"] - u["cachedInput"]) * p["input"] + u["cachedInput"] * p["cachedInput"] + u["output"] * p["output"]) / 1e6
+cost = ((u["input"] - u["cachedInput"]) * p["input"] + u["cachedInput"] * p["cachedInput"] + u["output"] * p["output"]) / 1e6 + u.get("imageUsd", 0)
 print(json.dumps({"tokens": u, "costUsd": round(cost, 4)}))
 PY
 )
@@ -74,7 +74,8 @@ import json, sys
 c = json.loads(sys.argv[1]); t = c["tokens"]; spent = float(sys.argv[2]) + c["costUsd"]; budget = float(sys.argv[3])
 n = lambda x: f"{x:,}".replace(",", " ")
 d = lambda x: f"{x:.2f}".replace(".", ",")
-print(f"Coût de ce passage : {d(c['costUsd'])} $ ({n(t['input'])} jetons lus, dont {n(t['cachedInput'])} depuis le cache, et {n(t['output'])} écrits).")
+img = f", dont {d(t['imageUsd'])} $ d'image de mème" if t.get("imageUsd") else ""
+print(f"Coût de ce passage : {d(c['costUsd'])} $ ({n(t['input'])} jetons lus, dont {n(t['cachedInput'])} depuis le cache, et {n(t['output'])} écrits{img}).")
 print(f"Dépense du mois : {d(spent)} $ sur {d(budget)} $ ({round(spent / budget * 100)} % du plafond).")
 PY
 )

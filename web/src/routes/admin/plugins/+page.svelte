@@ -41,7 +41,7 @@
   .cat { font-size: 12px; font-weight: 700; color: var(--ink2); background: var(--soft); border-radius: 999px; padding: 2px 8px; margin-left: 6px; }
   .info p { margin: 6px 0; color: var(--ink2); font-size: 15px; line-height: 1.5; }
   .state { font-size: 13px; font-weight: 700; color: var(--muted); }
-  .state.on { color: var(--s3); }
+  .state.on { color: #1d7a4f; }
   .actions { display: flex; gap: 8px; align-items: center; }
   .btn, button { min-height: 44px; display: inline-flex; align-items: center; padding: 0 16px; border-radius: 12px; font: 700 15px 'Inter Variable', system-ui, sans-serif; cursor: pointer; text-decoration: none; }
   .btn { background: #2a78d6; color: #fff; }

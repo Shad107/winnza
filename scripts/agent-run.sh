@@ -20,7 +20,9 @@ export PATH="$(printf '%s' "$AGENT_PATH" | sed "s#\([^:]*\)#$HOME/\1#g"):$PATH"
 TEXT="$(cat "$PROMPT")
 
 Fichier des tendances du jour : $TRENDS"
-rm -f "$OUT/last.md" "$OUT/run.jsonl" "$OUT/usage.json"
+rm -f "$OUT/last.md" "$OUT/run.jsonl" "$OUT/usage.json" "$OUT/image-usage.jsonl"
+# les images de mème engendrées pendant le passage y écrivent leur dépense (server/src/meme-image.ts)
+export WINNZA_IMAGE_USAGE="$OUT/image-usage.jsonl"
 
 case "$ENGINE" in
   codex)
@@ -51,4 +53,16 @@ PY
     ;;
   *) echo "moteur inconnu : $ENGINE" >&2; exit 2 ;;
 esac
+# la dépense des images s'ajoute à celle du moteur : un seul budget
+python3 - "$OUT/usage.json" "$WINNZA_IMAGE_USAGE" <<'PY'
+import json, sys
+try: u = json.load(open(sys.argv[1]))
+except (FileNotFoundError, ValueError): u = {"input": 0, "cachedInput": 0, "output": 0}
+img = 0.0
+try:
+    for line in open(sys.argv[2]): img += json.loads(line)["costUsd"]
+except FileNotFoundError: pass
+u["imageUsd"] = round(img, 4)
+json.dump(u, open(sys.argv[1], "w"))
+PY
 exit "$rc"

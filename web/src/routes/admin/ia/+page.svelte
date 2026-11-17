@@ -41,12 +41,12 @@
 <style>
   .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
   .lead { color: var(--ink2); }
-  .err { color: var(--up-strong); font-weight: 600; }
+  .err { color: #b3261e; font-weight: 600; }
   .btn { min-height: 44px; display: inline-flex; align-items: center; padding: 0 14px; border-radius: 12px; background: var(--soft); color: var(--ink); font-weight: 600; text-decoration: none; }
   .prop { padding: 16px 18px; margin-top: 14px; }
   .head { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
   .tag { font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: var(--soft); }
-  .tag.on { background: var(--s3); color: var(--on-s3); }
+  .tag.on { background: #1d7a4f; color: #ffffff; }
   .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 10px; }
   .k { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
   .t { font-weight: 700; margin-top: 4px; }

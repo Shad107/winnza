@@ -1,95 +1,40 @@
 <script lang="ts">
-  // Accueil : le plein ou le litre découpé, et le prix du jour de chaque carburant.
-  import Toggle from '#lib/components/Toggle.svelte';
-  import StackedBar from '#lib/components/StackedBar.svelte';
-  import PartCard from '#lib/components/PartCard.svelte';
-  import Jerrycan from '#lib/components/Jerrycan.svelte';
-  import Icon from '#lib/components/Icon.svelte';
-  import StationsToday from '#lib/components/StationsToday.svelte';
-  import TrendCard from '#lib/components/TrendCard.svelte';
-  import Faq from '#lib/components/Faq.svelte';
-  import NextPages from '#lib/components/NextPages.svelte';
+  // Accueil : la semaine, le mème de la semaine, puis les précédents.
+  import MemeCard from '#lib/components/MemeCard.svelte';
+  import MemeThumb from '#lib/components/MemeThumb.svelte';
   import Seo from '#lib/plugins/seo/Seo.svelte';
-  import { LITRE_PARTS, LITRE_SEGMENTS, ICON } from '#lib/parts.ts';
-  import { eur2, money, percent, longDate } from '#lib/format.ts';
-  import { scaled, sum, allText, shareText, describe } from '#lib/view.ts';
-  import { PAGES } from '#lib/site-nav.ts';
-
+  import { longDate } from '#lib/format.ts';
   let { data } = $props();
-  const fuel = $derived(data.page);
-  const UNIT = { litre: 'litre', fill: 'fill' } as const;
-  type UnitId = (typeof UNIT)[keyof typeof UNIT];
-
-  let productId = $state('diesel');
-  let unit = $state<UnitId>(UNIT.litre);
-  let litres = $state(50);
-
-  const p = $derived(fuel.products.find((x) => x.id === productId) ?? fuel.products[0]!);
-  const name = $derived(p.label.toLowerCase());
-  const perLitre = $derived(unit === UNIT.litre);
-  const now = $derived(scaled(p.now, perLitre ? 1 : litres));
-  const total = $derived(sum(now));
-  const taxes = $derived(now.excise + now.vat);
-
-  const faq = [
-    { q: 'Qui fixe le prix à la pompe ?', a: "Personne en particulier : en France, chaque station fixe son prix. Mais toutes achètent leur carburant aux mêmes cours, d'où des prix proches d'une station à l'autre. Les taxes, elles, sont les mêmes partout." },
-    { q: 'Le carburant va-t-il baisser ?', a: "Le prix à la pompe suit le marché de gros avec environ une semaine de retard. Winnza en tire chaque jour une tendance pour la semaine qui vient, avec le bilan réel de la méthode sur les années passées : voir la page Prévision." },
-  ];
 </script>
 
-<Seo site={data.site} page={{ path: '/', title: `Prix des carburants aujourd'hui : où passe l'argent de votre plein ? | Winnza`,
-  description: `Sur ${eur2(fuel.products[0]!.litre)} de ${fuel.products[0]!.label.toLowerCase()}, combien pour le pétrole, la raffinerie, la TICPE et la TVA ? Le prix du jour de chaque carburant, chaque semaine le vrai découpage. Chiffres officiels.`,
-  faq, modified: fuel.asOf }} />
+<Seo site={data.site} page={{ path: '/', title: `${data.site.name} : l'actualité de la semaine en un mème satirique`, description: data.site.description, modified: data.latest?.date }} image="/images/dernier.png" />
 
 <main class="wrap">
-  <section class="page-head" aria-labelledby="titre">
-    <div class="hero-grid">
-      <div class="hero-text">
-        <p class="chip"><Icon name={ICON.chart} size={16} />Prix officiels, mis à jour automatiquement</p>
-        <h1 class="h1" id="titre">Où passe l'argent de votre plein&#160;?</h1>
-        <p class="intro">Sur chaque litre, une partie paie le pétrole, une autre la raffinerie et la station, le reste part en taxes. Voici combien.</p>
-        <div class="controls">
-          <Toggle label="Carburant" bind:value={productId} options={fuel.products.map((x) => ({ id: x.id, label: x.label }))} />
-          <Toggle label="Afficher" bind:value={unit} options={[{ id: UNIT.litre, label: '1 litre' }, { id: UNIT.fill, label: 'Mon plein' }]} />
-        </div>
-        {#if !perLitre}
-          <div class="slider">
-            <label for="litres"><span>Mon plein</span><span>{litres} litres</span></label>
-            <input id="litres" type="range" min="20" max="80" step="5" bind:value={litres} />
-          </div>
-        {/if}
-        <div class="headline">
-          <span class="big">{money(total, perLitre)}</span>
-          <span class="sub">{perLitre ? `le litre de ${name}, moyenne nationale de la semaine du ${longDate(fuel.asOf)}` : `pour ${litres} litres de ${name}, à ${eur2(p.litre)} le litre`}</span>
-        </div>
-      </div>
-      <Jerrycan values={now} texts={allText(now, perLitre)} label={describe(now, perLitre ? `Un litre à ${money(total, true)}` : `Votre plein de ${money(total, false)}`, perLitre)} />
-    </div>
-
-    <div class="bar-wrap"><StackedBar parts={LITRE_SEGMENTS} values={now} texts={shareText(now, total)} label={describe(now, 'Répartition', perLitre)} /></div>
-    <div class="grid-cards parts">
-      {#each LITRE_PARTS as key (key)}<PartCard part={key} value={money(now[key], perLitre)} share={percent(now[key], total)} />{/each}
-    </div>
-    <p class="punch">Au total, {money(taxes, perLitre)} de taxes affichées, soit {percent(taxes, total)} de ce que vous payez. Le pétrole, lui, ne pèse que {percent(now.oil, total)}. <a href="/taxes">Et il y a les taxes qu'on ne voit pas.</a></p>
+  <section class="hero">
+    {#if data.latest}<span class="badge">Semaine {data.latest.week} · {longDate(data.latest.date)}</span>{/if}
+    <h1>L'actualité de la semaine, en un mème.</h1>
+    <p class="lead">Un seul mème par semaine, sur ce dont tout le monde parle. Dessiné et écrit par une IA, avec ses personnages qui reviennent d'une semaine à l'autre. L'information qui l'a inspiré, elle, est vraie et citée.</p>
   </section>
 
-  {#if fuel.forecast}
-    <section class="section" aria-labelledby="attendre">
-      <h2 class="h2" id="attendre">Plein maintenant ou j'attends&#160;?</h2>
-      <p class="lead">Ce que le marché de gros annonce pour la semaine qui vient. <a href="/prevision">Méthode et bilan réel</a>.</p>
-      <div class="grid-cards" style="margin-top: 20px">{#each fuel.forecast.products as f (f.id)}<TrendCard {f} compact />{/each}</div>
-    </section>
+  {#if data.latest}
+    <MemeCard meme={data.latest} siteUrl={data.site.url} />
+  {:else}
+    <p class="lead">Le premier mème arrive cette semaine.</p>
   {/if}
 
-  {#if fuel.stations}<StationsToday stations={fuel.stations} litres={perLitre ? 50 : litres} />{/if}
-
-  <Faq items={faq} />
-  <NextPages links={PAGES} />
+  {#if data.previous.length}
+    <section id="archives" class="archives">
+      <h2>Les semaines précédentes</h2>
+      <div class="grid">{#each data.previous as m (m.slug)}<MemeThumb meme={m} />{/each}</div>
+    </section>
+  {/if}
 </main>
 
 <style>
-  .hero-grid { display: flex; flex-wrap: wrap; gap: 32px 48px; align-items: center; }
-  .hero-text { flex: 1 1 520px; min-width: 0; }
-  .bar-wrap { margin-top: 32px; }
-  .parts { margin-top: 18px; }
+  main { padding-top: 40px; display: flex; flex-direction: column; gap: 28px; }
+  .hero { display: flex; flex-direction: column; gap: 10px; }
+  h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(34px, 6.5vw, 48px); line-height: 1.05; letter-spacing: -1px; }
+  .archives { display: flex; flex-direction: column; gap: 16px; margin-top: 24px; }
+  h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 26px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
 </style>

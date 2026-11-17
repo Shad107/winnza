@@ -3,67 +3,17 @@
   "url": "https://www.winnza.eu",
   "name": "Winnza",
   "locale": "fr_FR",
-  "description": "Où passe l'argent de votre plein ? Le vrai découpage du prix du carburant, chaque semaine : pétrole, raffinerie et station, TICPE, TVA et les taxes cachées. Chiffres officiels.",
+  "description": "Site satirique : chaque semaine, l'actualité en un mème. Dessin et blague par une IA, la vraie information citée sous chaque mème.",
   "pages": [
     {
       "path": "/",
-      "changefreq": "daily",
+      "changefreq": "weekly",
       "priority": 1.0
     },
     {
-      "path": "/carte-des-stations",
-      "changefreq": "daily",
-      "priority": 0.9
-    },
-    {
-      "path": "/prix-carburant",
-      "changefreq": "daily",
-      "priority": 0.9
-    },
-    {
-      "path": "/prix-par-departement",
-      "changefreq": "daily",
-      "priority": 0.9
-    },
-    {
-      "path": "/prevision",
-      "changefreq": "daily",
-      "priority": 0.9
-    },
-    {
-      "path": "/taxes",
+      "path": "/personnages",
       "changefreq": "weekly",
-      "priority": 0.9
-    },
-    {
-      "path": "/historique",
-      "changefreq": "weekly",
-      "priority": 0.8
-    },
-    {
-      "path": "/prix-du-baril",
-      "changefreq": "daily",
-      "priority": 0.9
-    },
-    {
-      "path": "/analyses",
-      "changefreq": "weekly",
-      "priority": 0.7
-    },
-    {
-      "path": "/europe",
-      "changefreq": "weekly",
-      "priority": 0.8
-    },
-    {
-      "path": "/cout-aux-100-km",
-      "changefreq": "daily",
-      "priority": 0.9
-    },
-    {
-      "path": "/electricite",
-      "changefreq": "daily",
-      "priority": 0.9
+      "priority": 0.6
     }
   ],
   "publisher": {

@@ -1,8 +1,10 @@
 # Winnza : règles de travail
 
-Winnza (https://www.winnza.eu) est le vrai prix de l'énergie : carburant, électricité, coût aux 100 km.
-Gratuit, sans compte, sans publicité ni lien affilié, sources publiques et gratuites seulement. Le site est
-**géré par une IA** : ce fichier est écrit pour elle autant que pour un humain.
+Winnza (https://www.winnza.eu) est un **site satirique** : chaque semaine, l'actualité en un mème, avec une
+troupe de personnages inventés qui reviennent d'une semaine à l'autre. Gratuit, sans compte, sans publicité.
+Le site est **géré par une IA** : ce fichier est écrit pour elle autant que pour un humain. (Jusqu'au
+2026-11-17, Winnza était un site sur le vrai prix de l'énergie : son dernier état est l'étiquette git
+`energie-2026-11`. La collecte de ces données tourne encore, pour l'instant, sans page qui l'affiche.)
 
 ## Langue
 
@@ -18,21 +20,20 @@ Dans le code, un test qui en a besoin l'écrit en séquence d'échappement (`\u2
 
 ## Architecture
 
-- `server/` : le socle (TypeScript, SQLite). Tout ce que le site affiche entre en base par un **plugin**
-  (`server/src/plugins/<id>/`), déclaré dans `server/src/plugins/builtins.ts`. Un plugin déclare ses
-  sources, séries, instantanés et réglages, et ses collecteurs. Contrat : `server/src/contract.ts`.
-- `declarations/<plugin>.json` : la configuration de chaque plugin (adresses des sources, colonnes, pays,
-  limites). **Une valeur qui décrit une source ou le produit se déclare là, jamais dans le code.**
-  Un commit qui modifie une déclaration la fait ressemer en base au déploiement (le dépôt fait foi : un
-  réglage changé à la main dans /admin est écrasé à la prochaine modification de sa déclaration), et le
-  plugin l'applique à la collecte suivante.
-- `declarations/anchors.json` : des valeurs publiées par des tiers que nos calculs doivent retrouver. Une
-  ancre violée arrête la collecte. Toute nouvelle série calculée mérite son ancre.
-- `server/src/pages/*.ts` : les données de chaque page, calculées depuis la base seulement, testées.
-- `web/` : le site (SvelteKit, rendu serveur, Svelte 5, TypeScript). Il ne lit QUE la base.
-- `scripts/` : collecte quotidienne (`collect-and-alert.sh`), déploiement (`deploy.sh`,
-  `deploy-when-green.sh`), passage quotidien de l'IA qui gère le site (`agent-cron.sh`, `agent-run.sh`,
-  consignes dans `agent-prompt.md`, moteur et budget dans `declarations/agent.json`).
+- `content/memes/AAAA-MM-JJ-sujet.json` et `.jpg` : un mème (texte, et image de fond SANS texte engendrée
+  par `cd server && npm run meme:image -- <sujet>`). `content/personnages/<id>.json` : le casting. Format et
+  règles : `server/src/pages/memes.ts`, vérifiés par `memes.test.ts` (un mème fautif bloque l'intégration
+  continue). Réglages de l'image et flux d'actualité : `declarations/memes.json`.
+- `web/` : le site (SvelteKit, rendu serveur, Svelte 5, TypeScript). Un seul dessin pour un mème
+  (`web/src/lib/server/meme-svg.ts`) : SVG dans la page, PNG pour le partage (`/images/<sujet>.png`).
+- `server/` : le socle (TypeScript, SQLite) et ses plugins (`server/src/plugins/<id>/`, contrat
+  `server/src/contract.ts`), configurés par `declarations/<plugin>.json`. Le site y lit son identité (plugin
+  site) et sa mesure d'audience (plugin matomo). Une valeur qui décrit une source ou le produit se déclare
+  dans `declarations/`, jamais dans le code ; un commit qui modifie une déclaration la fait ressemer en base
+  au déploiement (le dépôt fait foi).
+- `scripts/` : déploiement (`deploy.sh`, `deploy-when-green.sh`), passage quotidien de l'IA qui gère le site
+  (`agent-cron.sh`, `agent-run.sh`, consignes dans `agent-prompt.md`, moteur et budget dans
+  `declarations/agent.json`), collecte (`collect-and-alert.sh`).
 
 ## Vérifier avant de pousser
 
@@ -46,26 +47,23 @@ secrets (gitleaks). **Un commit sur `main` dont l'intégration continue est vert
 serveur vient le chercher toutes les 5 minutes, le construit, vérifie que le site répond, et remet la version
 précédente sinon. Il n'y a pas d'autre chemin de déploiement.
 
-## Les analyses (« le point de la semaine »)
+## Les mèmes
 
-`content/analyses/AAAA-MM-JJ-sujet.md` : un en-tête entre deux lignes `---` (title, description, date),
-puis du Markdown sans HTML. **Aucun chiffre tapé à la main** : un chiffre s'écrit par un jeton de données,
-remplacé à l'affichage par la valeur de la base à la date indiquée :
-
-- `{{<série>@<date>|<format>}}` : la valeur en vigueur à cette date ; formats `eur2`, `eur3`, `eur4`, `usd0` ;
-- `{{<série>@<date1>..<date2>|<format>}}` : l'écart entre deux dates ; formats `ct` (centimes), `pct` (%).
-
-Les identifiants de séries sont construits dans `server/src/plugins/*/series-ids.ts` et
-`server/src/plugins/stations/index.ts` (par exemple `station.FR.gazole.avg`, `oil.brent.usd_per_barrel`,
-`elec.wholesale.FR`, `elec.trv.base.6kva.kwh.ttc`). Les années (« en 2022 ») restent permises.
-Les règles sont vérifiées par `server/src/pages/articles.test.ts` : un article qui les enfreint bloque
-l'intégration continue. Au plus une analyse par semaine, et seulement quand quelque chose a vraiment bougé.
+- **Satire, jamais une attaque.** On grossit une situation, un travers, une absurdité réelle. Jamais le nom
+  d'une personne réelle ni une déformation reconnaissable de son nom ; jamais une personne réelle dessinée.
+  Une personnalité devient un personnage inventé qui joue son rôle. Rien sur la religion, l'origine, le
+  handicap, la sexualité ; rien qui moque des victimes.
+- **La vraie information est citée** sous chaque mème (média, titre, adresse de l'article), et elle a été
+  lue et vérifiée dans un second média avant publication. Le chapeau dit en une phrase ce qui est vrai.
+- **Le casting fait le fil** : des noms en jeux de mots, un caractère et une apparence qui ne changent pas
+  d'un épisode à l'autre ; `previous` relie un mème à l'épisode qu'il continue.
+- Au plus un mème tous les 6 jours ; un mème publié ne se réécrit pas, une erreur se corrige par un nouveau
+  commit qui la signale.
 
 ## L'état du site
 
-https://www.winnza.eu/etat.json : les dernières collectes (réussite, erreurs, sources d'appoint absentes),
-le dernier déploiement, la date du dernier relevé de chaque donnée, les pages retirées faute de données.
-Une date qui ne bouge plus signale une source cassée.
+https://www.winnza.eu/etat.json : le dernier déploiement, les dernières collectes, la date du dernier relevé
+de chaque donnée.
 
 ## Règles de code
 
@@ -77,7 +75,7 @@ Une date qui ne bouge plus signale une source cassée.
 - **Une source qui change de format doit faire échouer la collecte**, jamais afficher un chiffre faux. Les
   colonnes et champs se repèrent par leur nom, déclaré.
 - **Une source d'appoint** (non indispensable) se déclare `optional` : sa panne avertit sans tout arrêter.
-- **Aucun chiffre inventé** sur le site : chaque nombre vient de la base, avec sa source et sa date.
+- **Aucun fait inventé présenté comme vrai** : la blague est inventée et l'affiche ; le fait réel est cité.
 - **Un composant** ne varie que par son contenu : même cadre, même disposition partout.
 - Prendre la **dernière version** de chaque dépendance, et suivre ses changements plutôt que redescendre.
 

@@ -1,4 +1,4 @@
-import { analytics, fuelPage, seoOverrides, siteDecl } from '#lib/server/data.ts';
+import { analytics, siteDecl } from '#lib/server/data.ts';
 
-// Toutes les pages lisent les mêmes données (calculées une fois par mise à jour de la base).
-export const load = () => ({ asOf: fuelPage().asOf, site: siteDecl(), page: fuelPage(), audience: analytics()?.enabled === true, seoOverrides: seoOverrides() });
+// Ce que toutes les pages lisent : l'identité du site et la mesure d'audience.
+export const load = () => ({ site: siteDecl(), audience: analytics()?.enabled === true });

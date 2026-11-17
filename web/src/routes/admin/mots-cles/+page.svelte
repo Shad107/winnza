@@ -42,7 +42,7 @@
 <style>
   .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
   .lead { color: var(--ink2); }
-  .err { color: var(--up-strong); font-weight: 600; }
+  .err { color: #b3261e; font-weight: 600; }
   .btn { min-height: 44px; display: inline-flex; align-items: center; padding: 0 14px; border-radius: 12px; background: var(--soft); color: var(--ink); font-weight: 600; text-decoration: none; }
   .group { padding: 16px 18px; margin-top: 14px; }
   .head { width: 100%; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; border: 0; background: none; color: var(--ink); font: 15px 'Inter Variable', system-ui, sans-serif; text-align: left; cursor: pointer; min-height: 44px; padding: 0; }
