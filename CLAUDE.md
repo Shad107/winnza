@@ -34,7 +34,7 @@ Dans le code, un test qui en a besoin l'écrit en séquence d'échappement (`\u2
   (`node server/dist/cli.js keyword-ideas "mot" ...`). Une valeur qui décrit une source ou le produit se déclare
   dans `declarations/`, jamais dans le code ; un commit qui modifie une déclaration la fait ressemer en base
   au déploiement (le dépôt fait foi).
-- `scripts/` : déploiement (`deploy.sh`, `deploy-when-green.sh`), passage quotidien de l'IA qui gère le site
+- `scripts/` : déploiement (`deploy.sh`, `deploy-when-green.sh`), passage hebdomadaire de l'IA qui gère le site, le jour de publication déclaré (`publishDay`)
   (`agent-cron.sh`, `agent-run.sh`, consignes dans `agent-prompt.md`, moteur et budget dans
   `declarations/agent.json`), collecte (`collect-and-alert.sh`).
 

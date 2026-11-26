@@ -5,8 +5,8 @@
   "monthlyBudgetUsd": 10,
   "timeoutMinutes": 45,
   "promptFile": "scripts/agent-prompt.md",
-  "weeklyReportDay": 7,
-  "$comment_weeklyReportDay": "Jour du rapport de stratégie (1 = lundi, 7 = dimanche) : ce jour-là, l'agent fait aussi le bilan de la semaine et ses propositions de cap.",
+  "publishDay": 5,
+  "$comment_publishDay": "Seul jour de passage de l'IA (1 = lundi, 7 = dimanche) : elle publie le mème de la semaine, fait le bilan de la semaine passée et ses propositions de cap. Les autres jours, pas de passage, donc ni dépense ni compte rendu. Vendredi (choix du 2026-11-26) : la semaine d'actualité est complète et le mème a le week-end pour circuler.",
   "engines": {
     "codex": {
       "binary": ".local/codex/bin/codex",

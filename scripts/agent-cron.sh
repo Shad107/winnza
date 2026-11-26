@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Chaque jour (crontab de root), après la collecte du matin : l'IA qui gère le site fait son passage.
+# Chaque jour (crontab de root), après la collecte du matin. L'IA qui gère le site ne passe que le jour de
+# publication déclaré (publishDay de declarations/agent.json) ; les autres jours, le script s'arrête aussitôt.
+#   0. jour : pas le jour de publication, pas de passage (ni dépense, ni compte rendu) ;
 #   1. budget : la dépense du mois (tenue par root, dans un fichier que l'agent ne peut pas toucher) doit
 #      rester sous monthlyBudgetUsd de declarations/agent.json, sinon pas de passage ;
 #   2. tendances du jour, extraites de la base et déposées pour l'agent seul ;
@@ -9,6 +11,10 @@
 set -u
 cd "$(dirname "$0")/.."
 . scripts/lib-alert.sh
+PUBLISH_DAY=$(python3 -c 'import json; print(json.load(open("declarations/agent.json"))["publishDay"])')
+if [ "$(date +%u)" != "$PUBLISH_DAY" ]; then
+  exit 0
+fi
 AGENT=winnza-agent
 LIB=/usr/local/lib/winnza-agent        # copies figées, à root
 WORK=/var/lib/winnza-agent             # au nom de l'agent : tendances et sorties du passage
@@ -20,11 +26,6 @@ install -o root -g root -m 755 scripts/agent-run.sh "$LIB/agent-run.sh"
 install -o root -g root -m 644 declarations/agent.json "$LIB/agent.json"
 PROMPT_FILE=$(python3 -c 'import json; print(json.load(open("declarations/agent.json"))["promptFile"])')
 install -o root -g root -m 644 "$PROMPT_FILE" "$LIB/prompt.md"
-# le jour du rapport de stratégie, les consignes le disent (jour déclaré dans agent.json, 1 = lundi)
-WEEKLY=$(python3 -c 'import json; print(json.load(open("declarations/agent.json"))["weeklyReportDay"])')
-if [ "$(date +%u)" = "$WEEKLY" ]; then
-  printf '\nAujourd hui est le jour du rapport de stratégie : ajoute le bilan de la semaine à ton compte rendu.\n' >> "$LIB/prompt.md"
-fi
 
 read -r MODEL BUDGET TIMEOUT < <(python3 -c 'import json; c=json.load(open("declarations/agent.json")); print(c["model"], c["monthlyBudgetUsd"], c["timeoutMinutes"])')
 SPENT=$(python3 - "$SPEND" <<'PY'
@@ -79,8 +80,7 @@ print(f"Coût de ce passage : {d(c['costUsd'])} $ ({n(t['input'])} jetons lus, d
 print(f"Dépense du mois : {d(spent)} $ sur {d(budget)} $ ({round(spent / budget * 100)} % du plafond).")
 PY
 )
-SUBJECT="[winnza] L'IA du site : compte rendu du $(date +%d/%m)"
-[ "$(date +%u)" = "$WEEKLY" ] && SUBJECT="[winnza] L'IA du site : bilan de la semaine et propositions ($(date +%d/%m))"
+SUBJECT="[winnza] L'IA du site : mème, bilan de la semaine et propositions ($(date +%d/%m))"
 alert_send "$SUBJECT" "$report
 
 $SPEND_LINE
