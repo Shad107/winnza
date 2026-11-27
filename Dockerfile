@@ -12,6 +12,8 @@ COPY server/ server/
 # les tests lisent les vraies déclarations et les analyses : ce qui part en production est ce qui est éprouvé
 COPY declarations/ declarations/
 COPY content/ content/
+COPY Dockerfile ./
+COPY scripts/agent-cron.sh scripts/
 RUN cd server && npm run build && npm test
 COPY web/package.json web/package-lock.json web/
 RUN cd web && npm ci
